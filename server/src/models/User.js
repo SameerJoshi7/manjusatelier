@@ -25,7 +25,17 @@ const userSchema = new mongoose.Schema(
       match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email'],
     },
     password: { type: String, required: true, minlength: 8, select: false },
-    role: { type: String, enum: ['user', 'admin'], default: 'user' },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+    },
+    cart: [
+      {
+        product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+        quantity: { type: Number, required: true },
+      },
+    ],
     phone: { type: String, trim: true },
     address: addressSchema,
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],

@@ -9,6 +9,7 @@ import {
   me,
   updateProfile,
   toggleWishlist,
+  syncCart,
 } from '../controllers/authController.js';
 
 const router = Router();
@@ -35,5 +36,6 @@ router.post('/logout', logout);
 router.get('/me', protect, me);
 router.patch('/profile', protect, updateProfile);
 router.post('/wishlist/:productId', protect, toggleWishlist);
+router.put('/cart', protect, syncCart);
 
 export default router;

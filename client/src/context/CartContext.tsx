@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { api } from '@/lib/api';
 import { finalPrice } from '@/lib/utils';
+import { useAuth } from './AuthContext';
 import type { CartItem, Product } from '@/types';
 
 interface CartContextType {
@@ -21,12 +22,30 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [syncedOnce, setSyncedOnce] = useState(false);
+  
+  const { user } = useAuth();
   
   const [shippingFlat, setShippingFlat] = useState(79);
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(1499);
 
-  // Load cart from local storage
+  // Load cart from DB if logged in, otherwise from local storage
   useEffect(() => {
+    if (user && user.cart && !syncedOnce) {
+      const dbItems = user.cart.map((c: any) => ({
+        product: c.product,
+        quantity: c.quantity
+      }));
+      setItems(dbItems);
+      setSyncedOnce(true);
+      setLoaded(true);
+    } else if (!user) {
+      setSyncedOnce(false);
+    }
+  }, [user, syncedOnce]);
+
+  useEffect(() => {
+    if (user) return; // DB handles it
     try {
       const saved = localStorage.getItem('manjus_cart');
       if (saved) setItems(JSON.parse(saved));
@@ -34,7 +53,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // ignore
     }
     setLoaded(true);
-  }, []);
+  }, [user]);
 
   // Fetch global shipping settings
   useEffect(() => {
@@ -48,12 +67,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
       .catch(console.error);
   }, []);
 
-  // Save cart to local storage
+  // Save cart to local storage & DB
   useEffect(() => {
-    if (loaded) {
-      localStorage.setItem('manjus_cart', JSON.stringify(items));
+    if (!loaded) return;
+    
+    localStorage.setItem('manjus_cart', JSON.stringify(items));
+    
+    // Sync up to backend if logged in
+    if (user && syncedOnce) {
+      const payload = {
+        items: items.map(i => ({ productId: i.product._id, quantity: i.quantity }))
+      };
+      api.put('/cart', payload).catch(console.error);
     }
-  }, [items, loaded]);
+  }, [items, loaded, user, syncedOnce]);
 
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
 

@@ -25,5 +25,6 @@ export function publicUser(user) {
     phone: user.phone,
     address: user.address,
     wishlist: user.wishlist,
+    cart: user.cart,
   };
 }

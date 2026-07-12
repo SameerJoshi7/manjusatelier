@@ -17,7 +17,9 @@ export const register = asyncHandler(async (req, res) => {
 
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email })
+    .select('+password')
+    .populate('cart.product');
   if (!user || !(await user.comparePassword(password))) {
     throw new ApiError(401, 'Invalid email or password');
   }
@@ -33,7 +35,8 @@ export const logout = asyncHandler(async (req, res) => {
 });
 
 export const me = asyncHandler(async (req, res) => {
-  res.json({ success: true, user: publicUser(req.user) });
+  const user = await User.findById(req.user._id).populate('cart.product');
+  res.json({ success: true, user: publicUser(user) });
 });
 
 export const updateProfile = asyncHandler(async (req, res) => {
@@ -55,4 +58,18 @@ export const toggleWishlist = asyncHandler(async (req, res) => {
   else user.wishlist.push(productId);
   await user.save();
   res.json({ success: true, wishlist: user.wishlist });
+});
+
+// Cart sync
+export const syncCart = asyncHandler(async (req, res) => {
+  const { items } = req.body;
+  
+  const user = await User.findById(req.user._id);
+  user.cart = items.map(item => ({
+    product: item.productId,
+    quantity: item.quantity
+  }));
+  
+  await user.save();
+  res.json({ success: true, cart: user.cart });
 });

@@ -63,6 +63,7 @@ export interface User {
   phone?: string;
   address?: Address;
   wishlist: string[];
+  cart?: { product: Product; quantity: number }[];
 }
 
 export interface CartItem {
