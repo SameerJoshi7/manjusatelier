@@ -40,7 +40,7 @@ const description = (name, material) =>
 const care = 'Wipe gently with a soft, dry cloth. Avoid direct sunlight and harsh chemicals. Handle with care.';
 
 async function run() {
-  await connectDB(process.env.MONGO_URI);
+  await connectDB(process.env.MONGODB_URI);
   console.log('Clearing existing catalog…');
   await Promise.all([
     Category.deleteMany({}),

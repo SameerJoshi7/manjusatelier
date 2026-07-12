@@ -74,7 +74,7 @@ cd server
 cp .env.example .env        # then edit .env
 ```
 Set at minimum:
-- `MONGO_URI` — your MongoDB connection string
+- `MONGODB_URI` — your MongoDB connection string
 - `JWT_SECRET`, `COOKIE_SECRET` — long random strings
 - `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` — from the
   [Razorpay dashboard](https://dashboard.razorpay.com/app/keys) (test mode is fine)
