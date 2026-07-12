@@ -139,7 +139,7 @@ export function Footer() {
             {[
               { Icon: Instagram, href: 'https://www.instagram.com/manjusatelier' },
               { Icon: Facebook, href: '#' },
-              { Icon: XIcon, href: '#' },
+              { Icon: XIcon, href: 'https://x.com/manjusatelier' },
             ].map(({ Icon, href }, i) => (
               <a
                 key={i}
