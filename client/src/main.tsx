@@ -9,6 +9,10 @@ import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { ToastProvider } from '@/components/ui/Toast';
 
+window.addEventListener('vite:preloadError', () => {
+  console.warn('Chunk load error caught. Redeploy detected, reloading...');
+  window.location.reload();
+});
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>

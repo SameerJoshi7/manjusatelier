@@ -11,6 +11,9 @@ export class ApiError extends Error {
 type Options = Omit<RequestInit, 'body'> & { body?: unknown };
 
 async function request<T>(path: string, options: Options = {}): Promise<T> {
+  if (!navigator.onLine) {
+    throw new ApiError(0, 'You are currently offline. Please check your internet connection.');
+  }
   const { body, headers, ...rest } = options;
   const res = await fetch(`${BASE}/api${path}`, {
     credentials: 'include',
@@ -32,6 +35,9 @@ async function request<T>(path: string, options: Options = {}): Promise<T> {
 }
 
 async function upload<T>(path: string, formData: FormData): Promise<T> {
+  if (!navigator.onLine) {
+    throw new ApiError(0, 'You are currently offline. Please check your internet connection.');
+  }
   const res = await fetch(`${BASE}/api${path}`, {
     method: 'POST',
     credentials: 'include',

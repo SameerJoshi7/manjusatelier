@@ -19,6 +19,7 @@ import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useCategories } from '@/hooks/useCategories';
+import { InstallPWA } from '@/components/ui/InstallPWA';
 
 const navLinks = [
   { to: '/', label: 'Home' },
@@ -282,7 +283,10 @@ export function Navbar() {
                   </NavLink>
                 </li>
               ))}
-              <li className="mt-2 border-t border-brown/10 pt-2">
+              <li className="mt-2 border-t border-brown/10 pt-4 px-4 pb-2">
+                <InstallPWA className="w-full justify-center" />
+              </li>
+              <li className="border-t border-brown/10 pt-2">
                 {user ? (
                   <button
                     onClick={logout}
