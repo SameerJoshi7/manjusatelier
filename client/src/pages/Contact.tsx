@@ -48,7 +48,7 @@ export default function Contact() {
         {/* Info + map */}
         <Reveal className="space-y-4">
           {[
-            { icon: Mail, label: 'Email', value: 'hello@manjusatelier.com' },
+            { icon: Mail, label: 'Email', value: 'help@manjusatelier.in' },
             { icon: Phone, label: 'Phone', value: '+91 98765 43210' },
             { icon: MapPin, label: 'Studio', value: '42 Artisan Lane, Bengaluru, India' },
             { icon: Clock, label: 'Hours', value: 'Mon–Sat, 10am – 7pm' },

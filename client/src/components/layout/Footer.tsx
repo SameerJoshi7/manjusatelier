@@ -132,7 +132,7 @@ export function Footer() {
               <Phone size={14} /> +91 98765 43210
             </span>
             <span className="flex items-center gap-1.5">
-              <Mail size={14} /> hello@manjusatelier.com
+              <Mail size={14} /> help@manjusatelier.in
             </span>
           </div>
           <div className="flex items-center gap-3">
