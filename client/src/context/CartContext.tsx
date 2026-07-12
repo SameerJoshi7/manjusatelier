@@ -28,7 +28,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Load cart from local storage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('cart');
+      const saved = localStorage.getItem('manjus_cart');
       if (saved) setItems(JSON.parse(saved));
     } catch {
       // ignore
@@ -51,7 +51,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Save cart to local storage
   useEffect(() => {
     if (loaded) {
-      localStorage.setItem('cart', JSON.stringify(items));
+      localStorage.setItem('manjus_cart', JSON.stringify(items));
     }
   }, [items, loaded]);
 
