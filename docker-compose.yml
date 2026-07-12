@@ -1,0 +1,13 @@
+# Spin up a local MongoDB for development:  docker compose up -d
+services:
+  mongo:
+    image: mongo:7
+    container_name: manjus-mongo
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - manjus_mongo_data:/data/db
+
+volumes:
+  manjus_mongo_data:

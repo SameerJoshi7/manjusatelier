@@ -1,0 +1,53 @@
+const BASE = import.meta.env.VITE_API_URL || '';
+
+export class ApiError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
+type Options = Omit<RequestInit, 'body'> & { body?: unknown };
+
+async function request<T>(path: string, options: Options = {}): Promise<T> {
+  const { body, headers, ...rest } = options;
+  const res = await fetch(`${BASE}/api${path}`, {
+    credentials: 'include',
+    headers: {
+      ...(body ? { 'Content-Type': 'application/json' } : {}),
+      ...headers,
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    ...rest,
+  });
+
+  const isJson = res.headers.get('content-type')?.includes('application/json');
+  const data = isJson ? await res.json() : null;
+
+  if (!res.ok) {
+    throw new ApiError(res.status, data?.message || `Request failed (${res.status})`);
+  }
+  return data as T;
+}
+
+async function upload<T>(path: string, formData: FormData): Promise<T> {
+  const res = await fetch(`${BASE}/api${path}`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  });
+  const data = res.headers.get('content-type')?.includes('application/json')
+    ? await res.json()
+    : null;
+  if (!res.ok) throw new ApiError(res.status, data?.message || `Upload failed (${res.status})`);
+  return data as T;
+}
+
+export const api = {
+  get: <T>(path: string) => request<T>(path),
+  post: <T>(path: string, body?: unknown) => request<T>(path, { method: 'POST', body }),
+  patch: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PATCH', body }),
+  delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
+  upload,
+};
