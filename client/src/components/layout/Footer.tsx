@@ -154,9 +154,22 @@ export function Footer() {
             ))}
           </div>
         </div>
-        <p className="pb-6 text-center text-xs text-beige/40">
-          © {new Date().getFullYear()} Manju&apos;s Atelier. Handmade with love.
-        </p>
+        <div className="flex flex-col items-center justify-center gap-2 pb-6 text-xs text-beige/40 md:flex-row md:gap-4">
+          <p>© {new Date().getFullYear()} Manju's Atelier. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <Link to="/track" className="hover:text-gold transition-colors font-medium">
+              Track Order
+            </Link>
+            <span>|</span>
+            <Link to="/terms" className="hover:text-gold transition-colors">
+              Terms & Conditions
+            </Link>
+            <span>|</span>
+            <Link to="/terms" className="hover:text-gold transition-colors">
+              Refund Policy
+            </Link>
+          </div>
+        </div>
       </div>
     </footer>
   );

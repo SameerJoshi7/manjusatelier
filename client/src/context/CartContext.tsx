@@ -1,12 +1,9 @@
-import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
-import type { CartItem, Product } from '@/types';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { api } from '@/lib/api';
 import { finalPrice } from '@/lib/utils';
+import type { CartItem, Product } from '@/types';
 
-const STORAGE_KEY = 'manjus_cart';
-const SHIPPING_FLAT = 79;
-const FREE_SHIPPING_THRESHOLD = 1499;
-
-interface CartState {
+interface CartContextType {
   items: CartItem[];
   add: (product: Product, quantity?: number) => void;
   remove: (productId: string) => void;
@@ -19,60 +16,81 @@ interface CartState {
   lastAddedId: string | null;
 }
 
-const CartContext = createContext<CartState | undefined>(undefined);
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(() => {
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  
+  const [shippingFlat, setShippingFlat] = useState(79);
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(1499);
+
+  // Load cart from local storage
+  useEffect(() => {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      const saved = localStorage.getItem('cart');
+      if (saved) setItems(JSON.parse(saved));
     } catch {
-      return [];
+      // ignore
     }
-  });
+    setLoaded(true);
+  }, []);
+
+  // Fetch global shipping settings
+  useEffect(() => {
+    api.get<{ setting: { shippingFlat: number, freeShippingThreshold: number } }>('/settings')
+      .then(res => {
+        if (res.setting) {
+          setShippingFlat(res.setting.shippingFlat);
+          setFreeShippingThreshold(res.setting.freeShippingThreshold);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  // Save cart to local storage
+  useEffect(() => {
+    if (loaded) {
+      localStorage.setItem('cart', JSON.stringify(items));
+    }
+  }, [items, loaded]);
+
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
-
-  const add: CartState['add'] = (product, quantity = 1) => {
-    setItems((prev) => {
-      const existing = prev.find((i) => i.product._id === product._id);
+  const add = (product: Product, quantity = 1) => {
+    setItems((curr) => {
+      const existing = curr.find((i) => i.product._id === product._id);
       if (existing) {
-        return prev.map((i) =>
+        return curr.map((i) =>
           i.product._id === product._id
             ? { ...i, quantity: Math.min(i.quantity + quantity, product.stock) }
             : i
         );
       }
-      return [...prev, { product, quantity: Math.min(quantity, product.stock) }];
+      return [...curr, { product, quantity: Math.min(quantity, product.stock) }];
     });
     setLastAddedId(product._id);
     setTimeout(() => setLastAddedId(null), 600);
   };
 
-  const remove: CartState['remove'] = (id) =>
-    setItems((prev) => prev.filter((i) => i.product._id !== id));
+  const remove = (productId: string) => {
+    setItems((curr) => curr.filter((i) => i.product._id !== productId));
+  };
 
-  const setQuantity: CartState['setQuantity'] = (id, quantity) =>
-    setItems((prev) =>
-      prev
-        .map((i) =>
-          i.product._id === id
-            ? { ...i, quantity: Math.max(1, Math.min(quantity, i.product.stock)) }
-            : i
-        )
-        .filter((i) => i.quantity > 0)
+  const setQuantity = (productId: string, quantity: number) => {
+    if (quantity < 1) return;
+    setItems((curr) =>
+      curr.map((i) =>
+        i.product._id === productId ? { ...i, quantity: Math.min(quantity, i.product.stock) } : i
+      )
     );
+  };
 
   const clear = () => setItems([]);
 
-  const subtotal = useMemo(
-    () => items.reduce((sum, i) => sum + finalPrice(i.product) * i.quantity, 0),
-    [items]
-  );
-  const count = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items]);
-  const shippingFee = subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FLAT;
+  const count = items.reduce((acc, item) => acc + item.quantity, 0);
+  const subtotal = items.reduce((acc, item) => acc + finalPrice(item.product) * item.quantity, 0);
+  const shippingFee = subtotal === 0 || subtotal >= freeShippingThreshold ? 0 : shippingFlat;
 
   return (
     <CartContext.Provider
@@ -85,7 +103,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         count,
         subtotal,
         shippingFee,
-        freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
+        freeShippingThreshold,
         lastAddedId,
       }}
     >
@@ -94,7 +112,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function useCart() {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error('useCart must be used within CartProvider');

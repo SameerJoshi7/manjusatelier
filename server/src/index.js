@@ -11,6 +11,7 @@ async function start() {
   }
   await connectDB(process.env.MONGODB_URI);
   const app = createApp();
+
   app.listen(PORT, () => console.log(`✓ API listening on http://localhost:${PORT}`));
 }
 

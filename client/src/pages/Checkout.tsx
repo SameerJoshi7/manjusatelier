@@ -1,21 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { Check, Lock, CreditCard, MapPin, ClipboardList } from 'lucide-react';
+import { Check, Lock, MapPin, ClipboardList, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { api } from '@/lib/api';
-import { formatPrice, finalPrice, loadScript, cn } from '@/lib/utils';
+import { formatPrice, finalPrice, cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import type { Address } from '@/types';
 
-const RAZORPAY_SDK = 'https://checkout.razorpay.com/v1/checkout.js';
-const steps = ['Shipping', 'Payment', 'Review'] as const;
+const steps = ['Shipping', 'Review', 'Payment'] as const;
 
 interface CreateOrderResponse {
-  order: { id: string; amount: number; currency: string };
-  razorpay: { orderId: string; amount: number; currency: string; keyId: string };
+  order: { id: string; customOrderId: string; amount: number };
 }
 
 export default function Checkout() {
@@ -29,6 +28,9 @@ export default function Checkout() {
 
   const [step, setStep] = useState(0);
   const [processing, setProcessing] = useState(false);
+  const [activeOrder, setActiveOrder] = useState<CreateOrderResponse['order'] | null>(null);
+  const [utrNumber, setUtrNumber] = useState('');
+  
   const [address, setAddress] = useState<Address>({
     fullName: user?.name || '',
     phone: user?.phone || '',
@@ -39,10 +41,6 @@ export default function Checkout() {
     postalCode: '',
     country: 'India',
   });
-
-  useEffect(() => {
-    loadScript(RAZORPAY_SDK);
-  }, []);
 
   useEffect(() => {
     if (user) setAddress((a) => ({ ...a, fullName: a.fullName || user.name, phone: a.phone || user.phone || '' }));
@@ -64,7 +62,8 @@ export default function Checkout() {
     );
   }
 
-  if (items.length === 0) {
+  // Allow them to see step 2 if they already created an order but haven't paid
+  if (items.length === 0 && !activeOrder) {
     return (
       <div className="container-x grid place-items-center py-24 text-center">
         <h1 className="font-serif text-3xl text-brown-dark dark:text-beige">Your cart is empty</h1>
@@ -78,49 +77,52 @@ export default function Checkout() {
   const addressValid =
     address.fullName && address.phone && address.line1 && address.city && address.postalCode;
 
-  const pay = async () => {
+  const placeOrder = async () => {
     setProcessing(true);
     try {
-      const ok = await loadScript(RAZORPAY_SDK);
-      if (!ok || !window.Razorpay) throw new Error('Could not load payment gateway');
-
-      const { order, razorpay } = await api.post<CreateOrderResponse>('/orders', {
+      const { order } = await api.post<CreateOrderResponse>('/orders', {
         items: items.map((i) => ({ productId: i.product._id, quantity: i.quantity })),
         shippingAddress: address,
         couponCode,
       });
 
-      const rzp = new window.Razorpay({
-        key: razorpay.keyId,
-        amount: razorpay.amount,
-        currency: razorpay.currency,
-        name: "Manju's Atelier",
-        description: 'Handcrafted with love',
-        order_id: razorpay.orderId,
-        prefill: { name: address.fullName, email: user?.email, contact: address.phone },
-        theme: { color: '#8B5E3C' },
-        handler: async (response: Record<string, string>) => {
-          try {
-            await api.post('/orders/verify', {
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            });
-            clear();
-            notify('Payment successful!');
-            navigate(`/checkout/success/${order.id}`);
-          } catch (err) {
-            notify(err instanceof Error ? err.message : 'Verification failed', 'error');
-          }
-        },
-        modal: { ondismiss: () => setProcessing(false) },
-      });
-      rzp.open();
+      clear();
+      setActiveOrder(order);
+      setStep(2); // Move to Payment Screen
+      window.scrollTo(0, 0);
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Checkout failed', 'error');
+    } finally {
       setProcessing(false);
     }
   };
+
+  const submitPayment = async () => {
+    if (!activeOrder) return;
+    if (utrNumber.trim().length !== 12) {
+      notify('Please enter a valid 12-digit UTR number', 'error');
+      return;
+    }
+    
+    setProcessing(true);
+    try {
+      await api.post(`/orders/${activeOrder.id}/utr`, { utrNumber });
+      notify('Payment details submitted successfully!');
+      navigate(`/checkout/success/${activeOrder.id}`);
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Failed to submit payment details', 'error');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // Generate dynamic UPI string
+  // It reads your actual UPI ID from the environment variables (.env file)
+  const upiId = import.meta.env.VITE_UPI_ID || "your_actual_upi_id@okbank"; 
+  const merchantName = "Manjus Atelier";
+  const upiString = activeOrder 
+    ? `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${activeOrder.amount}&cu=INR&tn=Order ${activeOrder.customOrderId} - ${user?.email}`
+    : '';
 
   return (
     <div className="container-x py-10">
@@ -129,7 +131,7 @@ export default function Checkout() {
       {/* Stepper */}
       <div className="mt-8 flex items-center gap-2">
         {steps.map((s, i) => {
-          const Icon = [MapPin, CreditCard, ClipboardList][i];
+          const Icon = [MapPin, ClipboardList, QrCode][i];
           return (
             <div key={s} className="flex flex-1 items-center gap-2">
               <div
@@ -151,7 +153,7 @@ export default function Checkout() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="card-surface p-6 md:p-8">
-          {/* Step 1: Shipping */}
+          {/* Step 0: Shipping */}
           {step === 0 && (
             <div className="space-y-4">
               <h2 className="font-serif text-2xl text-brown-dark dark:text-beige">
@@ -183,45 +185,13 @@ export default function Checkout() {
                 </Field>
               </div>
               <Button size="lg" disabled={!addressValid} onClick={() => setStep(1)}>
-                Continue to Payment
+                Review Order
               </Button>
             </div>
           )}
 
-          {/* Step 2: Payment */}
+          {/* Step 1: Review */}
           {step === 1 && (
-            <div className="space-y-4">
-              <h2 className="font-serif text-2xl text-brown-dark dark:text-beige">
-                Payment Method
-              </h2>
-              <div className="flex items-center gap-3 rounded-2xl border-2 border-brown bg-beige/20 p-5">
-                <CreditCard className="text-brown" />
-                <div>
-                  <p className="font-medium text-brown-dark dark:text-beige">
-                    Razorpay Secure Checkout
-                  </p>
-                  <p className="text-sm text-brown/60 dark:text-beige/60">
-                    Cards, UPI, Netbanking & Wallets
-                  </p>
-                </div>
-                <Lock size={18} className="ml-auto text-forest" />
-              </div>
-              <p className="text-sm text-brown/60 dark:text-beige/60">
-                You&apos;ll complete your payment securely via Razorpay when you place the order.
-              </p>
-              <div className="flex gap-3">
-                <Button variant="secondary" size="lg" onClick={() => setStep(0)}>
-                  Back
-                </Button>
-                <Button size="lg" onClick={() => setStep(2)}>
-                  Review Order
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Review */}
-          {step === 2 && (
             <div className="space-y-5">
               <h2 className="font-serif text-2xl text-brown-dark dark:text-beige">
                 Review Your Order
@@ -252,11 +222,60 @@ export default function Checkout() {
                 ))}
               </div>
               <div className="flex gap-3">
-                <Button variant="secondary" size="lg" onClick={() => setStep(1)}>
+                <Button variant="secondary" size="lg" onClick={() => setStep(0)}>
                   Back
                 </Button>
-                <Button size="lg" onClick={pay} disabled={processing}>
-                  <Lock size={16} /> {processing ? 'Processing…' : `Pay ${formatPrice(total)}`}
+                <Button size="lg" onClick={placeOrder} disabled={processing}>
+                  {processing ? 'Processing…' : `Confirm & Pay via UPI`}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Payment */}
+          {step === 2 && activeOrder && (
+            <div className="space-y-6">
+              <h2 className="font-serif text-2xl text-brown-dark dark:text-beige">
+                Complete Payment
+              </h2>
+              
+              <div className="rounded-xl border border-red-500/20 bg-red-50 p-4 text-red-900 dark:bg-red-500/10 dark:text-red-200">
+                <p className="font-medium">⚠️ Important: Keep your 12-digit UTR handy!</p>
+                <p className="mt-1 text-sm opacity-90">
+                  After you scan and pay on your UPI app, you must enter the 12-digit UTR / Transaction ID below to verify your order.
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center gap-6 rounded-2xl bg-white p-8 text-center shadow-sm dark:bg-beige/5">
+                <div className="rounded-xl bg-white p-4 shadow-lift">
+                  <QRCodeSVG value={upiString} size={200} />
+                </div>
+                
+                <div>
+                  <p className="text-lg font-semibold text-brown-dark dark:text-beige">
+                    Scan with any UPI App
+                  </p>
+                  <p className="text-sm text-brown/60 dark:text-beige/60">
+                    GPay, PhonePe, Paytm, or BHIM
+                  </p>
+                  <p className="mt-4 font-serif text-3xl font-medium text-forest">
+                    {formatPrice(activeOrder.amount)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Field label="Enter 12-Digit UTR / Transaction ID">
+                  <input 
+                    className="input font-mono tracking-widest text-lg" 
+                    placeholder="e.g. 123456789012"
+                    maxLength={12}
+                    value={utrNumber}
+                    onChange={(e) => setUtrNumber(e.target.value.replace(/\D/g, ''))} 
+                  />
+                </Field>
+                <Button size="lg" fullWidth onClick={submitPayment} disabled={processing || utrNumber.length !== 12}>
+                  {processing ? 'Verifying…' : 'Submit UTR & Finish Order'}
                 </Button>
               </div>
             </div>
@@ -284,12 +303,11 @@ export default function Checkout() {
               )}
               <div className="flex justify-between border-t border-brown/10 pt-3 text-base font-semibold text-brown-dark dark:text-beige">
                 <dt>Total</dt>
-                <dd>{formatPrice(total)}</dd>
+                <dd>{formatPrice(activeOrder ? activeOrder.amount : total)}</dd>
               </div>
             </dl>
             <p className="mt-4 flex items-center gap-1.5 text-xs text-brown/50 dark:text-beige/50">
-              <Lock size={12} /> Secured by Razorpay. Final total (incl. coupon) confirmed at
-              payment.
+              <Lock size={12} /> Secure UPI Payment.
             </p>
           </div>
         </aside>

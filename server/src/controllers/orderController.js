@@ -2,11 +2,9 @@ import mongoose from 'mongoose';
 import Product from '../models/Product.js';
 import Order from '../models/Order.js';
 import Coupon from '../models/Coupon.js';
+import Setting from '../models/Setting.js';
 import { asyncHandler, ApiError } from '../middleware/error.js';
 import { getRazorpay, verifyPaymentSignature } from '../utils/razorpay.js';
-
-const SHIPPING_FLAT = 79;
-const FREE_SHIPPING_THRESHOLD = 1499;
 
 /**
  * Recompute the cart total from the DATABASE (never trust client prices).
@@ -50,13 +48,18 @@ async function computeCart(items, couponCode) {
   }
 
   const afterDiscount = subtotal - discount;
-  const shippingFee = afterDiscount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FLAT;
+  
+  let setting = await Setting.findOne();
+  if (!setting) {
+    setting = { shippingFlat: 79, freeShippingThreshold: 1499 };
+  }
+  const shippingFee = afterDiscount >= setting.freeShippingThreshold ? 0 : setting.shippingFlat;
   const total = afterDiscount + shippingFee;
 
   return { orderItems, subtotal, discount, shippingFee, total, appliedCode };
 }
 
-/** POST /api/orders  — creates a pending order + Razorpay order. */
+/** POST /api/orders  — creates a pending order. */
 export const createOrder = asyncHandler(async (req, res) => {
   const { items, shippingAddress, couponCode } = req.body;
   if (!shippingAddress?.line1 || !shippingAddress?.city || !shippingAddress?.postalCode) {
@@ -68,14 +71,6 @@ export const createOrder = asyncHandler(async (req, res) => {
     couponCode
   );
 
-  const rzp = getRazorpay();
-  const rzpOrder = await rzp.orders.create({
-    amount: total * 100, // paise
-    currency: 'INR',
-    receipt: `rcpt_${Date.now()}`,
-    notes: { userId: req.user._id.toString() },
-  });
-
   const order = await Order.create({
     user: req.user._id,
     items: orderItems,
@@ -85,74 +80,31 @@ export const createOrder = asyncHandler(async (req, res) => {
     shippingFee,
     total,
     couponCode: appliedCode,
-    razorpayOrderId: rzpOrder.id,
-    paymentStatus: 'pending',
+    paymentStatus: 'PAYMENT_PENDING',
   });
 
   res.status(201).json({
     success: true,
-    order: { id: order._id, amount: total, currency: 'INR' },
-    razorpay: {
-      orderId: rzpOrder.id,
-      amount: rzpOrder.amount,
-      currency: rzpOrder.currency,
-      keyId: process.env.RAZORPAY_KEY_ID,
-    },
+    order: { id: order._id, customOrderId: order.customOrderId, amount: total },
   });
 });
 
-/** POST /api/orders/verify — verify signature, mark paid, decrement stock. */
-export const verifyPayment = asyncHandler(async (req, res) => {
-  const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+/** POST /api/orders/:id/utr — submit UTR number. */
+export const submitUtr = asyncHandler(async (req, res) => {
+  const { utrNumber } = req.body;
+  if (!utrNumber || utrNumber.trim().length !== 12) {
+    throw new ApiError(400, 'A valid 12-digit UTR number is required');
+  }
 
-  const valid = verifyPaymentSignature({
-    orderId: razorpayOrderId,
-    paymentId: razorpayPaymentId,
-    signature: razorpaySignature,
-  });
-
-  const order = await Order.findOne({ razorpayOrderId, user: req.user._id });
+  const order = await Order.findOne({ _id: req.params.id, user: req.user._id });
   if (!order) throw new ApiError(404, 'Order not found');
-
-  if (!valid) {
-    order.paymentStatus = 'failed';
-    await order.save();
-    throw new ApiError(400, 'Payment verification failed');
+  if (order.paymentStatus === 'SUCCESSFUL' || order.paymentStatus === 'UTR_VERIFIED') {
+    throw new ApiError(400, 'Order is already verified');
   }
 
-  if (order.paymentStatus === 'paid') {
-    return res.json({ success: true, order }); // idempotent
-  }
-
-  const session = await mongoose.startSession();
-  try {
-    await session.withTransaction(async () => {
-      for (const item of order.items) {
-        await Product.updateOne(
-          { _id: item.product },
-          { $inc: { stock: -item.quantity } },
-          { session }
-        );
-      }
-      order.paymentStatus = 'paid';
-      order.orderStatus = 'confirmed';
-      order.razorpayPaymentId = razorpayPaymentId;
-      order.razorpaySignature = razorpaySignature;
-      await order.save({ session });
-    });
-  } catch (err) {
-    // Transactions require a replica set; fall back to non-atomic updates.
-    for (const item of order.items) {
-      await Product.updateOne({ _id: item.product }, { $inc: { stock: -item.quantity } });
-    }
-    order.paymentStatus = 'paid';
-    order.orderStatus = 'confirmed';
-    order.razorpayPaymentId = razorpayPaymentId;
-    order.razorpaySignature = razorpaySignature;
-    await order.save();
-  } finally {
-    session.endSession();
-  }
+  order.utrNumber = utrNumber.trim();
+  order.paymentStatus = 'UTR_VERIFICATION_PENDING';
+  await order.save();
 
   res.json({ success: true, order });
 });
@@ -199,6 +151,51 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     { new: true }
   ).populate('user', 'name email');
   if (!order) throw new ApiError(404, 'Order not found');
+  res.json({ success: true, order });
+});
+
+/** PATCH /api/orders/:id/verify-utr (admin) */
+export const verifyUtr = asyncHandler(async (req, res) => {
+  const { verified } = req.body; // boolean
+
+  const order = await Order.findById(req.params.id).populate('user', 'name email');
+  if (!order) throw new ApiError(404, 'Order not found');
+
+  if (order.paymentStatus === 'SUCCESSFUL') {
+    return res.json({ success: true, order });
+  }
+
+  if (!verified) {
+    order.paymentStatus = 'FAILED';
+    await order.save();
+    return res.json({ success: true, order });
+  }
+
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      for (const item of order.items) {
+        await Product.updateOne(
+          { _id: item.product },
+          { $inc: { stock: -item.quantity } },
+          { session }
+        );
+      }
+      order.paymentStatus = 'SUCCESSFUL';
+      order.orderStatus = 'confirmed';
+      await order.save({ session });
+    });
+  } catch (err) {
+    for (const item of order.items) {
+      await Product.updateOne({ _id: item.product }, { $inc: { stock: -item.quantity } });
+    }
+    order.paymentStatus = 'SUCCESSFUL';
+    order.orderStatus = 'confirmed';
+    await order.save();
+  } finally {
+    session.endSession();
+  }
+
   res.json({ success: true, order });
 });
 

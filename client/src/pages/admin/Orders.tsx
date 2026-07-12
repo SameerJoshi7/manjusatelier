@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
-import { ChevronDown, Package } from 'lucide-react';
+import { ChevronDown, Package, CheckCircle2, XCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatPrice, cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useToast } from '@/components/ui/Toast';
+import { Button } from '@/components/ui/Button';
 import type { Order } from '@/types';
 
 interface AdminOrder extends Omit<Order, 'user'> {
   user?: { _id: string; name: string; email: string } | string;
+  customOrderId?: string;
+  utrNumber?: string;
 }
 
 const statuses = ['processing', 'confirmed', 'shipped', 'delivered', 'cancelled'] as const;
@@ -21,9 +24,12 @@ const statusColor: Record<string, string> = {
 };
 
 const payColor: Record<string, string> = {
-  paid: 'bg-forest/15 text-forest',
-  pending: 'bg-gold/20 text-brown-dark',
-  failed: 'bg-red-100 text-red-600',
+  SUCCESSFUL: 'bg-forest/15 text-forest',
+  UTR_VERIFIED: 'bg-forest/15 text-forest',
+  PAYMENT_PENDING: 'bg-gold/20 text-brown-dark',
+  PENDING_UTR: 'bg-orange-100 text-orange-700',
+  UTR_VERIFICATION_PENDING: 'bg-purple-100 text-purple-700',
+  FAILED: 'bg-red-100 text-red-600',
 };
 
 export default function Orders() {
@@ -55,6 +61,21 @@ export default function Orders() {
       notify('Order status updated');
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Update failed', 'error');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const verifyUtr = async (id: string, verified: boolean) => {
+    setUpdating(id);
+    try {
+      const { order } = await api.patch<{ order: AdminOrder }>(`/orders/${id}/verify-utr`, {
+        verified,
+      });
+      setOrders((prev) => prev.map((o) => (o._id === id ? { ...o, paymentStatus: order.paymentStatus, orderStatus: order.orderStatus } : o)));
+      notify(verified ? 'UTR Verified! Stock deducted.' : 'UTR Rejected.');
+    } catch (e) {
+      notify(e instanceof Error ? e.message : 'Verification failed', 'error');
     } finally {
       setUpdating(null);
     }
@@ -103,21 +124,21 @@ export default function Orders() {
       ) : (
         <div className="space-y-3">
           {orders.map((o) => (
-            <div key={o._id} className="card-surface overflow-hidden">
+            <div key={o._id} className={cn("card-surface overflow-hidden", o.paymentStatus === 'UTR_VERIFICATION_PENDING' && "border-2 border-purple-400")}>
               <button
                 onClick={() => setExpanded(expanded === o._id ? null : o._id)}
                 className="flex w-full items-center gap-4 p-4 text-left"
               >
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-brown-dark dark:text-beige">
-                    #{o._id.slice(-8).toUpperCase()}
+                    {o.customOrderId || `#${o._id.slice(-8).toUpperCase()}`}
                   </p>
                   <p className="truncate text-xs text-brown/50 dark:text-beige/50">
                     {customerName(o)} · {new Date(o.createdAt).toLocaleString('en-IN')}
                   </p>
                 </div>
-                <span className={cn('hidden rounded-full px-2.5 py-1 text-xs font-semibold sm:inline', payColor[o.paymentStatus])}>
-                  {o.paymentStatus}
+                <span className={cn('hidden rounded-full px-2.5 py-1 text-xs font-semibold sm:inline', payColor[o.paymentStatus] || 'bg-gray-100 text-gray-700')}>
+                  {o.paymentStatus.replace(/_/g, ' ')}
                 </span>
                 <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold capitalize', statusColor[o.orderStatus])}>
                   {o.orderStatus}
@@ -176,7 +197,7 @@ export default function Orders() {
                   {/* Shipping + status control */}
                   <div>
                     <h3 className="mb-2 text-sm font-semibold text-brown-dark dark:text-beige">
-                      Shipping to
+                      Shipping & Payment Info
                     </h3>
                     <div className="rounded-xl bg-beige/30 p-3 text-sm text-brown/80 dark:bg-beige/10 dark:text-beige/80">
                       <p className="font-medium">{o.shippingAddress.fullName}</p>
@@ -192,10 +213,41 @@ export default function Orders() {
                       {typeof o.user === 'object' && o.user && (
                         <p className="mt-2 text-xs text-brown/50">{o.user.email}</p>
                       )}
+                      
+                      <div className="mt-3 border-t border-brown/10 pt-2">
+                         <p className="text-xs text-brown/50">Method: {o.paymentMethod || 'UPI'}</p>
+                         {o.utrNumber && (
+                           <p className="font-mono text-sm mt-1">
+                             UTR: <span className="font-bold text-brown-dark dark:text-beige">{o.utrNumber}</span>
+                           </p>
+                         )}
+                      </div>
                     </div>
+                    
+                    {o.paymentStatus === 'UTR_VERIFICATION_PENDING' && (
+                      <div className="mt-4 flex gap-2">
+                        <Button 
+                          size="sm" 
+                          disabled={updating === o._id}
+                          className="flex-1 bg-forest text-white hover:bg-forest/90"
+                          onClick={() => verifyUtr(o._id, true)}
+                        >
+                          <CheckCircle2 size={16} className="mr-1" /> Approve UTR
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="secondary" 
+                          disabled={updating === o._id}
+                          onClick={() => verifyUtr(o._id, false)}
+                          className="text-red-600 border-red-200 hover:bg-red-50"
+                        >
+                          <XCircle size={16} /> Reject
+                        </Button>
+                      </div>
+                    )}
 
                     <label className="mt-4 block text-sm font-semibold text-brown-dark dark:text-beige">
-                      Update status
+                      Update Shipping Status
                     </label>
                     <select
                       value={o.orderStatus}

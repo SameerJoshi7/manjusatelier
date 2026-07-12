@@ -88,8 +88,12 @@ export interface Order {
   shippingFee: number;
   total: number;
   couponCode?: string;
-  paymentStatus: 'pending' | 'paid' | 'failed';
+  paymentStatus: 'PAYMENT_PENDING' | 'PENDING_UTR' | 'UTR_VERIFICATION_PENDING' | 'UTR_VERIFIED' | 'SUCCESSFUL' | 'FAILED' | 'paid' | 'pending' | 'failed';
   orderStatus: 'processing' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  paymentMethod?: string;
+  utrNumber?: string;
+  customOrderId?: string;
+  razorpayOrderId?: string;
   createdAt: string;
 }
 

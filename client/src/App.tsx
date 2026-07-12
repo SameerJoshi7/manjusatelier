@@ -17,6 +17,8 @@ const CheckoutSuccess = lazy(() => import('@/pages/CheckoutSuccess'));
 const Wishlist = lazy(() => import('@/pages/Wishlist'));
 const Login = lazy(() => import('@/pages/Login'));
 const Account = lazy(() => import('@/pages/Account'));
+const Terms = lazy(() => import('@/pages/Terms'));
+const OrderTracking = lazy(() => import('@/pages/OrderTracking'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 // Admin
@@ -25,6 +27,7 @@ const AdminOverview = lazy(() => import('@/pages/admin/Overview'));
 const AdminOrders = lazy(() => import('@/pages/admin/Orders'));
 const AdminProducts = lazy(() => import('@/pages/admin/Products'));
 const AdminCoupons = lazy(() => import('@/pages/admin/Coupons'));
+const AdminSettings = lazy(() => import('@/pages/admin/Settings'));
 
 export default function App() {
   const {
@@ -67,6 +70,8 @@ export default function App() {
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/login" element={<Login />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/track" element={<OrderTracking />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 
@@ -76,6 +81,7 @@ export default function App() {
           <Route path="orders" element={<AdminOrders />} />
           <Route path="products" element={<AdminProducts />} />
           <Route path="coupons" element={<AdminCoupons />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Routes>
     </Suspense>
