@@ -14,7 +14,7 @@ import type { Address } from '@/types';
 const steps = ['Shipping', 'Review', 'Payment'] as const;
 
 interface CreateOrderResponse {
-  order: { id: string; customOrderId: string; amount: number };
+  order: { id: string; customOrderId: string; amount: number; createdAt: string };
 }
 
 export default function Checkout() {
@@ -30,6 +30,7 @@ export default function Checkout() {
   const [processing, setProcessing] = useState(false);
   const [activeOrder, setActiveOrder] = useState<CreateOrderResponse['order'] | null>(null);
   const [utrNumber, setUtrNumber] = useState('');
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
   
   const [address, setAddress] = useState<Address>({
     fullName: user?.name || '',
@@ -45,6 +46,21 @@ export default function Checkout() {
   useEffect(() => {
     if (user) setAddress((a) => ({ ...a, fullName: a.fullName || user.name, phone: a.phone || user.phone || '' }));
   }, [user]);
+
+  useEffect(() => {
+    if (step === 2 && activeOrder?.createdAt) {
+      const targetTime = new Date(activeOrder.createdAt).getTime() + 5 * 60 * 1000;
+      
+      const updateTimer = () => {
+        const remaining = Math.max(0, Math.floor((targetTime - Date.now()) / 1000));
+        setTimeLeft(remaining);
+      };
+      
+      updateTimer();
+      const interval = setInterval(updateTimer, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [step, activeOrder]);
 
   const total = subtotal + shippingFee;
 
@@ -238,46 +254,69 @@ export default function Checkout() {
               <h2 className="font-serif text-2xl text-brown-dark dark:text-beige">
                 Complete Payment
               </h2>
-              
-              <div className="rounded-xl border border-red-500/20 bg-red-50 p-4 text-red-900 dark:bg-red-500/10 dark:text-red-200">
-                <p className="font-medium">⚠️ Important: Keep your 12-digit UTR handy!</p>
-                <p className="mt-1 text-sm opacity-90">
-                  After you scan and pay on your UPI app, you must enter the 12-digit UTR / Transaction ID below to verify your order.
-                </p>
-              </div>
 
-              <div className="flex flex-col items-center gap-6 rounded-2xl bg-white p-8 text-center shadow-sm dark:bg-beige/5">
-                <div className="rounded-xl bg-white p-4 shadow-lift">
-                  <QRCodeSVG value={upiString} size={200} />
+              {timeLeft === 0 ? (
+                <div className="rounded-xl border border-red-500/20 bg-red-50 p-6 text-center text-red-900 dark:bg-red-500/10 dark:text-red-200">
+                  <h3 className="font-serif text-xl font-medium">QR Code Expired</h3>
+                  <p className="mt-2 text-sm opacity-90">
+                    Your 5-minute window to scan the QR code has expired, and this order has been cancelled. 
+                    Please return to your cart to create a new order.
+                  </p>
+                  <Button className="mt-6" onClick={() => navigate('/cart')}>
+                    Return to Cart
+                  </Button>
                 </div>
-                
-                <div>
-                  <p className="text-lg font-semibold text-brown-dark dark:text-beige">
-                    Scan with any UPI App
-                  </p>
-                  <p className="text-sm text-brown/60 dark:text-beige/60">
-                    GPay, PhonePe, Paytm, or BHIM
-                  </p>
-                  <p className="mt-4 font-serif text-3xl font-medium text-forest">
-                    {formatPrice(activeOrder.amount)}
-                  </p>
-                </div>
-              </div>
+              ) : (
+                <>
+                  <div className="rounded-xl border border-red-500/20 bg-red-50 p-4 text-red-900 dark:bg-red-500/10 dark:text-red-200">
+                    <div className="flex items-center justify-between font-medium">
+                      <p>⚠️ Important: Keep your 12-digit UTR handy!</p>
+                      {timeLeft !== null && (
+                        <p className="text-red-700 dark:text-red-300 font-mono">
+                          {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:
+                          {(timeLeft % 60).toString().padStart(2, '0')}
+                        </p>
+                      )}
+                    </div>
+                    <p className="mt-1 text-sm opacity-90">
+                      After you scan and pay on your UPI app, you must enter the 12-digit UTR / Transaction ID below to verify your order before the timer runs out.
+                    </p>
+                  </div>
 
-              <div className="space-y-3">
-                <Field label="Enter 12-Digit UTR / Transaction ID">
-                  <input 
-                    className="input font-mono tracking-widest text-lg" 
-                    placeholder="e.g. 123456789012"
-                    maxLength={12}
-                    value={utrNumber}
-                    onChange={(e) => setUtrNumber(e.target.value.replace(/\D/g, ''))} 
-                  />
-                </Field>
-                <Button size="lg" fullWidth onClick={submitPayment} disabled={processing || utrNumber.length !== 12}>
-                  {processing ? 'Verifying…' : 'Submit UTR & Finish Order'}
-                </Button>
-              </div>
+                  <div className="flex flex-col items-center gap-6 rounded-2xl bg-white p-8 text-center shadow-sm dark:bg-beige/5">
+                    <div className="rounded-xl bg-white p-4 shadow-lift">
+                      <QRCodeSVG value={upiString} size={200} />
+                    </div>
+                    
+                    <div>
+                      <p className="text-lg font-semibold text-brown-dark dark:text-beige">
+                        Scan with any UPI App
+                      </p>
+                      <p className="text-sm text-brown/60 dark:text-beige/60">
+                        GPay, PhonePe, Paytm, or BHIM
+                      </p>
+                      <p className="mt-4 font-serif text-3xl font-medium text-forest">
+                        {formatPrice(activeOrder.amount)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Field label="Enter 12-Digit UTR / Transaction ID">
+                      <input 
+                        className="input font-mono tracking-widest text-lg" 
+                        placeholder="e.g. 123456789012"
+                        maxLength={12}
+                        value={utrNumber}
+                        onChange={(e) => setUtrNumber(e.target.value.replace(/\D/g, ''))} 
+                      />
+                    </Field>
+                    <Button size="lg" fullWidth onClick={submitPayment} disabled={processing || utrNumber.length !== 12}>
+                      {processing ? 'Verifying…' : 'Submit UTR & Finish Order'}
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
