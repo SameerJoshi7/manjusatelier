@@ -18,8 +18,8 @@ export function AboutSection() {
               className="aspect-[4/5] w-full object-cover"
             />
             <div className="absolute -bottom-6 -right-4 hidden rounded-2xl bg-white p-5 shadow-lift dark:bg-[#26201a] sm:block">
-              <p className="font-serif text-3xl text-brown">10+</p>
-              <p className="text-sm text-brown/60 dark:text-beige/60">years of craft</p>
+              <p className="font-serif text-3xl text-brown">5+</p>
+              <p className="text-sm text-brown/60 dark:text-beige/60">years of designing crafts</p>
             </div>
           </div>
         </Reveal>
