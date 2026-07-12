@@ -23,7 +23,9 @@ export function InstagramGallery() {
           {shots.map((s) => (
             <a
               key={s.seed}
-              href="#"
+              href="https://www.instagram.com/manjusatelier"
+              target="_blank"
+              rel="noopener noreferrer"
               className="group relative block break-inside-avoid overflow-hidden rounded-2xl"
               aria-label="Instagram post"
             >

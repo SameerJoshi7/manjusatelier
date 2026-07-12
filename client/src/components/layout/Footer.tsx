@@ -120,10 +120,16 @@ export function Footer() {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            {[Instagram, Facebook, Twitter].map((Icon, i) => (
+            {[
+              { Icon: Instagram, href: 'https://www.instagram.com/manjusatelier' },
+              { Icon: Facebook, href: '#' },
+              { Icon: Twitter, href: '#' },
+            ].map(({ Icon, href }, i) => (
               <a
                 key={i}
-                href="#"
+                href={href}
+                target={href !== '#' ? '_blank' : undefined}
+                rel={href !== '#' ? 'noopener noreferrer' : undefined}
                 aria-label="Social link"
                 className="grid h-9 w-9 place-items-center rounded-full bg-cream/10 transition-colors hover:bg-gold hover:text-brown-dark"
               >
