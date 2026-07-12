@@ -121,7 +121,7 @@ export default function Checkout() {
   const upiId = import.meta.env.VITE_UPI_ID || "your_actual_upi_id@okbank"; 
   const merchantName = "Manjus Atelier";
   const upiString = activeOrder 
-    ? `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${activeOrder.amount}&cu=INR&tn=Order ${activeOrder.customOrderId} - ${user?.email}`
+    ? `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&tr=${activeOrder.customOrderId}&am=${activeOrder.amount}&cu=INR&tn=${encodeURIComponent(`Order ${activeOrder.customOrderId}`)}`
     : '';
 
   return (
