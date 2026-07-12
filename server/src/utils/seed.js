@@ -89,11 +89,7 @@ async function run() {
     await User.create({ name: 'Manju Admin', email: adminEmail, password: 'Admin@12345', role: 'admin' });
     console.log(`✓ Admin user created: ${adminEmail} / Admin@12345`);
   }
-  const demoEmail = 'demo@manjusatelier.com';
-  if (!(await User.findOne({ email: demoEmail }))) {
-    await User.create({ name: 'Demo Customer', email: demoEmail, password: 'Demo@12345' });
-    console.log(`✓ Demo user created: ${demoEmail} / Demo@12345`);
-  }
+
 
   await mongoose.disconnect();
   console.log('Done.');

@@ -104,11 +104,7 @@ export default function Login() {
           </Button>
         </form>
 
-        {mode === 'login' && (
-          <p className="mt-4 rounded-lg bg-beige/40 p-3 text-center text-xs text-brown/70 dark:bg-beige/10">
-            Demo: <strong>demo@manjusatelier.com</strong> / <strong>Demo@12345</strong>
-          </p>
-        )}
+
 
         <p className="mt-6 text-center text-sm text-brown/60 dark:text-beige/60">
           {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}

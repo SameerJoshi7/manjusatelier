@@ -85,7 +85,6 @@ npm run seed        # from the root, or `npm run seed` inside /server
 ```
 This creates 7 categories, 12 handmade products, 3 coupons, and demo accounts:
 - Admin: `admin@manjusatelier.com` / `Admin@12345`
-- Customer: `demo@manjusatelier.com` / `Demo@12345`
 
 ### 5. Run in development
 ```bash
