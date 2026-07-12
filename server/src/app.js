@@ -66,6 +66,7 @@ export function createApp() {
   app.use('/api/auth/register', authLimiter);
 
   // --- Routes ---
+  app.get('/ping', (req, res) => res.json({}));
   app.get('/api/health', (req, res) => res.json({ success: true, status: 'ok' }));
   app.use('/api/auth', authRoutes);
   app.use('/api/products', productRoutes);
