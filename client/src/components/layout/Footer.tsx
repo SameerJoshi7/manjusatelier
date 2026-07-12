@@ -1,6 +1,22 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { Instagram, Facebook, Twitter, Mail, MapPin, Phone } from 'lucide-react';
+import { Instagram, Facebook, Mail, MapPin, Phone } from 'lucide-react';
+
+const XIcon = ({ size = 16 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
+    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+  </svg>
+);
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 
@@ -123,7 +139,7 @@ export function Footer() {
             {[
               { Icon: Instagram, href: 'https://www.instagram.com/manjusatelier' },
               { Icon: Facebook, href: '#' },
-              { Icon: Twitter, href: '#' },
+              { Icon: XIcon, href: '#' },
             ].map(({ Icon, href }, i) => (
               <a
                 key={i}
