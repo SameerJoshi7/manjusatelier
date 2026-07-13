@@ -19,6 +19,7 @@ import webhookRoutes from './routes/webhookRoutes.js';
 import placeholderRoutes from './routes/placeholderRoutes.js';
 import adminRoutes, { uploadDir } from './routes/adminRoutes.js';
 import settingRoutes from './routes/settingRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 
 export function createApp() {
   const app = express();
@@ -75,8 +76,9 @@ export function createApp() {
   app.use('/api/orders', orderRoutes);
   app.use('/api/coupons', couponRoutes);
   app.use('/api/reviews', reviewRoutes);
-  app.use('/api/settings', settingRoutes);
   app.use('/api/admin', adminRoutes);
+  app.use('/api/settings', settingRoutes);
+  app.use('/api/notifications', notificationRoutes);
 
   // --- Errors ---
   app.use(notFound);

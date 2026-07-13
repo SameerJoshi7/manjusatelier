@@ -12,12 +12,15 @@ import {
   Moon,
   ChevronDown,
   LogOut,
+  Bell,
+  CheckCircle2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useNotifications } from '@/context/NotificationContext';
 import { useCategories } from '@/hooks/useCategories';
 import { InstallPWA } from '@/components/ui/InstallPWA';
 
@@ -43,6 +46,7 @@ export function Navbar() {
   const { user, logout } = useAuth();
   const { theme, toggle } = useTheme();
   const { categories } = useCategories();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
   const isHome = location.pathname === '/';
   const transparent = isHome && !scrolled && !mobileOpen;
@@ -186,12 +190,77 @@ export function Navbar() {
             </IconButton>
           </Link>
 
+          {/* Notifications */}
+          {user && (
+            <div className="group relative">
+              <IconButton label="Notifications" transparent={transparent}>
+                <Bell size={20} />
+                {unreadCount > 0 && <Counter value={unreadCount} />}
+              </IconButton>
+              <div className="invisible absolute right-0 top-full w-80 pt-2 opacity-0 transition-all group-hover:visible group-hover:opacity-100 z-50">
+                <div className="flex max-h-96 flex-col overflow-hidden rounded-2xl bg-white shadow-lift dark:bg-[#26201a]">
+                  <div className="flex items-center justify-between border-b border-brown/10 p-3 dark:border-beige/10">
+                    <h3 className="font-medium text-brown-dark dark:text-beige">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <button onClick={markAllAsRead} className="text-xs text-forest hover:underline">
+                        Mark all as read
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-sm text-brown/50 dark:text-beige/50">
+                        No notifications yet.
+                      </div>
+                    ) : (
+                      <div className="flex flex-col">
+                        {notifications.map((n) => (
+                          <div
+                            key={n._id}
+                            onClick={() => {
+                              if (!n.read) markAsRead(n._id);
+                              if (n.link) navigate(n.link);
+                            }}
+                            className={cn(
+                              'cursor-pointer border-b border-brown/5 p-3 text-left transition-colors last:border-0 hover:bg-beige/30 dark:border-beige/5 dark:hover:bg-beige/5',
+                              !n.read && 'bg-beige/10 dark:bg-beige/5'
+                            )}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="mt-1 shrink-0 text-forest">
+                                <CheckCircle2 size={16} />
+                              </div>
+                              <div className="flex-1 space-y-1">
+                                <p className={cn("text-sm", !n.read ? "font-semibold text-brown-dark dark:text-beige" : "text-brown dark:text-beige/90")}>
+                                  {n.title}
+                                </p>
+                                <p className="text-xs text-brown/70 dark:text-beige/70 leading-relaxed">
+                                  {n.message}
+                                </p>
+                                <p className="text-[10px] text-brown/50 dark:text-beige/50">
+                                  {new Date(n.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                              {!n.read && (
+                                <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-red-500" />
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Profile */}
           <div className="group relative hidden md:block">
             <IconButton label="Account" transparent={transparent}>
               <User size={20} />
             </IconButton>
-            <div className="invisible absolute right-0 top-full w-48 pt-2 opacity-0 transition-all group-hover:visible group-hover:opacity-100">
+            <div className="invisible absolute right-0 top-full w-48 pt-2 opacity-0 transition-all group-hover:visible group-hover:opacity-100 z-50">
               <div className="rounded-2xl bg-white p-2 shadow-lift dark:bg-[#26201a]">
                 {user ? (
                   <>

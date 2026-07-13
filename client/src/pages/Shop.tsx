@@ -245,13 +245,13 @@ export default function Shop() {
           ) : data && data.products.length > 0 ? (
             view === 'grid' ? (
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:gap-6">
-                {data.products.map((p) => (
+                {data.products.map((p: Product) => (
                   <ProductCard key={p._id} product={p} onQuickView={setQuick} />
                 ))}
               </div>
             ) : (
               <div className="space-y-4">
-                {data.products.map((p) => (
+                {data.products.map((p: Product) => (
                   <ListRow key={p._id} product={p} />
                 ))}
               </div>

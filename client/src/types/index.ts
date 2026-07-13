@@ -98,6 +98,15 @@ export interface Order {
   createdAt: string;
 }
 
+export interface Notification {
+  _id: string;
+  title: string;
+  message: string;
+  link?: string;
+  read: boolean;
+  createdAt: string;
+}
+
 export interface Paginated<T> {
   products: T[];
   total: number;

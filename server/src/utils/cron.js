@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import Order from '../models/Order.js';
+import Notification from '../models/Notification.js';
 
 export const initCronJobs = () => {
   // Run every minute
@@ -20,6 +21,14 @@ export const initCronJobs = () => {
           order.paymentStatus = 'FAILED';
           order.orderStatus = 'cancelled';
           await order.save();
+          
+          await Notification.create({
+            user: order.user,
+            title: 'Order Expired',
+            message: `Your payment window for order ${order.customOrderId} expired. The order has been cancelled.`,
+            link: `/account?tab=orders`,
+          });
+          
           console.log(`[CRON] Cancelled order ${order.customOrderId}`);
         }
       }

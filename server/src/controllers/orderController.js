@@ -3,6 +3,7 @@ import Product from '../models/Product.js';
 import Order from '../models/Order.js';
 import Coupon from '../models/Coupon.js';
 import Setting from '../models/Setting.js';
+import Notification from '../models/Notification.js';
 import { asyncHandler, ApiError } from '../middleware/error.js';
 import { getRazorpay, verifyPaymentSignature } from '../utils/razorpay.js';
 
@@ -151,6 +152,14 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     { new: true }
   ).populate('user', 'name email');
   if (!order) throw new ApiError(404, 'Order not found');
+
+  await Notification.create({
+    user: order.user._id,
+    title: 'Order Status Updated',
+    message: `Your order ${order.customOrderId} is now ${orderStatus}.`,
+    link: `/account?tab=orders`,
+  });
+
   res.json({ success: true, order });
 });
 
@@ -161,37 +170,46 @@ export const verifyUtr = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id).populate('user', 'name email');
   if (!order) throw new ApiError(404, 'Order not found');
 
-  if (order.paymentStatus === 'SUCCESSFUL') {
-    return res.json({ success: true, order });
-  }
-
-  if (!verified) {
-    order.paymentStatus = 'FAILED';
-    await order.save();
+  if (order.paymentStatus === 'SUCCESSFUL' || order.paymentStatus === 'UTR_VERIFIED') {
     return res.json({ success: true, order });
   }
 
   const session = await mongoose.startSession();
   try {
-    await session.withTransaction(async () => {
-      for (const item of order.items) {
-        await Product.updateOne(
-          { _id: item.product },
-          { $inc: { stock: -item.quantity } },
-          { session }
-        );
-      }
-      order.paymentStatus = 'SUCCESSFUL';
-      order.orderStatus = 'confirmed';
-      await order.save({ session });
-    });
-  } catch (err) {
-    for (const item of order.items) {
-      await Product.updateOne({ _id: item.product }, { $inc: { stock: -item.quantity } });
+    if (verified) {
+      await session.withTransaction(async () => {
+        for (const item of order.items) {
+          await Product.updateOne(
+            { _id: item.product },
+            { $inc: { stock: -item.quantity } },
+            { session }
+          );
+        }
+        order.paymentStatus = 'UTR_VERIFIED';
+        order.orderStatus = 'confirmed';
+        await order.save({ session });
+      });
+
+      await Notification.create({
+        user: order.user._id,
+        title: 'Payment Verified',
+        message: `Your payment for order ${order.customOrderId} has been verified successfully.`,
+        link: `/account?tab=orders`,
+      });
+    } else {
+      order.paymentStatus = 'FAILED';
+      order.orderStatus = 'cancelled';
+      await order.save();
+
+      await Notification.create({
+        user: order.user._id,
+        title: 'Payment Rejected',
+        message: `We could not verify the UTR for order ${order.customOrderId}. The order has been cancelled.`,
+        link: `/account?tab=orders`,
+      });
     }
-    order.paymentStatus = 'SUCCESSFUL';
-    order.orderStatus = 'confirmed';
-    await order.save();
+  } catch (err) {
+    throw err;
   } finally {
     session.endSession();
   }
