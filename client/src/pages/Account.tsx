@@ -5,7 +5,7 @@ import { api } from '@/lib/api';
 import type { Order } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { usePageMeta } from '@/hooks/usePageMeta';
-import { formatPrice, cn } from '@/lib/utils';
+import { cn, formatPrice, formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 
@@ -84,11 +84,7 @@ export default function Account() {
                       #{order._id.slice(-8).toUpperCase()}
                     </p>
                     <p className="text-xs text-brown/50">
-                      {new Date(order.createdAt).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
+                      {formatDate(order.createdAt)}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

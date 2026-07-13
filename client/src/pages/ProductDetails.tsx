@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Product, Review } from '@/types';
-import { cn, formatPrice, finalPrice, categoryName } from '@/lib/utils';
+import { cn, formatPrice, finalPrice, categoryName, formatDate } from '@/lib/utils';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -442,11 +442,7 @@ function ReviewsTab({
                 <p className="mt-2 text-sm text-brown/70 dark:text-beige/70">{r.comment}</p>
               )}
               <p className="mt-2 text-xs text-brown/40">
-                {new Date(r.createdAt).toLocaleDateString('en-IN', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
+                {formatDate(r.createdAt)}
               </p>
             </div>
           ))

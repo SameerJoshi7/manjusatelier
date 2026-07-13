@@ -21,6 +21,17 @@ export function categoryName(p: Product): string {
   return typeof p.category === 'string' ? p.category : p.category?.name ?? '';
 }
 
+export function formatDate(dateString: string | Date): string {
+  return new Date(dateString).toLocaleString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
+
 /** Load an external script once (used for Razorpay checkout). */
 export function loadScript(src: string): Promise<boolean> {
   return new Promise((resolve) => {

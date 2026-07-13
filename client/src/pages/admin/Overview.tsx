@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IndianRupee, ShoppingBag, Package, Users, AlertTriangle, Clock } from 'lucide-react';
 import { api } from '@/lib/api';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, formatDate } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/Skeleton';
 import type { Order, Product } from '@/types';
 
@@ -119,7 +119,7 @@ export default function Overview() {
                       {typeof o.user === 'object' && o.user
                         ? (o.user as { name?: string }).name
                         : 'Customer'}{' '}
-                      · {new Date(o.createdAt).toLocaleDateString('en-IN')}
+                      · {formatDate(o.createdAt)}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">

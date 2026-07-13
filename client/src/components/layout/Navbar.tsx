@@ -15,7 +15,7 @@ import {
   Bell,
   CheckCircle2,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
@@ -238,7 +238,7 @@ export function Navbar() {
                                   {n.message}
                                 </p>
                                 <p className="text-[10px] text-brown/50 dark:text-beige/50">
-                                  {new Date(n.createdAt).toLocaleDateString()}
+                                  {formatDate(n.createdAt)}
                                 </p>
                               </div>
                               {!n.read && (
