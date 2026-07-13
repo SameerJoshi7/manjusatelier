@@ -161,7 +161,7 @@ export function Navbar() {
         </ul>
 
         {/* Actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           <IconButton label="Search" transparent={transparent} onClick={() => setSearchOpen((v) => !v)}>
             <Search size={20} />
           </IconButton>
@@ -295,7 +295,7 @@ export function Navbar() {
 
           <button
             className={cn(
-              'ml-1 rounded-full p-2 lg:hidden',
+              'ml-0.5 sm:ml-1 rounded-full p-1.5 md:p-2 lg:hidden',
               transparent ? 'text-white' : 'text-brown-dark dark:text-beige'
             )}
             aria-label="Menu"
@@ -341,7 +341,8 @@ export function Navbar() {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden bg-cream lg:hidden dark:bg-[#1c1712]"
           >
-            <ul className="container-x flex flex-col gap-1 py-4">
+            <div className="max-h-[calc(100vh-80px)] overflow-y-auto">
+              <ul className="container-x flex flex-col gap-1 py-4">
               {navLinks.map((link) => (
                 <li key={link.to}>
                   <NavLink
@@ -352,27 +353,56 @@ export function Navbar() {
                   </NavLink>
                 </li>
               ))}
+              {user && (
+                <>
+                  <li className="mt-2 border-t border-brown/10 pt-2">
+                    <Link
+                      to="/account"
+                      onClick={() => setMobileOpen(false)}
+                      className="block rounded-xl px-4 py-3 text-brown-dark hover:bg-beige/40 dark:text-beige dark:hover:bg-beige/10"
+                    >
+                      My Orders
+                    </Link>
+                  </li>
+                  {user.role === 'admin' && (
+                    <li>
+                      <Link
+                        to="/admin"
+                        onClick={() => setMobileOpen(false)}
+                        className="block rounded-xl px-4 py-3 text-brown-dark hover:bg-beige/40 dark:text-beige dark:hover:bg-beige/10"
+                      >
+                        Admin Dashboard
+                      </Link>
+                    </li>
+                  )}
+                </>
+              )}
               <li className="mt-2 border-t border-brown/10 pt-4 px-4 pb-2">
                 <InstallPWA className="w-full justify-center" />
               </li>
               <li className="border-t border-brown/10 pt-2">
                 {user ? (
                   <button
-                    onClick={logout}
-                    className="block w-full rounded-xl px-4 py-3 text-left text-brown-dark dark:text-beige"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      logout();
+                    }}
+                    className="block w-full rounded-xl px-4 py-3 text-left text-brown-dark dark:text-beige hover:bg-beige/40 dark:hover:bg-beige/10"
                   >
                     Logout
                   </button>
                 ) : (
                   <Link
                     to="/login"
-                    className="block rounded-xl px-4 py-3 text-brown-dark dark:text-beige"
+                    onClick={() => setMobileOpen(false)}
+                    className="block rounded-xl px-4 py-3 text-brown-dark hover:bg-beige/40 dark:text-beige dark:hover:bg-beige/10"
                   >
                     Login / Register
                   </Link>
                 )}
               </li>
             </ul>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -396,7 +426,7 @@ function IconButton({
       onClick={onClick}
       aria-label={label}
       className={cn(
-        'relative rounded-full p-2 transition-colors',
+        'relative rounded-full p-1.5 md:p-2 transition-colors',
         transparent
           ? 'text-white hover:bg-white/15'
           : 'text-brown-dark hover:bg-brown/10 dark:text-beige dark:hover:bg-beige/10'
