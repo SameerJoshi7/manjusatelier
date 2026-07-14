@@ -13,10 +13,10 @@ export default function Login() {
   );
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
-  const { login, register } = useAuth();
+  const { user, login, register, logout } = useAuth();
   const { notify } = useToast();
   const navigate = useNavigate();
-  const redirect = params.get('redirect') || '/account';
+  const redirect = params.get('redirect') || (user?.role === 'admin' ? '/admin' : '/account');
 
   usePageMeta({ title: `${mode === 'login' ? 'Login' : 'Register'} — Manju's Atelier` });
 
@@ -34,6 +34,53 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      await logout();
+      notify('Logged out successfully');
+    } catch (err) {
+      notify('Failed to log out', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (user) {
+    return (
+      <div className="container-x grid min-h-[80vh] place-items-center py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card-surface w-full max-w-md p-8 text-center"
+        >
+          <img
+            src="/logo-256.png"
+            alt="Manju's Atelier"
+            width={64}
+            height={64}
+            className="mx-auto h-16 w-16 rounded-full object-cover ring-1 ring-gold/40 mb-4"
+          />
+          <h1 className="font-serif text-3xl text-brown-dark dark:text-beige mb-2">
+            Already Logged In
+          </h1>
+          <p className="text-brown/70 dark:text-beige/70 mb-8">
+            You are currently logged in as <strong>{user.name}</strong> ({user.email}). 
+            Would you like to continue or log out to switch accounts?
+          </p>
+          <div className="flex flex-col gap-3">
+            <Button onClick={() => navigate(redirect)} size="lg" fullWidth>
+              Continue as {user.name}
+            </Button>
+            <Button variant="outline" onClick={handleLogout} size="lg" fullWidth disabled={loading}>
+              {loading ? 'Logging out...' : 'Log Out'}
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="container-x grid min-h-[80vh] place-items-center py-12">
