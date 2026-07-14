@@ -1,7 +1,9 @@
 import 'dotenv/config';
+import http from 'http';
 import { createApp } from './app.js';
 import { connectDB } from './config/db.js';
 import { initCronJobs } from './utils/cron.js';
+import { initSocket } from './socket.js';
 
 const PORT = process.env.PORT || 5000;
 
@@ -12,9 +14,14 @@ async function start() {
   }
   await connectDB(process.env.MONGODB_URI);
   initCronJobs();
+  
   const app = createApp();
+  const server = http.createServer(app);
+  
+  // Initialize Socket.io
+  initSocket(server);
 
-  app.listen(PORT, () => console.log(`✓ API listening on http://localhost:${PORT}`));
+  server.listen(PORT, () => console.log(`✓ API listening on http://localhost:${PORT}`));
 }
 
 start().catch((err) => {

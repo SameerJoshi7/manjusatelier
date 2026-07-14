@@ -33,7 +33,8 @@
     "node-cron": "^4.6.0",
     "nodemailer": "^9.0.3",
     "razorpay": "^2.9.4",
-    "resend": "^6.17.2"
+    "resend": "^6.17.2",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "mongodb-memory-server": "^11.2.0",

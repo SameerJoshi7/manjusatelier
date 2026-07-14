@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { useToast } from '@/components/ui/Toast';
 import { Button } from '@/components/ui/Button';
 import type { Order } from '@/types';
+import { useSocket } from '@/hooks/useSocket';
 
 interface AdminOrder extends Omit<Order, 'user'> {
   user?: { _id: string; name: string; email: string } | string;
@@ -50,6 +51,22 @@ export default function Orders() {
   };
 
   useEffect(load, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const socket = useSocket();
+  useEffect(() => {
+    if (!socket) return;
+    const onOrderUpdate = () => {
+      // Re-fetch when any order updates
+      api
+        .get<{ orders: AdminOrder[] }>(`/orders${filter ? `?status=${filter}` : ''}`)
+        .then(({ orders }) => setOrders(orders))
+        .catch(() => void 0);
+    };
+    socket.on('order_update', onOrderUpdate);
+    return () => {
+      socket.off('order_update', onOrderUpdate);
+    };
+  }, [socket, filter]);
 
   const changeStatus = async (id: string, orderStatus: string) => {
     setUpdating(id);

@@ -6,6 +6,7 @@ import Setting from '../models/Setting.js';
 import Notification from '../models/Notification.js';
 import { asyncHandler, ApiError } from '../middleware/error.js';
 import { getRazorpay, verifyPaymentSignature } from '../utils/razorpay.js';
+import { getSocket } from '../socket.js';
 
 /**
  * Recompute the cart total from the DATABASE (never trust client prices).
@@ -84,6 +85,12 @@ export const createOrder = asyncHandler(async (req, res) => {
     paymentStatus: 'PAYMENT_PENDING',
   });
 
+  try {
+    getSocket().to('admins').emit('order_update', { orderId: order._id });
+  } catch (err) {
+    console.error('Socket emission failed:', err);
+  }
+
   res.status(201).json({
     success: true,
     order: { id: order._id, customOrderId: order.customOrderId, amount: total, createdAt: order.createdAt },
@@ -106,6 +113,12 @@ export const submitUtr = asyncHandler(async (req, res) => {
   order.utrNumber = utrNumber.trim();
   order.paymentStatus = 'UTR_VERIFICATION_PENDING';
   await order.save();
+
+  try {
+    getSocket().to('admins').emit('order_update', { orderId: order._id });
+  } catch (err) {
+    console.error('Socket emission failed:', err);
+  }
 
   res.json({ success: true, order });
 });
@@ -159,6 +172,12 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     message: `Your order ${order.customOrderId} is now ${orderStatus}.`,
     link: `/account?tab=orders`,
   });
+
+  try {
+    getSocket().to(`user_${order.user._id.toString()}`).emit('order_update', { orderId: order._id });
+  } catch (err) {
+    console.error('Socket emission failed:', err);
+  }
 
   res.json({ success: true, order });
 });
@@ -233,6 +252,12 @@ export const verifyUtr = asyncHandler(async (req, res) => {
     session.endSession();
   }
 
+  try {
+    getSocket().to(`user_${order.user._id.toString()}`).emit('order_update', { orderId: order._id });
+  } catch (err) {
+    console.error('Socket emission failed:', err);
+  }
+
   res.json({ success: true, order });
 });
 
@@ -256,6 +281,12 @@ export const editUtr = asyncHandler(async (req, res) => {
   order.paymentStatus = 'UTR_VERIFICATION_PENDING';
   order.utrEdited = true;
   await order.save();
+
+  try {
+    getSocket().to('admins').emit('order_update', { orderId: order._id });
+  } catch (err) {
+    console.error('Socket emission failed:', err);
+  }
 
   res.json({ success: true, order });
 });

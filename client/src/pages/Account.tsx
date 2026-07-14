@@ -8,8 +8,8 @@ import { usePageMeta } from '@/hooks/usePageMeta';
 import { cn, formatPrice, formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
-
 import { useToast } from '@/components/ui/Toast';
+import { useSocket } from '@/hooks/useSocket';
 
 const statusStyles: Record<string, string> = {
   processing: 'bg-gold/20 text-brown-dark',
@@ -45,6 +45,22 @@ export default function Account() {
         .catch(() => void 0)
         .finally(() => setLoadingOrders(false));
   }, [user]);
+
+  const socket = useSocket();
+  useEffect(() => {
+    if (!socket || !user) return;
+    const onOrderUpdate = () => {
+      // Re-fetch when user's order updates
+      api
+        .get<{ orders: Order[] }>('/orders/mine')
+        .then(({ orders }) => setOrders(orders))
+        .catch(() => void 0);
+    };
+    socket.on('order_update', onOrderUpdate);
+    return () => {
+      socket.off('order_update', onOrderUpdate);
+    };
+  }, [socket, user]);
 
   const submitUtr = async (orderId: string, utr: string) => {
     setUpdatingUtr(true);
