@@ -12,6 +12,7 @@ import {
   syncCart,
   forgotPassword,
   resetPassword,
+  verifyResetToken,
 } from '../controllers/authController.js';
 
 const router = Router();
@@ -29,18 +30,33 @@ router.post(
 
 router.post(
   '/login',
-  [body('email').isEmail(), body('password').notEmpty()],
+  [
+    body('email').isEmail().withMessage('Valid email required'),
+    body('password').notEmpty().withMessage('Password is required'),
+  ],
   validate,
   login
 );
 
-router.post('/forgot-password', [body('email').isEmail().withMessage('Valid email required')], validate, forgotPassword);
-router.put('/reset-password/:token', [body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')], validate, resetPassword);
-
 router.post('/logout', logout);
-router.get('/me', protect, me);
-router.patch('/profile', protect, updateProfile);
-router.post('/wishlist/:productId', protect, toggleWishlist);
-router.put('/cart', protect, syncCart);
+router.post(
+  '/forgot-password', 
+  [body('email').isEmail().withMessage('Valid email required')], 
+  validate, 
+  forgotPassword
+);
+router.get('/reset-password/:token', verifyResetToken);
+router.put(
+  '/reset-password/:token', 
+  [body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')], 
+  validate, 
+  resetPassword
+);
+
+router.use(protect);
+router.get('/me', me);
+router.put('/profile', updateProfile);
+router.post('/wishlist/:productId', toggleWishlist);
+router.post('/cart/sync', syncCart);
 
 export default router;

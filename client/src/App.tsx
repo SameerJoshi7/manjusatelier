@@ -72,13 +72,14 @@ export default function App() {
           <Route path="/checkout/success/:id" element={<CheckoutSuccess />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/account" element={<Account />} />
           <Route path="/track" element={<OrderTracking />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
         </Route>
+
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Admin dashboard — own layout, admin-only */}
         <Route path="/admin" element={<AdminLayout />}>

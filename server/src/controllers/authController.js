@@ -143,3 +143,22 @@ export const resetPassword = asyncHandler(async (req, res) => {
     .cookie('token', token, cookieOptions)
     .json({ success: true, token, user: publicUser(user) });
 });
+
+// Verify Reset Password Token
+export const verifyResetToken = asyncHandler(async (req, res) => {
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    throw new ApiError(400, 'Invalid or expired token');
+  }
+
+  res.json({ success: true, email: user.email, name: user.name });
+});
