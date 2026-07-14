@@ -9,6 +9,9 @@ const sendEmail = async (options) => {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
   });
 
   // Define email options
@@ -25,8 +28,7 @@ const sendEmail = async (options) => {
     console.log('Message sent: %s', info.messageId);
   } catch (error) {
     console.error('Error sending email:', error);
-    // You can throw the error if you want the request to fail when email fails
-    // throw error; 
+    throw error;
   }
 };
 
