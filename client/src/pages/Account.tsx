@@ -139,8 +139,14 @@ export default function Account() {
                     </span>
                   </div>
                 </div>
+                {order.paymentStatus === 'UTR_MISMATCH_RETRY' && (
+                  <div className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-200">
+                    <p className="font-semibold">UTR Mismatch</p>
+                    <p>Please check your bank statement and re-enter the correct 12-digit UTR.</p>
+                  </div>
+                )}
                 {order.paymentMethod === 'UPI' &&
-                 (order.paymentStatus === 'PENDING_UTR' || order.paymentStatus === 'UTR_VERIFICATION_PENDING') &&
+                 (order.paymentStatus === 'PENDING_UTR' || order.paymentStatus === 'UTR_VERIFICATION_PENDING' || order.paymentStatus === 'UTR_MISMATCH_RETRY') &&
                  !order.utrEdited && (
                   <div className="mt-2 text-right">
                     <button

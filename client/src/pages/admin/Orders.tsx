@@ -29,6 +29,7 @@ const payColor: Record<string, string> = {
   UTR_VERIFIED: 'bg-forest/15 text-forest',
   PAYMENT_PENDING: 'bg-gold/20 text-brown-dark',
   PENDING_UTR: 'bg-orange-100 text-orange-700',
+  UTR_MISMATCH_RETRY: 'bg-orange-100 text-orange-700',
   UTR_VERIFICATION_PENDING: 'bg-purple-100 text-purple-700',
   FAILED: 'bg-red-100 text-red-600',
 };

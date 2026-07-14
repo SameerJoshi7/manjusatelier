@@ -17,9 +17,9 @@ window.addEventListener('vite:preloadError', () => {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <ThemeProvider>
-        <ToastProvider>
-          <AuthProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <ToastProvider>
             <NotificationProvider>
               <WishlistProvider>
                 <CartProvider>
@@ -27,9 +27,9 @@ createRoot(document.getElementById('root')!).render(
                 </CartProvider>
               </WishlistProvider>
             </NotificationProvider>
-          </AuthProvider>
-        </ToastProvider>
-      </ThemeProvider>
+          </ToastProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>
 );

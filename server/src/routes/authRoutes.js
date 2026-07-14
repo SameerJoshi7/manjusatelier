@@ -13,6 +13,7 @@ import {
   forgotPassword,
   resetPassword,
   verifyResetToken,
+  updatePreferences,
 } from '../controllers/authController.js';
 
 const router = Router();
@@ -58,5 +59,6 @@ router.get('/me', me);
 router.put('/profile', updateProfile);
 router.post('/wishlist/:productId', toggleWishlist);
 router.post('/cart/sync', syncCart);
+router.put('/preferences', updatePreferences);
 
 export default router;

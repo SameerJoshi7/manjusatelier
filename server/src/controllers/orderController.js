@@ -222,7 +222,7 @@ export const verifyUtr = asyncHandler(async (req, res) => {
     } else {
       if (!order.utrEdited) {
         // First rejection: give them a chance to edit
-        order.paymentStatus = 'PENDING_UTR';
+        order.paymentStatus = 'UTR_MISMATCH_RETRY';
         order.utrNumber = undefined;
         await order.save();
 

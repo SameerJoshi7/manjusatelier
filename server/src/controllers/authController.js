@@ -159,3 +159,17 @@ export const verifyResetToken = asyncHandler(async (req, res) => {
 
   res.json({ success: true, email: user.email, name: user.name });
 });
+
+// Update Preferences
+export const updatePreferences = asyncHandler(async (req, res) => {
+  const { theme } = req.body;
+  const user = await User.findById(req.user._id);
+  
+  if (theme) {
+    user.preferences = user.preferences || {};
+    user.preferences.theme = theme;
+  }
+  
+  await user.save();
+  res.json({ success: true, preferences: user.preferences });
+});

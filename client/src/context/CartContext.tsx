@@ -78,7 +78,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const payload = {
         items: items.map(i => ({ productId: i.product._id, quantity: i.quantity }))
       };
-      api.put('/cart', payload).catch(console.error);
+      api.post('/auth/cart/sync', payload).catch(console.error);
     }
   }, [items, loaded, user, syncedOnce]);
 

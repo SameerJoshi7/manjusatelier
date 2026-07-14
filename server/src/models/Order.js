@@ -36,7 +36,7 @@ const orderSchema = new mongoose.Schema(
     utrEdited: { type: Boolean, default: false },
     paymentStatus: {
       type: String,
-      enum: ['PAYMENT_PENDING', 'PENDING_UTR', 'UTR_VERIFICATION_PENDING', 'UTR_VERIFIED', 'SUCCESSFUL', 'FAILED'],
+      enum: ['PAYMENT_PENDING', 'PENDING_UTR', 'UTR_MISMATCH_RETRY', 'UTR_VERIFICATION_PENDING', 'UTR_VERIFIED', 'SUCCESSFUL', 'FAILED'],
       default: 'PAYMENT_PENDING',
     },
     orderStatus: {
