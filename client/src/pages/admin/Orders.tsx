@@ -249,7 +249,7 @@ export default function Orders() {
                         </Button>
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="secondary"
                           className="border-red-200 text-red-600 hover:bg-red-50"
                           disabled={updating === o._id}
                           onClick={() => initiateVerify(o._id, false)}
@@ -279,6 +279,39 @@ export default function Orders() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* UTR Modal */}
+      {utrPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-brown-dark">
+            <h3 className="mb-2 text-lg font-serif text-brown-dark dark:text-beige">Enter UTR Number</h3>
+            <p className="mb-4 text-sm text-brown/70 dark:text-beige/70">
+              Please enter the 12-digit UTR from your bank statement to verify this payment.
+            </p>
+            <input
+              type="text"
+              className="w-full rounded-xl border border-brown/20 bg-cream px-4 py-2 mb-4 dark:border-beige/20 dark:bg-[#2c2621] outline-none focus:border-gold text-brown-dark dark:text-beige"
+              value={adminUtr}
+              onChange={(e) => setAdminUtr(e.target.value.replace(/\D/g, ''))}
+              maxLength={12}
+              placeholder="12-digit UTR"
+            />
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" onClick={() => setUtrPrompt(null)}>Cancel</Button>
+              <Button 
+                disabled={adminUtr.length !== 12 || updating === utrPrompt.id}
+                onClick={() => {
+                  const id = utrPrompt.id;
+                  setUtrPrompt(null);
+                  verifyUtrSubmit(id, true, adminUtr);
+                }}
+              >
+                Confirm
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>
