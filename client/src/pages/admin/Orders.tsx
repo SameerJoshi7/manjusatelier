@@ -66,18 +66,24 @@ export default function Orders() {
     }
   };
 
-  const verifyUtr = async (id: string, verified: boolean) => {
-    let adminUtr = '';
-    if (verified) {
-      adminUtr = window.prompt('Please enter the UTR number from your bank statement:') || '';
-      if (!adminUtr) return; // User cancelled or entered nothing
-    }
+  const [utrPrompt, setUtrPrompt] = useState<{ id: string; action: 'verify' } | null>(null);
+  const [adminUtr, setAdminUtr] = useState('');
 
+  const initiateVerify = (id: string, verified: boolean) => {
+    if (verified) {
+      setAdminUtr('');
+      setUtrPrompt({ id, action: 'verify' });
+    } else {
+      verifyUtrSubmit(id, false, '');
+    }
+  };
+
+  const verifyUtrSubmit = async (id: string, verified: boolean, providedUtr: string) => {
     setUpdating(id);
     try {
       const { order } = await api.patch<{ order: AdminOrder }>(`/orders/${id}/verify-utr`, {
         verified,
-        adminUtr,
+        adminUtr: providedUtr,
       });
       setOrders((prev) => prev.map((o) => (o._id === id ? { ...o, paymentStatus: order.paymentStatus, orderStatus: order.orderStatus } : o)));
       notify(verified ? 'UTR Verified! Stock deducted.' : 'UTR Rejected.');
@@ -233,22 +239,22 @@ export default function Orders() {
                     
                     {o.paymentStatus === 'UTR_VERIFICATION_PENDING' && (
                       <div className="mt-4 flex gap-2">
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
+                          className="bg-forest text-cream hover:bg-forest/90"
                           disabled={updating === o._id}
-                          className="flex-1 bg-forest text-white hover:bg-forest/90"
-                          onClick={() => verifyUtr(o._id, true)}
+                          onClick={() => initiateVerify(o._id, true)}
                         >
                           <CheckCircle2 size={16} className="mr-1" /> Approve UTR
                         </Button>
-                        <Button 
-                          size="sm" 
-                          variant="secondary" 
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-red-200 text-red-600 hover:bg-red-50"
                           disabled={updating === o._id}
-                          onClick={() => verifyUtr(o._id, false)}
-                          className="text-red-600 border-red-200 hover:bg-red-50"
+                          onClick={() => initiateVerify(o._id, false)}
                         >
-                          <XCircle size={16} /> Reject
+                          <XCircle size={16} className="mr-1" /> Reject UTR
                         </Button>
                       </div>
                     )}

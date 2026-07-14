@@ -73,7 +73,7 @@ export default function Login() {
             <Button onClick={() => navigate(redirect)} size="lg" fullWidth>
               Continue as {user.name}
             </Button>
-            <Button variant="outline" onClick={handleLogout} size="lg" fullWidth disabled={loading}>
+            <Button variant="secondary" onClick={handleLogout} size="lg" fullWidth disabled={loading}>
               {loading ? 'Logging out...' : 'Log Out'}
             </Button>
           </div>

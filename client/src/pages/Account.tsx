@@ -9,6 +9,8 @@ import { cn, formatPrice, formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 
+import { useToast } from '@/components/ui/Toast';
+
 const statusStyles: Record<string, string> = {
   processing: 'bg-gold/20 text-brown-dark',
   confirmed: 'bg-forest/15 text-forest',
@@ -20,8 +22,15 @@ const statusStyles: Record<string, string> = {
 export default function Account() {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
+  const { notify } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  
+  // UTR Modal state
+  const [utrPrompt, setUtrPrompt] = useState<string | null>(null);
+  const [newUtr, setNewUtr] = useState('');
+  const [updatingUtr, setUpdatingUtr] = useState(false);
+
   usePageMeta({ title: "My Account — Manju's Atelier" });
 
   useEffect(() => {
@@ -37,16 +46,16 @@ export default function Account() {
         .finally(() => setLoadingOrders(false));
   }, [user]);
 
-  const handleEditUtr = async (orderId: string) => {
-    const newUtr = window.prompt('Please enter your correct UTR number:');
-    if (!newUtr) return;
-
+  const submitUtr = async (orderId: string, utr: string) => {
+    setUpdatingUtr(true);
     try {
-      const { order } = await api.put<{ order: Order }>(`/orders/${orderId}/edit-utr`, { utrNumber: newUtr });
+      const { order } = await api.put<{ order: Order }>(`/orders/${orderId}/edit-utr`, { utrNumber: utr });
       setOrders((prev) => prev.map((o) => (o._id === orderId ? order : o)));
-      alert('UTR updated successfully.');
+      notify('UTR updated successfully.');
     } catch (e: any) {
-      alert(e.response?.data?.error || 'Failed to update UTR.');
+      notify(e.response?.data?.error || 'Failed to update UTR.', 'error');
+    } finally {
+      setUpdatingUtr(false);
     }
   };
 
@@ -119,7 +128,10 @@ export default function Account() {
                  !order.utrEdited && (
                   <div className="mt-2 text-right">
                     <button
-                      onClick={() => handleEditUtr(order._id)}
+                      onClick={() => {
+                        setNewUtr('');
+                        setUtrPrompt(order._id);
+                      }}
                       className="text-xs font-medium text-gold hover:text-gold-light underline"
                     >
                       Edit UTR
@@ -144,6 +156,39 @@ export default function Account() {
           </div>
         )}
       </section>
+
+      {/* UTR Modal */}
+      {utrPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-brown-dark">
+            <h3 className="mb-2 text-lg font-serif text-brown-dark dark:text-beige">Edit UTR Number</h3>
+            <p className="mb-4 text-sm text-brown/70 dark:text-beige/70">
+              Please enter the correct 12-digit UTR for this payment.
+            </p>
+            <input
+              type="text"
+              className="w-full rounded-xl border border-brown/20 bg-cream px-4 py-2 mb-4 dark:border-beige/20 dark:bg-[#2c2621] outline-none focus:border-gold text-brown-dark dark:text-beige"
+              value={newUtr}
+              onChange={(e) => setNewUtr(e.target.value.replace(/\D/g, ''))}
+              maxLength={12}
+              placeholder="12-digit UTR"
+            />
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" onClick={() => setUtrPrompt(null)}>Cancel</Button>
+              <Button 
+                disabled={newUtr.length !== 12 || updatingUtr}
+                onClick={() => {
+                  const id = utrPrompt;
+                  setUtrPrompt(null);
+                  submitUtr(id, newUtr);
+                }}
+              >
+                Submit
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
