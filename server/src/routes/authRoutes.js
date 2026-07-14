@@ -10,6 +10,8 @@ import {
   updateProfile,
   toggleWishlist,
   syncCart,
+  forgotPassword,
+  resetPassword,
 } from '../controllers/authController.js';
 
 const router = Router();
@@ -31,6 +33,9 @@ router.post(
   validate,
   login
 );
+
+router.post('/forgot-password', [body('email').isEmail().withMessage('Valid email required')], validate, forgotPassword);
+router.put('/reset-password/:token', [body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')], validate, resetPassword);
 
 router.post('/logout', logout);
 router.get('/me', protect, me);

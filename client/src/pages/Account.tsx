@@ -37,6 +37,19 @@ export default function Account() {
         .finally(() => setLoadingOrders(false));
   }, [user]);
 
+  const handleEditUtr = async (orderId: string) => {
+    const newUtr = window.prompt('Please enter your correct UTR number:');
+    if (!newUtr) return;
+
+    try {
+      const { order } = await api.put<{ order: Order }>(`/orders/${orderId}/edit-utr`, { utrNumber: newUtr });
+      setOrders((prev) => prev.map((o) => (o._id === orderId ? order : o)));
+      alert('UTR updated successfully.');
+    } catch (e: any) {
+      alert(e.response?.data?.error || 'Failed to update UTR.');
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -101,6 +114,18 @@ export default function Account() {
                     </span>
                   </div>
                 </div>
+                {order.paymentMethod === 'UPI' &&
+                 (order.paymentStatus === 'PENDING_UTR' || order.paymentStatus === 'UTR_VERIFICATION_PENDING') &&
+                 !order.utrEdited && (
+                  <div className="mt-2 text-right">
+                    <button
+                      onClick={() => handleEditUtr(order._id)}
+                      className="text-xs font-medium text-gold hover:text-gold-light underline"
+                    >
+                      Edit UTR
+                    </button>
+                  </div>
+                )}
                 <div className="mt-3 flex flex-wrap gap-3">
                   {order.items.map((item) => (
                     <div key={item.product} className="flex items-center gap-2">

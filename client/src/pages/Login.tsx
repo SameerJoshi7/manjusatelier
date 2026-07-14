@@ -99,6 +99,16 @@ export default function Login() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
           </label>
+          {mode === 'login' && (
+            <div className="mb-4 text-right">
+              <Link
+                to="/forgot-password"
+                className="text-sm font-medium text-gold hover:text-gold-light"
+              >
+                Forgot your password?
+              </Link>
+            </div>
+          )}
           <Button type="submit" size="lg" fullWidth disabled={loading}>
             {loading ? 'Please wait…' : mode === 'login' ? 'Log In' : 'Create Account'}
           </Button>

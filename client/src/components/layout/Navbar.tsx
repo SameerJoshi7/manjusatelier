@@ -347,6 +347,7 @@ export function Navbar() {
                 <li key={link.to}>
                   <NavLink
                     to={link.to}
+                    onClick={() => setMobileOpen(false)}
                     className="block rounded-xl px-4 py-3 text-brown-dark hover:bg-beige/40 dark:text-beige dark:hover:bg-beige/10"
                   >
                     {link.label}

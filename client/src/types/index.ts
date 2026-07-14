@@ -93,6 +93,7 @@ export interface Order {
   orderStatus: 'processing' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
   paymentMethod?: string;
   utrNumber?: string;
+  utrEdited?: boolean;
   customOrderId?: string;
   razorpayOrderId?: string;
   createdAt: string;

@@ -8,6 +8,7 @@ import {
   getAllOrders,
   updateOrderStatus,
   verifyUtr,
+  editUtr,
 } from '../controllers/orderController.js';
 
 const router = Router();
@@ -16,6 +17,7 @@ router.use(protect); // all order routes require auth
 
 router.post('/', createOrder);
 router.post('/:id/utr', submitUtr);
+router.put('/:id/edit-utr', editUtr);
 router.get('/mine', getMyOrders);
 
 // Admin

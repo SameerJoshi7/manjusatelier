@@ -165,7 +165,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
 /** PATCH /api/orders/:id/verify-utr (admin) */
 export const verifyUtr = asyncHandler(async (req, res) => {
-  const { verified } = req.body; // boolean
+  const { verified, adminUtr } = req.body; // boolean, string
 
   const order = await Order.findById(req.params.id).populate('user', 'name email');
   if (!order) throw new ApiError(404, 'Order not found');
@@ -177,6 +177,10 @@ export const verifyUtr = asyncHandler(async (req, res) => {
   const session = await mongoose.startSession();
   try {
     if (verified) {
+      if (adminUtr !== order.utrNumber) {
+        throw new ApiError(400, 'UTR Number mismatch. Please verify again.');
+      }
+      
       await session.withTransaction(async () => {
         for (const item of order.items) {
           await Product.updateOne(
@@ -197,22 +201,61 @@ export const verifyUtr = asyncHandler(async (req, res) => {
         link: `/account?tab=orders`,
       });
     } else {
-      order.paymentStatus = 'FAILED';
-      order.orderStatus = 'cancelled';
-      await order.save();
+      if (!order.utrEdited) {
+        // First rejection: give them a chance to edit
+        order.paymentStatus = 'PENDING_UTR';
+        order.utrNumber = undefined;
+        await order.save();
 
-      await Notification.create({
-        user: order.user._id,
-        title: 'Payment Rejected',
-        message: `We could not verify the UTR for order ${order.customOrderId}. The order has been cancelled.`,
-        link: `/account?tab=orders`,
-      });
+        await Notification.create({
+          user: order.user._id,
+          title: 'UTR Rejected',
+          message: `The UTR for order ${order.customOrderId} was rejected. Please check and enter the correct UTR (you have one edit left).`,
+          link: `/account?tab=orders`,
+        });
+      } else {
+        // Second rejection: cancel order
+        order.paymentStatus = 'FAILED';
+        order.orderStatus = 'cancelled';
+        await order.save();
+
+        await Notification.create({
+          user: order.user._id,
+          title: 'Payment Rejected',
+          message: `We could not verify the UTR for order ${order.customOrderId}. The order has been cancelled.`,
+          link: `/account?tab=orders`,
+        });
+      }
     }
   } catch (err) {
     throw err;
   } finally {
     session.endSession();
   }
+
+  res.json({ success: true, order });
+});
+
+/** PUT /api/orders/:id/edit-utr */
+export const editUtr = asyncHandler(async (req, res) => {
+  const { utrNumber } = req.body;
+  if (!utrNumber) throw new ApiError(400, 'UTR number is required');
+
+  const order = await Order.findById(req.params.id);
+  if (!order) throw new ApiError(404, 'Order not found');
+
+  if (order.user.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, 'Not allowed');
+  }
+
+  if (order.utrEdited) {
+    throw new ApiError(400, 'You have already edited your UTR number once.');
+  }
+
+  order.utrNumber = utrNumber;
+  order.paymentStatus = 'UTR_VERIFICATION_PENDING';
+  order.utrEdited = true;
+  await order.save();
 
   res.json({ success: true, order });
 });

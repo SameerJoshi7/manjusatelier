@@ -16,6 +16,8 @@ const Checkout = lazy(() => import('@/pages/Checkout'));
 const CheckoutSuccess = lazy(() => import('@/pages/CheckoutSuccess'));
 const Wishlist = lazy(() => import('@/pages/Wishlist'));
 const Login = lazy(() => import('@/pages/Login'));
+const ForgotPassword = lazy(() => import('@/pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 const Account = lazy(() => import('@/pages/Account'));
 const Terms = lazy(() => import('@/pages/Terms'));
 const OrderTracking = lazy(() => import('@/pages/OrderTracking'));
@@ -69,6 +71,8 @@ export default function App() {
           <Route path="/checkout/success/:id" element={<CheckoutSuccess />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/account" element={<Account />} />
           <Route path="/track" element={<OrderTracking />} />
           <Route path="/terms" element={<Terms />} />

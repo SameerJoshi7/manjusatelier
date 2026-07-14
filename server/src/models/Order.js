@@ -33,6 +33,7 @@ const orderSchema = new mongoose.Schema(
     customOrderId: { type: String, unique: true },
     paymentMethod: { type: String, default: 'UPI' },
     utrNumber: { type: String },
+    utrEdited: { type: Boolean, default: false },
     paymentStatus: {
       type: String,
       enum: ['PAYMENT_PENDING', 'PENDING_UTR', 'UTR_VERIFICATION_PENDING', 'UTR_VERIFIED', 'SUCCESSFUL', 'FAILED'],

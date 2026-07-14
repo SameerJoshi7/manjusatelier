@@ -67,10 +67,17 @@ export default function Orders() {
   };
 
   const verifyUtr = async (id: string, verified: boolean) => {
+    let adminUtr = '';
+    if (verified) {
+      adminUtr = window.prompt('Please enter the UTR number from your bank statement:') || '';
+      if (!adminUtr) return; // User cancelled or entered nothing
+    }
+
     setUpdating(id);
     try {
       const { order } = await api.patch<{ order: AdminOrder }>(`/orders/${id}/verify-utr`, {
         verified,
+        adminUtr,
       });
       setOrders((prev) => prev.map((o) => (o._id === id ? { ...o, paymentStatus: order.paymentStatus, orderStatus: order.orderStatus } : o)));
       notify(verified ? 'UTR Verified! Stock deducted.' : 'UTR Rejected.');
