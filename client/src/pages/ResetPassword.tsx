@@ -52,9 +52,6 @@ export default function ResetPassword() {
     try {
       await api.put(`/auth/reset-password/${token}`, { password });
       setSuccess(true);
-      setTimeout(() => {
-        navigate('/'); // Redirect to home (user is logged in automatically)
-      }, 3000);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to reset password. Link may be invalid or expired.');
     } finally {
@@ -116,9 +113,12 @@ export default function ResetPassword() {
                 <CheckCircle2 size={32} />
               </div>
               <h2 className="text-2xl font-serif text-brown-dark dark:text-beige mb-2">Password Reset Successful!</h2>
-              <p className="text-brown/70 dark:text-beige/70">
-                The password for <strong>{userDetails?.email}</strong> has been updated. Logging you in...
+              <p className="text-brown/70 dark:text-beige/70 mb-6">
+                The password for <strong>{userDetails?.email}</strong> has been updated. You can now log in with your new credentials.
               </p>
+              <Link to="/login" className="btn bg-brown text-cream px-8 py-3 hover:bg-brown-dark inline-block">
+                Go to Login
+              </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">

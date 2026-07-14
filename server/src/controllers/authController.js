@@ -138,10 +138,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
   user.resetPasswordExpire = undefined;
   await user.save();
 
-  const token = signToken(user);
-  res
-    .cookie('token', token, cookieOptions)
-    .json({ success: true, token, user: publicUser(user) });
+  res.json({ success: true, message: 'Password reset successfully' });
 });
 
 // Verify Reset Password Token
