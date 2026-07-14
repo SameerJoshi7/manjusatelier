@@ -30,6 +30,7 @@ const AdminOrders = lazy(() => import('@/pages/admin/Orders'));
 const AdminProducts = lazy(() => import('@/pages/admin/Products'));
 const AdminCoupons = lazy(() => import('@/pages/admin/Coupons'));
 const AdminSettings = lazy(() => import('@/pages/admin/Settings'));
+const Marketing = lazy(() => import('@/pages/admin/Marketing'));
 
 export default function App() {
   const {
@@ -85,6 +86,7 @@ export default function App() {
           <Route path="orders" element={<AdminOrders />} />
           <Route path="products" element={<AdminProducts />} />
           <Route path="coupons" element={<AdminCoupons />} />
+          <Route path="marketing" element={<Marketing />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Routes>

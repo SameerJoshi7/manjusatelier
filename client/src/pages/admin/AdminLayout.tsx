@@ -10,6 +10,7 @@ import {
   X,
   Store,
   Settings2,
+  Megaphone,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { usePageMeta } from '@/hooks/usePageMeta';
@@ -21,6 +22,7 @@ const nav = [
   { to: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { to: '/admin/products', label: 'Products', icon: Package },
   { to: '/admin/coupons', label: 'Coupons', icon: Ticket },
+  { to: '/admin/marketing', label: 'Marketing', icon: Megaphone },
   { to: '/admin/settings', label: 'Settings', icon: Settings2 },
 ];
 
