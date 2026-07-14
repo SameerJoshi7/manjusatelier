@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Send, Loader2, Megaphone } from 'lucide-react';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { api } from '@/lib/api';
-import { toast } from 'react-hot-toast';
+import { useToast } from '@/components/ui/Toast';
 
 export default function Marketing() {
   usePageMeta({ title: "Marketing — Admin — Manju's Atelier" });
   const [loading, setLoading] = useState(false);
+  const { notify } = useToast();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -22,7 +23,7 @@ export default function Marketing() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.content) {
-      toast.error('Title and content are required');
+      notify('Title and content are required', 'error');
       return;
     }
 
@@ -34,10 +35,10 @@ export default function Marketing() {
         ...formData,
         discountPercentage: formData.discountPercentage ? Number(formData.discountPercentage) : undefined,
       });
-      toast.success(res.message);
+      notify(res.message, 'success');
       setFormData({ title: '', content: '', couponCode: '', discountPercentage: '' });
     } catch (error: any) {
-      toast.error(error.message || 'Failed to send broadcast');
+      notify(error.message || 'Failed to send broadcast', 'error');
     } finally {
       setLoading(false);
     }
