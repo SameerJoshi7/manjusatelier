@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 import { api } from '@/lib/api';
 
 export default function ResetPassword() {
   const { token } = useParams<{ token: string }>();
-  const navigate = useNavigate();
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
