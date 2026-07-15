@@ -138,7 +138,7 @@ export function Footer() {
           <div className="flex items-center gap-3">
             {[
               { Icon: Instagram, href: 'https://www.instagram.com/manjusatelier' },
-              { Icon: Facebook, href: '#' },
+              { Icon: Facebook, href: 'https://www.facebook.com/manjusatelier' },
               { Icon: XIcon, href: 'https://x.com/manjusatelier' },
             ].map(({ Icon, href }, i) => (
               <a
