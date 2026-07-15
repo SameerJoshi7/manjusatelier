@@ -97,17 +97,12 @@ export function Navbar() {
   return (
     <>
       {/* Mobile Menu Backdrop */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setMobileOpen(false)}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
-          />
-        )}
-      </AnimatePresence>
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+        />
+      )}
       
       <header
         ref={navRef}
@@ -391,15 +386,9 @@ export function Navbar() {
       </AnimatePresence>
 
       {/* Mobile menu */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden bg-cream lg:hidden dark:bg-[#1c1712]"
-          >
-            <div className="max-h-[calc(100vh-80px)] overflow-y-auto">
+      {mobileOpen && (
+        <div className="overflow-hidden bg-cream lg:hidden dark:bg-[#1c1712]">
+          <div className="max-h-[calc(100vh-80px)] overflow-y-auto">
               <ul className="container-x flex flex-col gap-1 py-4">
               {navLinks.map((link) => (
                 <li key={link.to}>
@@ -470,9 +459,9 @@ export function Navbar() {
               </li>
             </ul>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
     </header>
     </>
   );
