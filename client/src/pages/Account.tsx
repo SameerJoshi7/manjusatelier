@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Package, LogOut, User as UserIcon } from 'lucide-react';
+import { LogOut, User as UserIcon } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Order } from '@/types';
 import { useAuth } from '@/context/AuthContext';
@@ -135,6 +135,12 @@ export default function Account() {
 
       {activeTab === 'profile' && (
         <section className="card-surface p-6 max-w-2xl">
+          {!user.birthday && (
+            <div className="mb-6 rounded-xl border border-gold/30 bg-gold/5 p-4 text-sm text-brown-dark dark:border-gold/20 dark:text-beige">
+              <p className="font-medium text-gold-dark">🎉 Add your birthday!</p>
+              <p className="mt-1 opacity-90">Set your birthday to receive an exclusive surprise coupon during your birth month. <strong>Note: You can only set your birthday once.</strong></p>
+            </div>
+          )}
           <div className="mb-6 flex items-center gap-4">
             <span className="grid h-16 w-16 place-items-center rounded-full bg-brown text-cream">
               <UserIcon size={28} />
@@ -150,8 +156,17 @@ export default function Account() {
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-brown-dark dark:text-beige">Birthday</label>
-              <input type="date" className="input" value={birthday ? birthday.split('T')[0] : ''} onChange={(e) => setBirthday(e.target.value)} />
+              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-brown-dark dark:text-beige">
+                Birthday
+                {user.birthday && <span className="text-[10px] uppercase tracking-wider text-brown/50 border border-brown/20 px-1.5 py-0.5 rounded">Locked</span>}
+              </label>
+              <input 
+                type="date" 
+                className={cn("input", user.birthday && "opacity-60 cursor-not-allowed")} 
+                value={birthday ? birthday.split('T')[0] : ''} 
+                onChange={(e) => !user.birthday && setBirthday(e.target.value)}
+                readOnly={!!user.birthday}
+              />
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-brown-dark dark:text-beige">Gender</label>

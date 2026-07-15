@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { protect, adminOnly } from '../middleware/auth.js';
+import { protect, adminOnly, optionalAuth } from '../middleware/auth.js';
 import {
   validateCoupon,
   getCoupons,
@@ -10,8 +10,8 @@ import {
 
 const router = Router();
 
-router.post('/validate', validateCoupon);
-router.get('/active', getActiveCoupons);
+router.post('/validate', protect, validateCoupon);
+router.get('/active', optionalAuth, getActiveCoupons);
 router.get('/', protect, adminOnly, getCoupons);
 router.post('/', protect, adminOnly, createCoupon);
 router.delete('/:id', protect, adminOnly, deleteCoupon);

@@ -43,11 +43,21 @@ export const me = asyncHandler(async (req, res) => {
 
 export const updateProfile = asyncHandler(async (req, res) => {
   const { name, phone, addresses, birthday, gender } = req.body;
-  const user = await User.findByIdAndUpdate(
-    req.user._id,
-    { $set: { ...(name && { name }), ...(phone && { phone }), ...(addresses && { addresses }), ...(birthday && { birthday }), ...(gender && { gender }) } },
-    { new: true, runValidators: true }
-  );
+  const user = await User.findById(req.user._id);
+  
+  if (name) user.name = name;
+  if (phone) user.phone = phone;
+  if (addresses) user.addresses = addresses;
+  if (gender) user.gender = gender;
+  
+  if (birthday) {
+    if (!user.birthday) {
+      user.birthdaySetAt = new Date();
+    }
+    user.birthday = birthday;
+  }
+  
+  await user.save();
   res.json({ success: true, user: publicUser(user) });
 });
 

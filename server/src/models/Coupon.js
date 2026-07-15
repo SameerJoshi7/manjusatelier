@@ -8,6 +8,7 @@ const couponSchema = new mongoose.Schema(
     value: { type: Number, required: true, min: 0 },
     minSubtotal: { type: Number, default: 0 },
     maxDiscount: { type: Number }, // cap for percent coupons
+    validFrom: { type: Date },
     expiresAt: { type: Date },
     active: { type: Boolean, default: true },
   },
@@ -16,6 +17,7 @@ const couponSchema = new mongoose.Schema(
 
 couponSchema.methods.computeDiscount = function computeDiscount(subtotal) {
   if (!this.active) return 0;
+  if (this.validFrom && this.validFrom > new Date()) return 0;
   if (this.expiresAt && this.expiresAt < new Date()) return 0;
   if (subtotal < this.minSubtotal) return 0;
   let discount = this.type === 'percent' ? (subtotal * this.value) / 100 : this.value;

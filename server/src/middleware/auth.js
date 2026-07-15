@@ -27,6 +27,20 @@ export const protect = asyncHandler(async (req, res, next) => {
   next();
 });
 
+export const optionalAuth = asyncHandler(async (req, res, next) => {
+  const token = getToken(req);
+  if (!token) return next();
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    if (user) req.user = user;
+  } catch {
+    // Ignore invalid tokens for optional auth
+  }
+  next();
+});
+
 export const adminOnly = (req, res, next) => {
   if (req.user?.role !== 'admin') throw new ApiError(403, 'Admin access required');
   next();

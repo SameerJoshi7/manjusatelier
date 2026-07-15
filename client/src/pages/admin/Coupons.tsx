@@ -14,11 +14,21 @@ interface Coupon {
   value: number;
   minSubtotal: number;
   maxDiscount?: number;
-  active: boolean;
+  validFrom?: string;
   expiresAt?: string;
+  active: boolean;
 }
 
-const emptyForm = { code: '', description: '', type: 'percent', value: '', minSubtotal: '0', maxDiscount: '' };
+const emptyForm = { 
+  code: '', 
+  description: '', 
+  type: 'percent' as 'percent' | 'flat', 
+  value: '', 
+  minSubtotal: '0', 
+  maxDiscount: '',
+  validFrom: '',
+  expiresAt: ''
+};
 
 export default function Coupons() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -49,6 +59,8 @@ export default function Coupons() {
         value: Number(form.value),
         minSubtotal: Number(form.minSubtotal) || 0,
         maxDiscount: form.maxDiscount ? Number(form.maxDiscount) : undefined,
+        validFrom: form.validFrom || undefined,
+        expiresAt: form.expiresAt || undefined,
       });
       notify('Coupon created');
       setForm(emptyForm);
@@ -104,7 +116,7 @@ export default function Coupons() {
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Type">
-              <select className="input" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+              <select className="input" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as 'percent' | 'flat' })}>
                 <option value="percent">Percent (%)</option>
                 <option value="flat">Flat (₹)</option>
               </select>
@@ -119,6 +131,14 @@ export default function Coupons() {
             </Field>
             <Field label="Max discount (₹)">
               <input type="number" min="0" className="input" placeholder="optional" value={form.maxDiscount} onChange={(e) => setForm({ ...form, maxDiscount: e.target.value })} />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Valid From">
+              <input type="date" className="input" value={form.validFrom} onChange={(e) => setForm({ ...form, validFrom: e.target.value })} />
+            </Field>
+            <Field label="Valid Until">
+              <input type="date" className="input" value={form.expiresAt} onChange={(e) => setForm({ ...form, expiresAt: e.target.value })} />
             </Field>
           </div>
           <Button type="submit" fullWidth disabled={saving}>

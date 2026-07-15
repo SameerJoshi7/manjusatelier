@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -36,12 +36,13 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [desktopProfileOpen, setDesktopProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const navRef = React.useRef<HTMLElement>(null);
+  const navRef = useRef<HTMLElement>(null);
 
   const { count, lastAddedId } = useCart();
   const { ids } = useWishlist();
@@ -64,6 +65,7 @@ export function Navbar() {
     setMobileOpen(false);
     setMegaOpen(false);
     setProfileOpen(false);
+    setDesktopProfileOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -72,6 +74,7 @@ export function Navbar() {
         setMobileOpen(false);
         setMegaOpen(false);
         setProfileOpen(false);
+        setDesktopProfileOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -278,41 +281,55 @@ export function Navbar() {
           )}
 
           {/* Profile */}
-          <div className="group relative hidden md:block">
-            <IconButton label="Account" transparent={transparent}>
+          <div className="relative hidden md:block">
+            <IconButton 
+              label="Account" 
+              transparent={transparent} 
+              onClick={() => setDesktopProfileOpen(!desktopProfileOpen)}
+            >
               <User size={20} />
             </IconButton>
-            <div className="invisible absolute right-0 top-full w-48 pt-2 opacity-0 transition-all group-hover:visible group-hover:opacity-100 z-50">
-              <div className="rounded-2xl bg-white p-2 shadow-lift dark:bg-[#26201a]">
-                {user ? (
-                  <>
-                    <p className="px-3 py-2 text-sm text-brown/60 dark:text-beige/60">
-                      Hi, {user.name.split(' ')[0]}
-                    </p>
-                    <Link to="/account" className="menu-item">
-                      My Orders
-                    </Link>
-                    {user.role === 'admin' && (
-                      <Link to="/admin" className="menu-item">
-                        Admin Dashboard
-                      </Link>
+            
+            <AnimatePresence>
+              {desktopProfileOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute right-0 top-full w-48 pt-2 z-50"
+                >
+                  <div className="rounded-2xl bg-white p-2 shadow-lift dark:bg-[#26201a]">
+                    {user ? (
+                      <>
+                        <p className="px-3 py-2 text-sm text-brown/60 dark:text-beige/60">
+                          Hi, {user.name.split(' ')[0]}
+                        </p>
+                        <Link to="/account" onClick={() => setDesktopProfileOpen(false)} className="menu-item">
+                          My Account
+                        </Link>
+                        {user.role === 'admin' && (
+                          <Link to="/admin" onClick={() => setDesktopProfileOpen(false)} className="menu-item">
+                            Admin Dashboard
+                          </Link>
+                        )}
+                        <button onClick={() => { setDesktopProfileOpen(false); logout(); }} className="menu-item flex w-full items-center gap-2">
+                          <LogOut size={15} /> Logout
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Link to="/login" onClick={() => setDesktopProfileOpen(false)} className="menu-item">
+                          Login
+                        </Link>
+                        <Link to="/login?mode=register" onClick={() => setDesktopProfileOpen(false)} className="menu-item">
+                          Create account
+                        </Link>
+                      </>
                     )}
-                    <button onClick={logout} className="menu-item flex w-full items-center gap-2">
-                      <LogOut size={15} /> Logout
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link to="/login" className="menu-item">
-                      Login
-                    </Link>
-                    <Link to="/login?mode=register" className="menu-item">
-                      Create account
-                    </Link>
-                  </>
-                )}
-              </div>
-            </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <button

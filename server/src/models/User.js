@@ -39,6 +39,7 @@ const userSchema = new mongoose.Schema(
     ],
     phone: { type: String, trim: true },
     birthday: { type: Date },
+    birthdaySetAt: { type: Date },
     gender: { type: String, enum: ['male', 'female', 'other', 'prefer_not_to_say'] },
     addresses: [addressSchema],
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
