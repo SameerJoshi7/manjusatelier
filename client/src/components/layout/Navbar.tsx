@@ -95,9 +95,23 @@ export function Navbar() {
   };
 
   return (
-    <header
-      ref={navRef}
-      className={cn(
+    <>
+      {/* Mobile Menu Backdrop */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileOpen(false)}
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+      
+      <header
+        ref={navRef}
+        className={cn(
         'fixed inset-x-0 top-0 z-50 transition-all duration-300',
         transparent
           ? 'bg-transparent'
@@ -460,6 +474,7 @@ export function Navbar() {
         )}
       </AnimatePresence>
     </header>
+    </>
   );
 }
 
