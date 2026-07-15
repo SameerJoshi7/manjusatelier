@@ -27,6 +27,7 @@ export default function Account() {
   const [activeTab, setActiveTab] = useState<'orders' | 'profile'>('orders');
   
   // Profile state
+  const [name, setName] = useState('');
   const [birthday, setBirthday] = useState('');
   const [gender, setGender] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
@@ -42,6 +43,7 @@ export default function Account() {
   useEffect(() => {
     if (!loading && !user) navigate('/login?redirect=/account');
     if (user) {
+      setName(user.name || '');
       setBirthday(user.birthday || '');
       setGender(user.gender || '');
     }
@@ -76,6 +78,7 @@ export default function Account() {
     setSavingProfile(true);
     try {
       await api.put('/auth/profile', {
+        name: name.trim() ? name.trim() : undefined,
         birthday: birthday ? birthday : undefined,
         gender: gender ? gender : undefined,
       });
@@ -156,6 +159,17 @@ export default function Account() {
             Personal Information
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
+            <div className="min-w-0 sm:col-span-2">
+              <label className="mb-1.5 block text-sm font-medium text-brown-dark dark:text-beige">Full Name</label>
+              <input 
+                type="text" 
+                className="input w-full min-w-0" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your name"
+                required
+              />
+            </div>
             <div className="min-w-0">
               <label className="mb-1.5 flex items-center gap-2 min-h-[28px] text-sm font-medium text-brown-dark dark:text-beige">
                 Birthday
