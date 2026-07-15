@@ -1,13 +1,6 @@
 import { Hero } from '@/components/home/Hero';
-import { FeaturedCategories } from '@/components/home/FeaturedCategories';
-import { FeaturedProducts } from '@/components/home/FeaturedProducts';
-import { AboutSection } from '@/components/home/AboutSection';
-import { WhyChooseUs } from '@/components/home/WhyChooseUs';
-import { CraftProcess } from '@/components/home/CraftProcess';
-import { Testimonials } from '@/components/home/Testimonials';
-import { CustomizationBanner } from '@/components/home/CustomizationBanner';
-import { GiftSection } from '@/components/home/GiftSection';
-import { InstagramGallery } from '@/components/home/InstagramGallery';
+import { CouponScroller } from '@/components/home/CouponScroller';
+import { ProductFeed } from '@/components/home/ProductFeed';
 import { usePageMeta } from '@/hooks/usePageMeta';
 
 export default function Home() {
@@ -20,15 +13,8 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <FeaturedCategories />
-      <FeaturedProducts />
-      <AboutSection />
-      <WhyChooseUs />
-      <CraftProcess />
-      <GiftSection />
-      <Testimonials />
-      <CustomizationBanner />
-      <InstagramGallery />
+      <CouponScroller />
+      <ProductFeed />
     </>
   );
 }

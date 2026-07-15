@@ -35,6 +35,7 @@ const navLinks = [
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -166,11 +167,13 @@ export function Navbar() {
             <Search size={20} />
           </IconButton>
 
-          <IconButton label="Theme" transparent={transparent} onClick={toggle}>
-            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-          </IconButton>
+          <div className="hidden md:block">
+            <IconButton label="Theme" transparent={transparent} onClick={toggle}>
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            </IconButton>
+          </div>
 
-          <Link to="/wishlist" className="relative">
+          <Link to="/wishlist" className="relative hidden md:block">
             <IconButton label="Wishlist" transparent={transparent}>
               <Heart size={20} />
               {ids.length > 0 && <Counter value={ids.length} />}
@@ -192,7 +195,7 @@ export function Navbar() {
 
           {/* Notifications */}
           {user && (
-            <div className="group relative">
+            <div className="group relative hidden md:block">
               <IconButton label="Notifications" transparent={transparent}>
                 <Bell size={20} />
                 {unreadCount > 0 && <Counter value={unreadCount} />}
@@ -354,45 +357,50 @@ export function Navbar() {
                   </NavLink>
                 </li>
               ))}
-              {user && (
-                <>
-                  <li className="mt-2 border-t border-brown/10 pt-2">
-                    <Link
-                      to="/account"
-                      onClick={() => setMobileOpen(false)}
-                      className="block rounded-xl px-4 py-3 text-brown-dark hover:bg-beige/40 dark:text-beige dark:hover:bg-beige/10"
-                    >
-                      My Orders
-                    </Link>
-                  </li>
-                  {user.role === 'admin' && (
-                    <li>
-                      <Link
-                        to="/admin"
-                        onClick={() => setMobileOpen(false)}
-                        className="block rounded-xl px-4 py-3 text-brown-dark hover:bg-beige/40 dark:text-beige dark:hover:bg-beige/10"
-                      >
-                        Admin Dashboard
-                      </Link>
-                    </li>
-                  )}
-                </>
-              )}
-              <li className="mt-2 border-t border-brown/10 pt-4 px-4 pb-2">
-                <InstallPWA className="w-full justify-center" />
+              <li className="mt-2 border-t border-brown/10 pt-2 flex gap-2 px-4 pb-2">
+                 <button onClick={toggle} className="flex-1 rounded-xl bg-beige/20 dark:bg-beige/5 py-2 text-center text-brown-dark dark:text-beige flex items-center justify-center gap-2">
+                   {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />} Theme
+                 </button>
+                 <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="flex-1 rounded-xl bg-beige/20 dark:bg-beige/5 py-2 text-center text-brown-dark dark:text-beige flex items-center justify-center gap-2">
+                   <Heart size={16} /> Wishlist
+                 </Link>
               </li>
-              <li className="border-t border-brown/10 pt-2">
-                {user ? (
+              {user ? (
+                <li className="border-t border-brown/10 pt-2">
                   <button
-                    onClick={() => {
-                      setMobileOpen(false);
-                      logout();
-                    }}
-                    className="block w-full rounded-xl px-4 py-3 text-left text-brown-dark dark:text-beige hover:bg-beige/40 dark:hover:bg-beige/10"
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-brown-dark hover:bg-beige/40 dark:text-beige dark:hover:bg-beige/10"
                   >
-                    Logout
+                    <span className="flex items-center gap-2"><User size={18} /> Profile</span>
+                    <ChevronDown size={16} className={cn("transition-transform", profileOpen && "rotate-180")} />
                   </button>
-                ) : (
+                  <AnimatePresence>
+                    {profileOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex flex-col gap-1 pl-8 pr-4 pt-1 pb-2">
+                          <Link to="/account" onClick={() => setMobileOpen(false)} className="block rounded-xl px-4 py-2 text-sm text-brown-dark hover:bg-beige/40 dark:text-beige dark:hover:bg-beige/10">
+                            My Orders
+                          </Link>
+                          {user.role === 'admin' && (
+                            <Link to="/admin" onClick={() => setMobileOpen(false)} className="block rounded-xl px-4 py-2 text-sm text-brown-dark hover:bg-beige/40 dark:text-beige dark:hover:bg-beige/10">
+                              Admin Dashboard
+                            </Link>
+                          )}
+                          <button onClick={() => { setMobileOpen(false); logout(); }} className="block w-full rounded-xl px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30">
+                            Logout
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </li>
+              ) : (
+                <li className="border-t border-brown/10 pt-2">
                   <Link
                     to="/login"
                     onClick={() => setMobileOpen(false)}
@@ -400,7 +408,10 @@ export function Navbar() {
                   >
                     Login / Register
                   </Link>
-                )}
+                </li>
+              )}
+              <li className="mt-2 border-t border-brown/10 pt-4 px-4 pb-2">
+                <InstallPWA className="w-full justify-center" />
               </li>
             </ul>
             </div>

@@ -16,6 +16,11 @@ export const validateCoupon = asyncHandler(async (req, res) => {
   res.json({ success: true, code: coupon.code, discount });
 });
 
+export const getActiveCoupons = asyncHandler(async (req, res) => {
+  const coupons = await Coupon.find({ active: true }).sort({ createdAt: -1 });
+  res.json({ success: true, coupons });
+});
+
 // ---- Admin ----
 export const getCoupons = asyncHandler(async (req, res) => {
   const coupons = await Coupon.find().sort({ createdAt: -1 });

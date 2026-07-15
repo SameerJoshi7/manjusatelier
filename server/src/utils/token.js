@@ -23,7 +23,9 @@ export function publicUser(user) {
     email: user.email,
     role: user.role,
     phone: user.phone,
-    address: user.address,
+    birthday: user.birthday,
+    gender: user.gender,
+    addresses: user.addresses,
     wishlist: user.wishlist,
     cart: user.cart,
   };

@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/Toast';
 interface Coupon {
   _id: string;
   code: string;
+  description: string;
   type: 'percent' | 'flat';
   value: number;
   minSubtotal: number;
@@ -17,7 +18,7 @@ interface Coupon {
   expiresAt?: string;
 }
 
-const emptyForm = { code: '', type: 'percent', value: '', minSubtotal: '0', maxDiscount: '' };
+const emptyForm = { code: '', description: '', type: 'percent', value: '', minSubtotal: '0', maxDiscount: '' };
 
 export default function Coupons() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -43,6 +44,7 @@ export default function Coupons() {
     try {
       await api.post('/coupons', {
         code: form.code.toUpperCase(),
+        description: form.description,
         type: form.type,
         value: Number(form.value),
         minSubtotal: Number(form.minSubtotal) || 0,
@@ -89,6 +91,15 @@ export default function Coupons() {
               placeholder="WELCOME10"
               value={form.code}
               onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+            />
+          </Field>
+          <Field label="Description">
+            <input
+              className="input"
+              required
+              placeholder="10% off your first order"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
@@ -138,6 +149,9 @@ export default function Coupons() {
                   <div className="flex-1">
                     <p className="font-mono font-semibold text-brown-dark dark:text-beige">
                       {c.code}
+                    </p>
+                    <p className="text-sm text-brown-dark/80 dark:text-beige/80 mb-0.5">
+                      {c.description}
                     </p>
                     <p className="text-xs text-brown/50 dark:text-beige/50">
                       {c.type === 'percent' ? `${c.value}% off` : `${formatPrice(c.value)} off`}

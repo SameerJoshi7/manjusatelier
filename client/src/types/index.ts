@@ -61,7 +61,9 @@ export interface User {
   email: string;
   role: 'user' | 'admin';
   phone?: string;
-  address?: Address;
+  birthday?: string;
+  gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
+  addresses?: Address[];
   wishlist: string[];
   cart?: { product: Product; quantity: number }[];
   preferences?: {

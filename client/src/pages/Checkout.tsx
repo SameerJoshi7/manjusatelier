@@ -32,7 +32,7 @@ export default function Checkout() {
   const [utrNumber, setUtrNumber] = useState('');
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   
-  const [address, setAddress] = useState<Address>({
+  const [address, setAddress] = useState<Address>(user?.addresses?.[0] || {
     fullName: user?.name || '',
     phone: user?.phone || '',
     line1: '',
@@ -42,9 +42,17 @@ export default function Checkout() {
     postalCode: '',
     country: 'India',
   });
+  const [birthday, setBirthday] = useState(user?.birthday || '');
+  const [gender, setGender] = useState(user?.gender || '');
 
   useEffect(() => {
-    if (user) setAddress((a) => ({ ...a, fullName: a.fullName || user.name, phone: a.phone || user.phone || '' }));
+    if (user && !user.addresses?.length) {
+      setAddress((a) => ({ ...a, fullName: a.fullName || user.name, phone: a.phone || user.phone || '' }));
+    }
+    if (user) {
+      if (user.birthday) setBirthday(user.birthday);
+      if (user.gender) setGender(user.gender);
+    }
   }, [user]);
 
   useEffect(() => {
@@ -96,6 +104,16 @@ export default function Checkout() {
   const placeOrder = async () => {
     setProcessing(true);
     try {
+      if (user) {
+        const isNewAddress = !user.addresses?.some(a => a.line1 === address.line1 && a.city === address.city);
+        await api.put('/auth/profile', {
+          birthday: birthday || undefined,
+          gender: gender || undefined,
+          phone: address.phone,
+          addresses: isNewAddress ? [...(user.addresses || []), address] : user.addresses
+        }).catch(() => {}); // ignore error
+      }
+
       const { order } = await api.post<CreateOrderResponse>('/orders', {
         items: items.map((i) => ({ productId: i.product._id, quantity: i.quantity })),
         shippingAddress: address,
@@ -173,14 +191,49 @@ export default function Checkout() {
           {step === 0 && (
             <div className="space-y-4">
               <h2 className="font-serif text-2xl text-brown-dark dark:text-beige">
-                Shipping Address
+                Shipping & Details
               </h2>
+              
+              {user?.addresses && user.addresses.length > 0 && (
+                <Field label="Saved Addresses">
+                  <select 
+                    className="input mb-2" 
+                    onChange={(e) => {
+                      if (e.target.value === 'new') {
+                        setAddress({ fullName: user.name, phone: user.phone || '', line1: '', line2: '', city: '', state: '', postalCode: '', country: 'India' });
+                      } else {
+                        setAddress(user.addresses![Number(e.target.value)]);
+                      }
+                    }}
+                  >
+                    <option value="new">Add New Address</option>
+                    {user.addresses.map((a, i) => (
+                      <option key={i} value={i}>{a.line1}, {a.city}</option>
+                    ))}
+                  </select>
+                </Field>
+              )}
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Full Name">
                   <input className="input" value={address.fullName} onChange={(e) => setAddress({ ...address, fullName: e.target.value })} />
                 </Field>
-                <Field label="Phone">
+                <Field label="Mobile Number">
                   <input className="input" value={address.phone} onChange={(e) => setAddress({ ...address, phone: e.target.value })} />
+                </Field>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Birthday">
+                  <input type="date" className="input" value={birthday ? birthday.split('T')[0] : ''} onChange={(e) => setBirthday(e.target.value)} />
+                </Field>
+                <Field label="Gender">
+                  <select className="input" value={gender} onChange={(e) => setGender(e.target.value)}>
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                  </select>
                 </Field>
               </div>
               <Field label="Address Line 1">

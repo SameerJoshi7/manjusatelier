@@ -42,10 +42,10 @@ export const me = asyncHandler(async (req, res) => {
 });
 
 export const updateProfile = asyncHandler(async (req, res) => {
-  const { name, phone, address } = req.body;
+  const { name, phone, addresses, birthday, gender } = req.body;
   const user = await User.findByIdAndUpdate(
     req.user._id,
-    { $set: { ...(name && { name }), ...(phone && { phone }), ...(address && { address }) } },
+    { $set: { ...(name && { name }), ...(phone && { phone }), ...(addresses && { addresses }), ...(birthday && { birthday }), ...(gender && { gender }) } },
     { new: true, runValidators: true }
   );
   res.json({ success: true, user: publicUser(user) });
