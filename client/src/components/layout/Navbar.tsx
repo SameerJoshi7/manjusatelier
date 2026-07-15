@@ -41,6 +41,7 @@ export function Navbar() {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+  const navRef = React.useRef<HTMLElement>(null);
 
   const { count, lastAddedId } = useCart();
   const { ids } = useWishlist();
@@ -62,7 +63,24 @@ export function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
     setMegaOpen(false);
+    setProfileOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setMobileOpen(false);
+        setMegaOpen(false);
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, []);
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +93,7 @@ export function Navbar() {
 
   return (
     <header
+      ref={navRef}
       className={cn(
         'fixed inset-x-0 top-0 z-50 transition-all duration-300',
         transparent

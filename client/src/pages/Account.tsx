@@ -24,6 +24,7 @@ export default function Account() {
   const navigate = useNavigate();
   const { notify } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [activeTab, setActiveTab] = useState<'orders' | 'profile'>('orders');
   
   // Profile state
   const [birthday, setBirthday] = useState('');
@@ -104,50 +105,75 @@ export default function Account() {
 
   return (
     <div className="container-x py-10">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <span className="grid h-14 w-14 place-items-center rounded-full bg-brown text-cream">
-            <UserIcon size={26} />
-          </span>
-          <div>
-            <h1 className="font-serif text-3xl text-brown-dark dark:text-beige">{user.name}</h1>
-            <p className="text-sm text-brown/60 dark:text-beige/60">{user.email}</p>
-          </div>
-        </div>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-brown/10 pb-6 dark:border-beige/10">
+        <h1 className="font-serif text-3xl text-brown-dark dark:text-beige">My Account</h1>
         <Button variant="secondary" onClick={() => logout().then(() => navigate('/'))}>
           <LogOut size={16} /> Logout
         </Button>
       </div>
 
-      <section className="mt-10 card-surface p-6">
-        <h2 className="mb-4 font-serif text-2xl text-brown-dark dark:text-beige">Profile Settings</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-brown-dark dark:text-beige">Birthday</label>
-            <input type="date" className="input" value={birthday ? birthday.split('T')[0] : ''} onChange={(e) => setBirthday(e.target.value)} />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-brown-dark dark:text-beige">Gender</label>
-            <select className="input" value={gender} onChange={(e) => setGender(e.target.value)}>
-              <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-              <option value="prefer_not_to_say">Prefer not to say</option>
-            </select>
-          </div>
-        </div>
-        <div className="mt-4 text-right">
-          <Button disabled={savingProfile} onClick={saveProfile}>
-            {savingProfile ? 'Saving...' : 'Save Profile'}
-          </Button>
-        </div>
-      </section>
+      <div className="mb-8 flex border-b border-brown/10 dark:border-beige/10">
+        <button 
+          onClick={() => setActiveTab('orders')}
+          className={cn(
+            "px-5 py-3 font-medium border-b-2 transition-colors",
+            activeTab === 'orders' ? "border-brown text-brown-dark dark:border-beige dark:text-beige" : "border-transparent text-brown/60 hover:text-brown dark:text-beige/60"
+          )}
+        >
+          My Orders
+        </button>
+        <button 
+          onClick={() => setActiveTab('profile')}
+          className={cn(
+            "px-5 py-3 font-medium border-b-2 transition-colors",
+            activeTab === 'profile' ? "border-brown text-brown-dark dark:border-beige dark:text-beige" : "border-transparent text-brown/60 hover:text-brown dark:text-beige/60"
+          )}
+        >
+          Profile Settings
+        </button>
+      </div>
 
-      <section className="mt-10">
-        <h2 className="flex items-center gap-2 font-serif text-2xl text-brown-dark dark:text-beige">
-          <Package size={22} /> My Orders
-        </h2>
+      {activeTab === 'profile' && (
+        <section className="card-surface p-6 max-w-2xl">
+          <div className="mb-6 flex items-center gap-4">
+            <span className="grid h-16 w-16 place-items-center rounded-full bg-brown text-cream">
+              <UserIcon size={28} />
+            </span>
+            <div>
+              <p className="font-serif text-2xl text-brown-dark dark:text-beige">{user.name}</p>
+              <p className="text-sm text-brown/60 dark:text-beige/60">{user.email}</p>
+            </div>
+          </div>
+          
+          <h2 className="mb-4 font-serif text-xl text-brown-dark dark:text-beige border-t border-brown/10 dark:border-beige/10 pt-6">
+            Personal Information
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-brown-dark dark:text-beige">Birthday</label>
+              <input type="date" className="input" value={birthday ? birthday.split('T')[0] : ''} onChange={(e) => setBirthday(e.target.value)} />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-brown-dark dark:text-beige">Gender</label>
+              <select className="input" value={gender} onChange={(e) => setGender(e.target.value)}>
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+                <option value="prefer_not_to_say">Prefer not to say</option>
+              </select>
+            </div>
+          </div>
+          <div className="mt-4 text-right">
+            <Button disabled={savingProfile} onClick={saveProfile}>
+              {savingProfile ? 'Saving...' : 'Save Profile'}
+            </Button>
+          </div>
+        </section>
+      )}
+
+      {activeTab === 'orders' && (
+        <section>
 
         {loadingOrders ? (
           <div className="mt-6 space-y-3">
@@ -228,6 +254,7 @@ export default function Account() {
           </div>
         )}
       </section>
+      )}
 
       {/* UTR Modal */}
       {utrPrompt && (
