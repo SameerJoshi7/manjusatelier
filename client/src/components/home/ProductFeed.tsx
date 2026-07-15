@@ -39,7 +39,7 @@ export function ProductFeed() {
           >
             All Items
           </Button>
-          {!catLoading && categories.map((cat) => (
+          {!catLoading && categories.filter(c => c.productCount && c.productCount > 0).map((cat) => (
             <Button
               key={cat._id}
               variant={selectedCategory === cat.slug ? 'primary' : 'secondary'}

@@ -76,7 +76,7 @@ export default function Shop() {
     <div className="space-y-7">
       <FilterGroup title="Category">
         <div className="space-y-1.5">
-          {categories.map((c) => (
+          {categories.filter(c => c.productCount && c.productCount > 0).map((c) => (
             <button
               key={c._id}
               onClick={() => update('category', params.get('category') === c.slug ? undefined : c.slug)}

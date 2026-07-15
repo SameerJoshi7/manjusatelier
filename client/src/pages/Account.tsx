@@ -20,10 +20,15 @@ const statusStyles: Record<string, string> = {
 };
 
 export default function Account() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, refresh } = useAuth();
   const navigate = useNavigate();
   const { notify } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
+  
+  // Profile state
+  const [birthday, setBirthday] = useState('');
+  const [gender, setGender] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
   const [loadingOrders, setLoadingOrders] = useState(true);
   
   // UTR Modal state
@@ -35,6 +40,10 @@ export default function Account() {
 
   useEffect(() => {
     if (!loading && !user) navigate('/login?redirect=/account');
+    if (user) {
+      setBirthday(user.birthday || '');
+      setGender(user.gender || '');
+    }
   }, [loading, user, navigate]);
 
   useEffect(() => {
@@ -61,6 +70,22 @@ export default function Account() {
       socket.off('order_update', onOrderUpdate);
     };
   }, [socket, user]);
+
+  const saveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      await api.put('/auth/profile', {
+        birthday: birthday ? birthday : undefined,
+        gender: gender ? gender : undefined,
+      });
+      notify('Profile updated successfully.');
+      await refresh();
+    } catch (e: any) {
+      notify(e.response?.data?.error || 'Failed to update profile.', 'error');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   const submitUtr = async (orderId: string, utr: string) => {
     setUpdatingUtr(true);
@@ -93,6 +118,31 @@ export default function Account() {
           <LogOut size={16} /> Logout
         </Button>
       </div>
+
+      <section className="mt-10 card-surface p-6">
+        <h2 className="mb-4 font-serif text-2xl text-brown-dark dark:text-beige">Profile Settings</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-brown-dark dark:text-beige">Birthday</label>
+            <input type="date" className="input" value={birthday ? birthday.split('T')[0] : ''} onChange={(e) => setBirthday(e.target.value)} />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-brown-dark dark:text-beige">Gender</label>
+            <select className="input" value={gender} onChange={(e) => setGender(e.target.value)}>
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+              <option value="prefer_not_to_say">Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+        <div className="mt-4 text-right">
+          <Button disabled={savingProfile} onClick={saveProfile}>
+            {savingProfile ? 'Saving...' : 'Save Profile'}
+          </Button>
+        </div>
+      </section>
 
       <section className="mt-10">
         <h2 className="flex items-center gap-2 font-serif text-2xl text-brown-dark dark:text-beige">
