@@ -13,7 +13,7 @@ export function Hero() {
   const overlayOpacity = useTransform(scrollYProgress, [0, 1], [0.45, 0.7]);
 
   return (
-    <section ref={ref} className="relative flex min-h-[60vh] md:min-h-[70vh] items-center overflow-hidden">
+    <section ref={ref} className="relative flex min-h-[60vh] md:min-h-[70vh] items-center overflow-hidden pt-24 md:pt-0">
       {/* Background image with parallax */}
       <motion.div style={{ y }} className="absolute inset-0 -z-10">
         <img
