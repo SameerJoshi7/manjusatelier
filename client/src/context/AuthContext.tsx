@@ -20,10 +20,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     try {
-      const { user } = await api.get<{ user: User }>('/auth/me');
+      const { user, token } = await api.get<{ user: User, token?: string }>('/auth/me');
       setUser(user);
+      if (token) localStorage.setItem('token', token);
     } catch {
       setUser(null);
+      localStorage.removeItem('token');
     } finally {
       setLoading(false);
     }
@@ -34,18 +36,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const login = async (email: string, password: string) => {
-    const { user } = await api.post<{ user: User }>('/auth/login', { email, password });
+    const { user, token } = await api.post<{ user: User, token: string }>('/auth/login', { email, password });
     setUser(user);
+    localStorage.setItem('token', token);
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const { user } = await api.post<{ user: User }>('/auth/register', { name, email, password });
+    const { user, token } = await api.post<{ user: User, token: string }>('/auth/register', { name, email, password });
     setUser(user);
+    localStorage.setItem('token', token);
   };
 
   const logout = async () => {
     await api.post('/auth/logout');
     setUser(null);
+    localStorage.removeItem('token');
   };
 
   return (
