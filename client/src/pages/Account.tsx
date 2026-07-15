@@ -157,7 +157,7 @@ export default function Account() {
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="min-w-0">
-              <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-brown-dark dark:text-beige">
+              <label className="mb-1.5 flex items-center gap-2 min-h-[28px] text-sm font-medium text-brown-dark dark:text-beige">
                 Birthday
                 {user.birthday && <span className="text-[10px] uppercase tracking-wider text-brown/50 border border-brown/20 px-1.5 py-0.5 rounded">Locked</span>}
               </label>
@@ -170,7 +170,7 @@ export default function Account() {
               />
             </div>
             <div className="min-w-0">
-              <label className="mb-1.5 block text-sm font-medium text-brown-dark dark:text-beige">Gender</label>
+              <label className="mb-1.5 flex items-center min-h-[28px] text-sm font-medium text-brown-dark dark:text-beige">Gender</label>
               <select className="input w-full min-w-0" value={gender} onChange={(e) => setGender(e.target.value)}>
                 <option value="">Select Gender</option>
                 <option value="male">Male</option>
