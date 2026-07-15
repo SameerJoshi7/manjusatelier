@@ -399,7 +399,7 @@ export function Navbar() {
                 </li>
               ))}
               <li className="mt-2 border-t border-brown/10 pt-2 flex gap-2 px-4 pb-2">
-                 <button onClick={toggle} className="flex-1 rounded-xl bg-beige/20 dark:bg-beige/5 py-2 text-center text-brown-dark dark:text-beige flex items-center justify-center gap-2">
+                 <button onClick={() => { toggle(); setMobileOpen(false); }} className="flex-1 rounded-xl bg-beige/20 dark:bg-beige/5 py-2 text-center text-brown-dark dark:text-beige flex items-center justify-center gap-2">
                    {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />} {theme === 'dark' ? 'Dark Theme' : 'Light Theme'}
                  </button>
                  <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="flex-1 rounded-xl bg-beige/20 dark:bg-beige/5 py-2 text-center text-brown-dark dark:text-beige flex items-center justify-center gap-2">

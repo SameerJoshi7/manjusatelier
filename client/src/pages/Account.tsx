@@ -82,7 +82,8 @@ export default function Account() {
       notify('Profile updated successfully.');
       await refresh();
     } catch (e: any) {
-      notify(e.response?.data?.error || 'Failed to update profile.', 'error');
+      console.error('Profile update failed:', e.response?.data || e);
+      notify(e.response?.data?.error || e.message || 'Failed to update profile.', 'error');
     } finally {
       setSavingProfile(false);
     }
@@ -155,22 +156,22 @@ export default function Account() {
             Personal Information
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div>
+            <div className="min-w-0">
               <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-brown-dark dark:text-beige">
                 Birthday
                 {user.birthday && <span className="text-[10px] uppercase tracking-wider text-brown/50 border border-brown/20 px-1.5 py-0.5 rounded">Locked</span>}
               </label>
               <input 
                 type="date" 
-                className={cn("input", user.birthday && "opacity-60 cursor-not-allowed")} 
+                className={cn("input w-full min-w-0", user.birthday && "opacity-60 cursor-not-allowed")} 
                 value={birthday ? birthday.split('T')[0] : ''} 
                 onChange={(e) => !user.birthday && setBirthday(e.target.value)}
                 readOnly={!!user.birthday}
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="mb-1.5 block text-sm font-medium text-brown-dark dark:text-beige">Gender</label>
-              <select className="input" value={gender} onChange={(e) => setGender(e.target.value)}>
+              <select className="input w-full min-w-0" value={gender} onChange={(e) => setGender(e.target.value)}>
                 <option value="">Select Gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
