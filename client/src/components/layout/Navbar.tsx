@@ -190,8 +190,13 @@ export function Navbar() {
           </IconButton>
 
           <div className="hidden md:block">
-            <IconButton label="Theme" transparent={transparent} onClick={toggle}>
-              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            <IconButton 
+              label="Theme" 
+              transparent={transparent} 
+              onClick={toggle}
+              title={theme === 'dark' ? 'Dark Theme' : 'Light Theme'}
+            >
+              {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
             </IconButton>
           </div>
 
@@ -395,7 +400,7 @@ export function Navbar() {
               ))}
               <li className="mt-2 border-t border-brown/10 pt-2 flex gap-2 px-4 pb-2">
                  <button onClick={toggle} className="flex-1 rounded-xl bg-beige/20 dark:bg-beige/5 py-2 text-center text-brown-dark dark:text-beige flex items-center justify-center gap-2">
-                   {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />} Theme
+                   {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />} {theme === 'dark' ? 'Dark Theme' : 'Light Theme'}
                  </button>
                  <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="flex-1 rounded-xl bg-beige/20 dark:bg-beige/5 py-2 text-center text-brown-dark dark:text-beige flex items-center justify-center gap-2">
                    <Heart size={16} /> Wishlist
@@ -463,16 +468,19 @@ function IconButton({
   label,
   transparent,
   onClick,
+  title,
 }: {
   children: React.ReactNode;
   label: string;
   transparent: boolean;
   onClick?: () => void;
+  title?: string;
 }) {
   return (
     <button
       onClick={onClick}
       aria-label={label}
+      title={title || label}
       className={cn(
         'relative rounded-full p-1.5 md:p-2 transition-colors',
         transparent
