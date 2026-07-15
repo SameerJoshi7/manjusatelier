@@ -163,7 +163,7 @@ export default function Account() {
               <label className="mb-1.5 block text-sm font-medium text-brown-dark dark:text-beige">Full Name</label>
               <input 
                 type="text" 
-                className="input w-full min-w-0" 
+                className="input block w-full appearance-none" 
                 value={name} 
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your name"
@@ -177,7 +177,7 @@ export default function Account() {
               </label>
               <input 
                 type="date" 
-                className={cn("input w-full min-w-0", user.birthday && "opacity-60 cursor-not-allowed")} 
+                className={cn("input block w-full appearance-none", user.birthday && "opacity-60 cursor-not-allowed")} 
                 value={birthday ? birthday.split('T')[0] : ''} 
                 onChange={(e) => !user.birthday && setBirthday(e.target.value)}
                 readOnly={!!user.birthday}
@@ -185,7 +185,7 @@ export default function Account() {
             </div>
             <div className="min-w-0">
               <label className="mb-1.5 flex items-center min-h-[28px] text-sm font-medium text-brown-dark dark:text-beige">Gender</label>
-              <select className="input w-full min-w-0" value={gender} onChange={(e) => setGender(e.target.value)}>
+              <select className="input block w-full appearance-none" value={gender} onChange={(e) => setGender(e.target.value)}>
                 <option value="">Select Gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
