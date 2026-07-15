@@ -24,8 +24,8 @@ async function request<T>(path: string, options: Options = {}): Promise<T> {
     headers: {
       ...(body ? { 'Content-Type': 'application/json' } : {}),
       ...authHeader,
-      ...headers,
-    },
+      ...(headers as Record<string, string>),
+    } as HeadersInit,
     body: body ? JSON.stringify(body) : undefined,
     ...rest,
   });
@@ -44,7 +44,7 @@ async function upload<T>(path: string, formData: FormData): Promise<T> {
     throw new ApiError(0, 'You are currently offline. Please check your internet connection.');
   }
   const token = localStorage.getItem('token');
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const headers = (token ? { Authorization: `Bearer ${token}` } : {}) as HeadersInit;
 
   const res = await fetch(`${BASE}/api${path}`, {
     method: 'POST',
