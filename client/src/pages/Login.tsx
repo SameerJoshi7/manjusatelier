@@ -84,20 +84,23 @@ export default function Login() {
   }
 
   return (
-    <div className="container-x grid min-h-[80vh] place-items-center py-12">
+    <div className="relative min-h-[80vh] py-12 flex items-center justify-center overflow-hidden">
+      {/* Ambient background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gold/10 dark:bg-gold/5 blur-[100px] rounded-full pointer-events-none" />
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card-surface w-full max-w-md p-8"
+        className="card-surface relative z-10 w-full max-w-md p-8 md:p-10"
       >
         <div className="text-center">
-          <img
-            src="/logo-256.png"
-            alt="Manju's Atelier"
-            width={64}
-            height={64}
-            className="mx-auto h-16 w-16 rounded-full object-cover ring-1 ring-gold/40"
-          />
+            <img
+              src="/logo-256.png"
+              alt="Manju's Atelier"
+              width={72}
+              height={72}
+              className="mx-auto h-18 w-18 rounded-full object-cover ring-2 ring-gold/40 shadow-sm"
+            />
           <h1 className="mt-4 font-serif text-3xl text-brown-dark dark:text-beige">
             {mode === 'login' ? 'Welcome Back' : 'Create Account'}
           </h1>
@@ -162,13 +165,13 @@ export default function Login() {
           </Button>
         </form>
 
-        <div className="mt-6">
+        <div className="mt-8">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-brown/10 dark:border-beige/10"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-cream dark:bg-[#1a1614] text-brown/50 dark:text-beige/50">Or continue with</span>
+            <div className="relative flex justify-center text-sm font-medium">
+              <span className="px-3 bg-white dark:bg-[#26201a] text-brown/50 dark:text-beige/50 uppercase tracking-wider text-xs">Or continue with</span>
             </div>
           </div>
           <div className="mt-6 flex justify-center">
@@ -193,6 +196,7 @@ export default function Login() {
               useOneTap
               theme="outline"
               size="large"
+              shape="pill"
               width="300"
             />
           </div>
