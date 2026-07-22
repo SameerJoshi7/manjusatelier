@@ -300,3 +300,29 @@ export const getOrder = asyncHandler(async (req, res) => {
   }
   res.json({ success: true, order });
 });
+
+/** GET /api/orders/track/:customOrderId */
+export const trackOrder = asyncHandler(async (req, res) => {
+  const { customOrderId } = req.params;
+  const order = await Order.findOne({ customOrderId: customOrderId.toUpperCase() });
+  
+  if (!order) {
+    throw new ApiError(404, 'Order not found. Please check your Order ID.');
+  }
+
+  res.json({
+    success: true,
+    tracking: {
+      customOrderId: order.customOrderId,
+      orderStatus: order.orderStatus,
+      paymentStatus: order.paymentStatus,
+      createdAt: order.createdAt,
+      items: order.items.map(item => ({
+        name: item.name,
+        image: item.image,
+        quantity: item.quantity
+      }))
+    }
+  });
+});
+
