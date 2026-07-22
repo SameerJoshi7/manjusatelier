@@ -5,6 +5,7 @@ import { protect } from '../middleware/auth.js';
 import {
   register,
   login,
+  googleLogin,
   logout,
   me,
   updateProfile,
@@ -38,6 +39,8 @@ router.post(
   validate,
   login
 );
+
+router.post('/google', googleLogin);
 
 router.post('/logout', logout);
 router.post(

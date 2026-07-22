@@ -3,6 +3,9 @@ import { asyncHandler, ApiError } from '../middleware/error.js';
 import { signToken, cookieOptions, publicUser } from '../utils/token.js';
 import sendEmail from '../utils/sendEmail.js';
 import crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
@@ -25,6 +28,30 @@ export const login = asyncHandler(async (req, res) => {
   if (!user || !(await user.comparePassword(password))) {
     throw new ApiError(401, 'Invalid email or password');
   }
+  const token = signToken(user);
+  res
+    .cookie('token', token, cookieOptions)
+    .json({ success: true, token, user: publicUser(user) });
+});
+
+export const googleLogin = asyncHandler(async (req, res) => {
+  const { credential } = req.body;
+  if (!credential) throw new ApiError(400, 'Google credential missing');
+
+  const ticket = await client.verifyIdToken({
+    idToken: credential,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  
+  const payload = ticket.getPayload();
+  const { name, email } = payload;
+  
+  let user = await User.findOne({ email }).populate('cart.product');
+  if (!user) {
+    const password = crypto.randomBytes(16).toString('hex');
+    user = await User.create({ name, email, password });
+  }
+  
   const token = signToken(user);
   res
     .cookie('token', token, cookieOptions)

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '@/context/AuthContext';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { Button } from '@/components/ui/Button';
@@ -13,7 +14,7 @@ export default function Login() {
   );
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
-  const { user, login, register, logout } = useAuth();
+  const { user, login, googleLogin, register, logout } = useAuth();
   const { notify } = useToast();
   const navigate = useNavigate();
   const redirect = params.get('redirect') || (user?.role === 'admin' ? '/admin' : '/account');
@@ -161,9 +162,43 @@ export default function Login() {
           </Button>
         </form>
 
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-brown/10 dark:border-beige/10"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-cream dark:bg-[#1a1614] text-brown/50 dark:text-beige/50">Or continue with</span>
+            </div>
+          </div>
+          <div className="mt-6 flex justify-center">
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                if (credentialResponse.credential) {
+                  setLoading(true);
+                  try {
+                    await googleLogin(credentialResponse.credential);
+                    notify(mode === 'login' ? 'Welcome back!' : 'Account created!');
+                    navigate(redirect);
+                  } catch (err) {
+                    notify(err instanceof Error ? err.message : 'Google login failed', 'error');
+                  } finally {
+                    setLoading(false);
+                  }
+                }
+              }}
+              onError={() => {
+                notify('Google login failed', 'error');
+              }}
+              useOneTap
+              theme="outline"
+              size="large"
+              width="300"
+            />
+          </div>
+        </div>
 
-
-        <p className="mt-6 text-center text-sm text-brown/60 dark:text-beige/60">
+        <p className="mt-8 text-center text-sm text-brown/60 dark:text-beige/60">
           {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
           <button
             onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
