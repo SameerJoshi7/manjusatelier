@@ -54,9 +54,10 @@ export function createApp() {
   app.use(hpp());
 
   // Rate limit the API
+  app.set('trust proxy', 1); // Trust first proxy (Render/Heroku/Nginx)
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 300,
+    max: 1000, // Increased limit to prevent strict throttling
     standardHeaders: true,
     legacyHeaders: false,
   });
