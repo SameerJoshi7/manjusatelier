@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, User as UserIcon } from 'lucide-react';
+import { LogOut, User as UserIcon, Plus, Trash2, MapPin } from 'lucide-react';
 import { api } from '@/lib/api';
-import type { Order } from '@/types';
+import type { Order, Address } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { cn, formatPrice, formatDate } from '@/lib/utils';
@@ -30,6 +30,8 @@ export default function Account() {
   const [name, setName] = useState('');
   const [birthday, setBirthday] = useState('');
   const [gender, setGender] = useState('');
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [newAddress, setNewAddress] = useState<Address | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [loadingOrders, setLoadingOrders] = useState(true);
   
@@ -46,6 +48,7 @@ export default function Account() {
       setName(user.name || '');
       setBirthday(user.birthday || '');
       setGender(user.gender || '');
+      setAddresses(user.addresses || []);
     }
   }, [loading, user, navigate]);
 
@@ -81,6 +84,7 @@ export default function Account() {
         name: name.trim() ? name.trim() : undefined,
         birthday: birthday ? birthday : undefined,
         gender: gender ? gender : undefined,
+        addresses: addresses,
       });
       notify('Profile updated successfully.');
       await refresh();
@@ -194,7 +198,78 @@ export default function Account() {
               </select>
             </div>
           </div>
-          <div className="mt-4 text-right">
+
+          <h2 className="mt-8 mb-4 font-serif text-xl text-brown-dark dark:text-beige border-t border-brown/10 dark:border-beige/10 pt-6">
+            Saved Addresses
+          </h2>
+          
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
+            {addresses.map((addr, idx) => (
+              <div key={idx} className="relative rounded-xl border border-brown/20 p-4 text-sm bg-cream dark:bg-beige/5 dark:border-beige/20 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2 text-brown-dark dark:text-beige font-medium">
+                    <MapPin size={16} /> Address {idx + 1}
+                  </div>
+                  <p className="text-brown/70 dark:text-beige/70">{addr.line1}</p>
+                  {addr.line2 && <p className="text-brown/70 dark:text-beige/70">{addr.line2}</p>}
+                  <p className="text-brown/70 dark:text-beige/70">{addr.city}, {addr.state}</p>
+                  <p className="text-brown/70 dark:text-beige/70">{addr.postalCode}</p>
+                </div>
+                <button 
+                  onClick={() => setAddresses(addresses.filter((_, i) => i !== idx))}
+                  className="absolute top-4 right-4 text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+            
+            {!newAddress && (
+              <button 
+                onClick={() => setNewAddress({ line1: '', line2: '', city: '', state: '', postalCode: '', country: 'India' })}
+                className="rounded-xl border-2 border-dashed border-brown/20 p-4 text-sm flex flex-col items-center justify-center gap-2 text-brown/60 hover:text-brown hover:border-brown hover:bg-brown/5 transition-all min-h-[140px] dark:border-beige/20 dark:text-beige/60 dark:hover:text-beige dark:hover:border-beige"
+              >
+                <Plus size={24} />
+                <span className="font-medium">Add New Address</span>
+              </button>
+            )}
+          </div>
+
+          {newAddress && (
+            <div className="rounded-xl border border-brown/20 p-5 bg-white shadow-sm dark:bg-[#2c2621] dark:border-beige/20 mb-6">
+              <h3 className="font-medium text-brown-dark dark:text-beige mb-4">New Address</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <input className="input block w-full" placeholder="Address Line 1" value={newAddress.line1} onChange={e => setNewAddress({...newAddress, line1: e.target.value})} />
+                </div>
+                <div className="sm:col-span-2">
+                  <input className="input block w-full" placeholder="Address Line 2 (Optional)" value={newAddress.line2} onChange={e => setNewAddress({...newAddress, line2: e.target.value})} />
+                </div>
+                <div>
+                  <input className="input block w-full" placeholder="City" value={newAddress.city} onChange={e => setNewAddress({...newAddress, city: e.target.value})} />
+                </div>
+                <div>
+                  <input className="input block w-full" placeholder="State" value={newAddress.state} onChange={e => setNewAddress({...newAddress, state: e.target.value})} />
+                </div>
+                <div>
+                  <input className="input block w-full" placeholder="PIN Code" value={newAddress.postalCode} onChange={e => setNewAddress({...newAddress, postalCode: e.target.value})} />
+                </div>
+              </div>
+              <div className="mt-4 flex gap-3 justify-end">
+                <Button variant="secondary" onClick={() => setNewAddress(null)}>Cancel</Button>
+                <Button onClick={() => {
+                  if (!newAddress.line1 || !newAddress.city || !newAddress.state || !newAddress.postalCode) {
+                    notify('Please fill all required address fields', 'error');
+                    return;
+                  }
+                  setAddresses([...addresses, newAddress]);
+                  setNewAddress(null);
+                }}>Add Address</Button>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4 text-right pt-4 border-t border-brown/10 dark:border-beige/10">
             <Button disabled={savingProfile} onClick={saveProfile}>
               {savingProfile ? 'Saving...' : 'Save Profile'}
             </Button>

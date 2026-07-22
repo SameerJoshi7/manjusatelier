@@ -197,12 +197,13 @@ export default function Checkout() {
               {user?.addresses && user.addresses.length > 0 && (
                 <Field label="Saved Addresses">
                   <select 
-                    className="input mb-2" 
+                    className="input mb-4" 
                     onChange={(e) => {
                       if (e.target.value === 'new') {
                         setAddress({ fullName: user.name, phone: user.phone || '', line1: '', line2: '', city: '', state: '', postalCode: '', country: 'India' });
                       } else {
-                        setAddress(user.addresses![Number(e.target.value)]);
+                        const selected = user.addresses![Number(e.target.value)];
+                        setAddress({ ...selected, fullName: address.fullName || user.name, phone: address.phone || user.phone || '' });
                       }
                     }}
                   >
