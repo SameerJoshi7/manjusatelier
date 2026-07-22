@@ -9,9 +9,12 @@ import {
   updateOrderStatus,
   verifyUtr,
   editUtr,
+  trackOrder,
 } from '../controllers/orderController.js';
 
 const router = Router();
+
+router.get('/track/:customOrderId', trackOrder);
 
 router.use(protect); // all order routes require auth
 
