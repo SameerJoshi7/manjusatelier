@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import OrderTracking from '../OrderTracking';
-import React from 'react';
 
 vi.mock('@/hooks/usePageMeta', () => ({
   usePageMeta: vi.fn(),

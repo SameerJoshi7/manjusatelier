@@ -3,6 +3,7 @@ import { renderHook, act } from '@testing-library/react';
 import { WishlistProvider, useWishlist } from '../WishlistContext';
 import React from 'react';
 
+// Mock api
 vi.mock('@/lib/api', () => ({
   api: {
     post: vi.fn().mockResolvedValue({}),
@@ -12,7 +13,7 @@ vi.mock('@/lib/api', () => ({
 
 // Mock useAuth since WishlistContext depends on it
 vi.mock('../AuthContext', async (importOriginal) => {
-  const actual = await importOriginal<unknown>();
+  const actual = await importOriginal<Record<string, unknown>>();
   return {
     ...actual,
     useAuth: () => ({ user: null }),

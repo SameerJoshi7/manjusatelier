@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Shop from '../Shop';
-import React from 'react';
 
 // Mock the hooks
 vi.mock('@/hooks/useProducts', () => ({
