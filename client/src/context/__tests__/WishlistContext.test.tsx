@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { WishlistProvider, useWishlist } from '../WishlistContext';
-import { AuthProvider } from '../AuthContext';
-import { api } from '@/lib/api';
 import React from 'react';
 
 vi.mock('@/lib/api', () => ({
@@ -14,7 +12,7 @@ vi.mock('@/lib/api', () => ({
 
 // Mock useAuth since WishlistContext depends on it
 vi.mock('../AuthContext', async (importOriginal) => {
-  const actual = await importOriginal<any>();
+  const actual = await importOriginal<unknown>();
   return {
     ...actual,
     useAuth: () => ({ user: null }),

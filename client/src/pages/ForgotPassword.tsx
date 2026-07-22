@@ -20,7 +20,8 @@ export default function ForgotPassword() {
         type: 'success',
         text: 'Email sent! Please check your inbox for password reset instructions.',
       });
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
       setMessage({
         type: 'error',
         text: err.response?.data?.error || 'Something went wrong. Please try again.',

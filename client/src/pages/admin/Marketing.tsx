@@ -37,7 +37,8 @@ export default function Marketing() {
       });
       notify(res.message, 'success');
       setFormData({ title: '', content: '', couponCode: '', discountPercentage: '' });
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as Error;
       notify(error.message || 'Failed to send broadcast', 'error');
     } finally {
       setLoading(false);

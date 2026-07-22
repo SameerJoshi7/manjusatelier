@@ -25,7 +25,8 @@ export default function ResetPassword() {
       try {
         const res = await api.get<{ success: boolean; email: string; name: string }>(`/auth/reset-password/${token}`);
         setUserDetails({ name: res.name, email: res.email });
-      } catch (err: any) {
+      } catch (error: unknown) {
+        const err = error as { response?: { data?: { error?: string } } };
         setTokenError(err.response?.data?.error || 'Invalid or expired reset link.');
       } finally {
         setVerifying(false);
@@ -51,7 +52,8 @@ export default function ResetPassword() {
     try {
       await api.put(`/auth/reset-password/${token}`, { password });
       setSuccess(true);
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
       setError(err.response?.data?.error || 'Failed to reset password. Link may be invalid or expired.');
     } finally {
       setLoading(false);

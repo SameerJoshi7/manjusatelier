@@ -14,7 +14,7 @@ vi.mock('@/components/ui/Toast', () => ({
 // Mock the API response
 const mockGet = vi.fn();
 vi.mock('@/lib/api', () => ({
-  api: { get: (...args: any[]) => mockGet(...args) }
+  api: { get: (...args: unknown[]) => mockGet(...args) }
 }));
 
 describe('OrderTracking Page', () => {

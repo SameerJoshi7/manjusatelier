@@ -11,7 +11,7 @@ interface TrackData {
   orderStatus: 'processing' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
   paymentStatus: string;
   createdAt: string;
-  items: any[];
+  items: { name: string; image?: string; quantity: number }[];
 }
 
 export default function OrderTracking() {
@@ -30,8 +30,8 @@ export default function OrderTracking() {
     try {
       const res = await api.get<{ success: boolean; tracking: TrackData }>(`/orders/track/${orderId.trim().toUpperCase()}`);
       setData(res.tracking);
-    } catch (err: any) {
-      notify(err.message || 'Order not found. Please check your Order ID.', 'error');
+    } catch (err: unknown) {
+      notify(err instanceof Error ? err.message : 'Order not found. Please check your Order ID.', 'error');
     } finally {
       setLoading(false);
     }

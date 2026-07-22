@@ -32,7 +32,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Load cart from DB if logged in, otherwise from local storage
   useEffect(() => {
     if (user && user.cart && !syncedOnce) {
-      const dbItems = user.cart.map((c: any) => ({
+      const dbItems = user.cart.map((c: { product: string, quantity: number }) => ({
         product: c.product,
         quantity: c.quantity
       }));

@@ -88,7 +88,8 @@ export default function Account() {
       });
       notify('Profile updated successfully.');
       await refresh();
-    } catch (e: any) {
+    } catch (error: unknown) {
+      const e = error as { response?: { data?: { error?: string } }; message?: string };
       console.error('Profile update failed:', e.response?.data || e);
       notify(e.response?.data?.error || e.message || 'Failed to update profile.', 'error');
     } finally {
@@ -102,7 +103,8 @@ export default function Account() {
       const { order } = await api.put<{ order: Order }>(`/orders/${orderId}/edit-utr`, { utrNumber: utr });
       setOrders((prev) => prev.map((o) => (o._id === orderId ? order : o)));
       notify('UTR updated successfully.');
-    } catch (e: any) {
+    } catch (error: unknown) {
+      const e = error as { response?: { data?: { error?: string } } };
       notify(e.response?.data?.error || 'Failed to update UTR.', 'error');
     } finally {
       setUpdatingUtr(false);
