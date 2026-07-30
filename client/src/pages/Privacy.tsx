@@ -35,8 +35,8 @@ export default function Privacy() {
             </p>
             <ul className="mt-2 list-disc pl-5 space-y-1 text-brown/80 dark:text-beige/80">
               <li><strong>Personal Identification Information:</strong> Name, email address, phone number, shipping and billing addresses.</li>
-              <li><strong>Payment Information:</strong> Processed securely via our payment partners (e.g., Razorpay). We do not store your full credit card details.</li>
-              <li><strong>Account Data:</strong> Order history, wishlist items, and preferences.</li>
+              <li><strong>Payment Information:</strong> Payments are processed manually via secure UPI transfers. We collect transaction reference numbers (UTR) to verify your payments. We do not collect or store any bank account or credit card details.</li>
+              <li><strong>Account Data:</strong> Order history, wishlist items, and preferences. If you log in via Google, we receive your basic profile information (name and email) from Google.</li>
               <li><strong>Technical Data:</strong> IP address, browser type, device information, and usage patterns collected via cookies.</li>
             </ul>
           </section>
@@ -66,7 +66,7 @@ export default function Privacy() {
               who assist us in operating our website and conducting our business, such as:
             </p>
             <ul className="mt-2 list-disc pl-5 space-y-1 text-brown/80 dark:text-beige/80">
-              <li>Payment gateways (e.g., Razorpay) for processing transactions safely.</li>
+              <li>Banking and financial institutions (only to the extent necessary to verify your manual UPI transaction references).</li>
               <li>Shipping and delivery partners to deliver your handmade orders.</li>
               <li>Service providers for email communications and analytics.</li>
             </ul>
