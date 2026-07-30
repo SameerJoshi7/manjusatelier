@@ -1,9 +1,18 @@
+import { useState, useEffect } from 'react';
 import { Hero } from '@/components/home/Hero';
 import { CouponScroller } from '@/components/home/CouponScroller';
 import { ProductFeed } from '@/components/home/ProductFeed';
 import { usePageMeta } from '@/hooks/usePageMeta';
 
 export default function Home() {
+  const [showHero, setShowHero] = useState(() => !sessionStorage.getItem('hasSeenHero'));
+
+  useEffect(() => {
+    if (showHero) {
+      sessionStorage.setItem('hasSeenHero', 'true');
+    }
+  }, [showHero]);
+
   usePageMeta({
     title: "Manju's Atelier — Handcrafted with Love, Made to Last",
     description:
@@ -12,7 +21,7 @@ export default function Home() {
 
   return (
     <>
-      <Hero />
+      {showHero && <Hero />}
       <CouponScroller />
       <ProductFeed />
     </>

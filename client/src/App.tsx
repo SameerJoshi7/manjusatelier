@@ -22,6 +22,7 @@ const Account = lazy(() => import('@/pages/Account'));
 const Terms = lazy(() => import('@/pages/Terms'));
 const OrderTracking = lazy(() => import('@/pages/OrderTracking'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
+const Privacy = lazy(() => import('@/pages/Privacy'));
 
 // Admin
 const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout'));
@@ -76,6 +77,7 @@ export default function App() {
           <Route path="/account" element={<Account />} />
           <Route path="/track" element={<OrderTracking />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 

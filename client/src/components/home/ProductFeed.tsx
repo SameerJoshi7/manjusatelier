@@ -34,7 +34,7 @@ export function ProductFeed() {
           <Button
             variant={selectedCategory === null ? 'primary' : 'secondary'}
             size="sm"
-            className="rounded-full bg-white dark:bg-transparent"
+            className="rounded-full"
             onClick={() => setSelectedCategory(null)}
           >
             All Items
@@ -44,7 +44,7 @@ export function ProductFeed() {
               key={cat._id}
               variant={selectedCategory === cat.slug ? 'primary' : 'secondary'}
               size="sm"
-              className="rounded-full bg-white dark:bg-transparent"
+              className="rounded-full"
               onClick={() => setSelectedCategory(cat.slug)}
             >
               {cat.name}

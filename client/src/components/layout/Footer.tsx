@@ -43,7 +43,7 @@ const columns = [
     title: 'Company',
     links: [
       { label: 'Our Story', to: '/about' },
-      { label: 'Privacy Policy', to: '/contact' },
+      { label: 'Privacy Policy', to: '/privacy' },
       { label: 'Terms', to: '/contact' },
     ],
   },
@@ -165,8 +165,8 @@ export function Footer() {
               Terms & Conditions
             </Link>
             <span>|</span>
-            <Link to="/terms" className="hover:text-gold transition-colors">
-              Refund Policy
+            <Link to="/privacy" className="hover:text-gold transition-colors">
+              Privacy Policy
             </Link>
           </div>
         </div>

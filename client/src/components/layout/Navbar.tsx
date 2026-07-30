@@ -52,7 +52,8 @@ export function Navbar() {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
   const isHome = location.pathname === '/';
-  const transparent = isHome && !scrolled && !mobileOpen;
+  const showHero = isHome && !sessionStorage.getItem('hasSeenHero');
+  const transparent = showHero && !scrolled && !mobileOpen;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
@@ -149,8 +150,9 @@ export function Navbar() {
                     'flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors',
                     transparent
                       ? 'text-white/90 hover:text-white'
-                      : 'text-brown-dark hover:text-brown dark:text-beige',
-                    isActive && !transparent && 'text-brown'
+                      : 'text-brown-dark hover:text-brown dark:text-beige hover:bg-brown/5 dark:hover:bg-beige/10',
+                    isActive && !transparent && 'text-brown bg-brown/10 dark:bg-beige/10',
+                    isActive && transparent && 'bg-white/20 text-white'
                   )
                 }
               >

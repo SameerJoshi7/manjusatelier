@@ -27,6 +27,10 @@ export default function Login() {
     try {
       if (mode === 'login') await login(form.email, form.password);
       else await register(form.name, form.email, form.password);
+      
+      // Allow the Hero to show again as a welcome after login
+      sessionStorage.removeItem('hasSeenHero');
+      
       notify(mode === 'login' ? 'Welcome back!' : 'Account created!');
       navigate(redirect);
     } catch (err) {
@@ -181,6 +185,10 @@ export default function Login() {
                   setLoading(true);
                   try {
                     await googleLogin(credentialResponse.credential);
+                    
+                    // Allow the Hero to show again as a welcome after login
+                    sessionStorage.removeItem('hasSeenHero');
+                    
                     notify(mode === 'login' ? 'Welcome back!' : 'Account created!');
                     navigate(redirect);
                   } catch (err) {
