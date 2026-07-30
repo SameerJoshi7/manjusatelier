@@ -46,7 +46,12 @@ export default function ProductDetails() {
   const { user } = useAuth();
   const { notify } = useToast();
 
-  usePageMeta({ title: product ? `${product.name} — Manju's Atelier` : 'Loading…' });
+  usePageMeta({
+    title: product ? `${product.name} — Manju's Atelier` : 'Loading…',
+    description: product?.description,
+    image: product?.images[0],
+    url: typeof window !== 'undefined' ? window.location.href : undefined,
+  });
 
   useEffect(() => {
     setLoading(true);

@@ -10,6 +10,7 @@ import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import { ToastProvider } from '@/components/ui/Toast';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 window.addEventListener('vite:preloadError', () => {
   console.warn('Chunk load error caught. Redeploy detected, reloading...');
@@ -25,7 +26,9 @@ createRoot(document.getElementById('root')!).render(
               <WishlistProvider>
                 <CartProvider>
                   <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
-                    <App />
+                    <ErrorBoundary>
+                      <App />
+                    </ErrorBoundary>
                   </GoogleOAuthProvider>
                 </CartProvider>
               </WishlistProvider>

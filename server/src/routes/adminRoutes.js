@@ -23,6 +23,7 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'manjus_atelier_products',
     allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+    format: 'webp',
   },
 });
 
