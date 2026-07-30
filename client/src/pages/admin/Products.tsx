@@ -20,7 +20,7 @@ interface FormState {
   dimensions: string;
   color: string;
   description: string;
-  image: string;
+  images: string[];
   badges: Badge[];
   featured: boolean;
 }
@@ -35,7 +35,7 @@ const emptyForm: FormState = {
   dimensions: '',
   color: '',
   description: '',
-  image: '',
+  images: [],
   badges: ['Handmade'],
   featured: false,
 };
@@ -199,7 +199,7 @@ function ProductForm({
           dimensions: product.dimensions || '',
           color: product.color || '',
           description: product.description,
-          image: product.images[0] || '',
+          images: product.images || [],
           badges: product.badges || [],
           featured: !!product.featured,
         }
@@ -210,15 +210,22 @@ function ProductForm({
     setForm((f) => ({ ...f, [k]: v }));
 
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    if (form.images.length + files.length > 6) {
+      return notify('Maximum 6 images allowed per product', 'error');
+    }
     setUploading(true);
     try {
-      const fd = new FormData();
-      fd.append('image', file);
-      const { url } = await api.upload<{ url: string }>('/admin/upload', fd);
-      set('image', url);
-      notify('Image uploaded');
+      const uploadedUrls = [];
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('image', file);
+        const { url } = await api.upload<{ url: string }>('/admin/upload', fd);
+        uploadedUrls.push(url);
+      }
+      set('images', [...form.images, ...uploadedUrls]);
+      notify(`${files.length} image(s) uploaded`);
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Upload failed', 'error');
     } finally {
@@ -229,7 +236,7 @@ function ProductForm({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.category) return notify('Please choose a category', 'error');
-    if (!form.image) return notify('Please add a product image', 'error');
+    if (form.images.length === 0) return notify('Please add at least one product image', 'error');
     setSaving(true);
     const payload = {
       name: form.name,
@@ -241,7 +248,7 @@ function ProductForm({
       dimensions: form.dimensions,
       color: form.color,
       description: form.description,
-      images: [form.image],
+      images: form.images,
       badges: form.badges,
       featured: form.featured,
     };
@@ -277,25 +284,34 @@ function ProductForm({
 
         <form onSubmit={submit} className="space-y-4">
           {/* Image */}
-          <div className="flex items-center gap-4">
-            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-beige/40">
-              {form.image ? (
-                <img src={form.image} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <div className="grid h-full place-items-center text-brown/30">
-                  <Package size={28} />
-                </div>
-              )}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-4">
+              <div>
+                <label className="btn cursor-pointer border border-brown/30 px-4 py-2 text-sm text-brown hover:bg-brown/10">
+                  <Upload size={15} /> {uploading ? 'Uploading…' : 'Upload images'}
+                  <input type="file" multiple accept="image/*" className="hidden" onChange={onFile} />
+                </label>
+                <p className="mt-1.5 text-xs text-brown/50 dark:text-beige/50">
+                  Select up to 6 images (JPG, PNG, WEBP).
+                </p>
+              </div>
             </div>
-            <div>
-              <label className="btn cursor-pointer border border-brown/30 px-4 py-2 text-sm text-brown hover:bg-brown/10">
-                <Upload size={15} /> {uploading ? 'Uploading…' : 'Upload image'}
-                <input type="file" accept="image/*" className="hidden" onChange={onFile} />
-              </label>
-              <p className="mt-1.5 text-xs text-brown/50 dark:text-beige/50">
-                JPG, PNG or WEBP, up to 5MB.
-              </p>
-            </div>
+            {form.images.length > 0 && (
+              <div className="flex flex-wrap gap-3">
+                {form.images.map((img, i) => (
+                  <div key={i} className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-brown/10 bg-beige/40">
+                    <img src={img} alt="" className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => set('images', form.images.filter((_, idx) => idx !== i))}
+                      className="absolute right-1 top-1 rounded-full bg-red-500 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <Field label="Name">
