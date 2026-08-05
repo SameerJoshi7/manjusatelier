@@ -8,7 +8,7 @@ import { asyncHandler, ApiError } from '../middleware/error.js';
 import { getRazorpay, verifyPaymentSignature } from '../utils/razorpay.js';
 import { getSocket } from '../socket.js';
 import { sendEmail } from '../utils/sendEmail.js';
-import { getOrderReceivedTemplate, getPaymentVerifiedTemplate, getOrderShippedTemplate, getOrderDeliveredTemplate } from '../utils/emailTemplates.js';
+import { getOrderReceivedTemplate, getPaymentVerifiedTemplate, getOrderShippedTemplate, getOrderDeliveredTemplate, getOrderCancelledTemplate } from '../utils/emailTemplates.js';
 
 /**
  * Recompute the cart total from the DATABASE (never trust client prices).
@@ -255,6 +255,16 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     } catch (err) {
       console.error('Failed to send delivered email:', err);
     }
+  } else if (orderStatus === 'cancelled' && order.user.email) {
+    try {
+      await sendEmail({
+        email: order.user.email,
+        subject: `Order Cancelled 😔 - #${order.customOrderId}`,
+        html: getOrderCancelledTemplate(order)
+      });
+    } catch (err) {
+      console.error('Failed to send cancelled email:', err);
+    }
   }
 
   try {
@@ -352,10 +362,30 @@ export const verifyUtr = asyncHandler(async (req, res) => {
 
         await Notification.create({
           user: order.user._id,
-          title: 'Payment Rejected',
+          title: 'Order Cancelled 😔',
           message: `We could not verify the UTR for order ${order.customOrderId}. The order has been cancelled.`,
           link: `/account?tab=orders`,
         });
+
+        const { sendPushToUser } = await import('../utils/push.js');
+        await sendPushToUser(order.user._id, {
+          title: 'Order Cancelled 😔',
+          body: `We could not verify your UTR for order ${order.customOrderId}. It has been cancelled.`,
+          icon: '/pwa-192x192.png',
+          url: '/account?tab=orders'
+        });
+
+        if (order.user.email) {
+          try {
+            await sendEmail({
+              email: order.user.email,
+              subject: `Order Cancelled 😔 - #${order.customOrderId}`,
+              html: getOrderCancelledTemplate(order)
+            });
+          } catch (err) {
+            console.error('Failed to send cancelled email:', err);
+          }
+        }
       }
     }
   } catch (err) {
