@@ -7,6 +7,8 @@ import Notification from '../models/Notification.js';
 import { asyncHandler, ApiError } from '../middleware/error.js';
 import { getRazorpay, verifyPaymentSignature } from '../utils/razorpay.js';
 import { getSocket } from '../socket.js';
+import { sendEmail } from '../utils/sendEmail.js';
+import { getOrderReceivedTemplate, getPaymentVerifiedTemplate, getOrderShippedTemplate } from '../utils/emailTemplates.js';
 
 /**
  * Recompute the cart total from the DATABASE (never trust client prices).
@@ -91,6 +93,20 @@ export const createOrder = asyncHandler(async (req, res) => {
     console.error('Socket emission failed:', err);
   }
 
+  // Send Order Received Email
+  try {
+    const populatedUser = await mongoose.model('User').findById(req.user._id);
+    if (populatedUser && populatedUser.email) {
+      await sendEmail({
+        email: populatedUser.email,
+        subject: `Order Received - #${order.customOrderId}`,
+        html: getOrderReceivedTemplate(order)
+      });
+    }
+  } catch (err) {
+    console.error('Failed to send order received email:', err);
+  }
+
   res.status(201).json({
     success: true,
     order: { id: order._id, customOrderId: order.customOrderId, amount: total, createdAt: order.createdAt },
@@ -173,6 +189,19 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     link: `/account?tab=orders`,
   });
 
+  // Send email if shipped
+  if (orderStatus === 'shipped' && order.user.email) {
+    try {
+      await sendEmail({
+        email: order.user.email,
+        subject: `Your Order has Shipped! - #${order.customOrderId}`,
+        html: getOrderShippedTemplate(order)
+      });
+    } catch (err) {
+      console.error('Failed to send shipped email:', err);
+    }
+  }
+
   try {
     getSocket().to(`user_${order.user._id.toString()}`).emit('order_update', { orderId: order._id });
   } catch (err) {
@@ -219,6 +248,18 @@ export const verifyUtr = asyncHandler(async (req, res) => {
         message: `Your payment for order ${order.customOrderId} has been verified successfully.`,
         link: `/account?tab=orders`,
       });
+
+      if (order.user.email) {
+        try {
+          await sendEmail({
+            email: order.user.email,
+            subject: `Payment Verified - #${order.customOrderId}`,
+            html: getPaymentVerifiedTemplate(order)
+          });
+        } catch (err) {
+          console.error('Failed to send payment verified email:', err);
+        }
+      }
     } else {
       if (!order.utrEdited) {
         // First rejection: give them a chance to edit

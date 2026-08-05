@@ -1,6 +1,9 @@
 import cron from 'node-cron';
 import Order from '../models/Order.js';
 import Notification from '../models/Notification.js';
+import User from '../models/User.js';
+import { sendEmail } from './sendEmail.js';
+import { getAbandonedCartTemplate } from './emailTemplates.js';
 
 export const initCronJobs = () => {
   // Run every minute
@@ -37,5 +40,43 @@ export const initCronJobs = () => {
     }
   });
   
+  // Run every day at 10:00 AM for abandoned carts
+  cron.schedule('0 10 * * *', async () => {
+    try {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+      const abandonedUsers = await User.find({
+        'cart.0': { $exists: true }, // cart is not empty
+        updatedAt: { $lt: oneDayAgo },
+        $or: [
+          { cartReminderSentAt: { $exists: false } },
+          { cartReminderSentAt: null },
+          { cartReminderSentAt: { $lt: sevenDaysAgo } }
+        ]
+      });
+
+      if (abandonedUsers.length > 0) {
+        console.log(`[CRON] Found ${abandonedUsers.length} abandoned carts. Sending emails...`);
+        for (const user of abandonedUsers) {
+          if (!user.email) continue;
+          try {
+            await sendEmail({
+              email: user.email,
+              subject: "Did you forget something?",
+              html: getAbandonedCartTemplate(user.name.split(' ')[0], 'COMEBACK5')
+            });
+            user.cartReminderSentAt = new Date();
+            await user.save();
+          } catch (e) {
+            console.error(\`Failed to send abandoned cart email to \${user.email}:\`, e);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[CRON] Error processing abandoned carts:', error);
+    }
+  });
+
   console.log('[CRON] Jobs initialized.');
 };

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronDown, Package, CheckCircle2, XCircle } from 'lucide-react';
+import { ChevronDown, Package, CheckCircle2, XCircle, MessageCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatPrice, cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -114,6 +114,14 @@ export default function Orders() {
 
   const customerName = (o: AdminOrder) =>
     typeof o.user === 'object' && o.user ? o.user.name : o.shippingAddress.fullName || 'Customer';
+
+  const getWhatsAppLink = (o: AdminOrder) => {
+    const phone = o.shippingAddress.phone?.replace(/\D/g, '') || '';
+    const countryCode = phone.length === 10 ? '91' : '';
+    const number = `${countryCode}${phone}`;
+    const text = encodeURIComponent(`Hi ${customerName(o)}, this is Manju's Atelier! We are reaching out regarding your order #${o.customOrderId}.`);
+    return `https://wa.me/${number}?text=${text}`;
+  };
 
   return (
     <div>
@@ -243,6 +251,17 @@ export default function Orders() {
                       </p>
                       {typeof o.user === 'object' && o.user && (
                         <p className="mt-2 text-xs text-brown/50">{o.user.email}</p>
+                      )}
+                      
+                      {o.shippingAddress.phone && (
+                        <a
+                          href={getWhatsAppLink(o)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[#25D366]/10 px-3 py-1.5 text-xs font-semibold text-[#128C7E] transition-colors hover:bg-[#25D366]/20 dark:bg-[#25D366]/10 dark:text-[#25D366]"
+                        >
+                          <MessageCircle size={14} /> Message on WhatsApp
+                        </a>
                       )}
                       
                       <div className="mt-3 border-t border-brown/10 pt-2">

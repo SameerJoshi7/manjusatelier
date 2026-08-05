@@ -33,3 +33,69 @@ export const getPromotionalTemplate = (title, content, couponCode, discountPerce
     </div>
   `;
 };
+
+export const getOrderReceivedTemplate = (order) => `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #f8f5f0; padding: 20px; text-align: center;">
+      <h1 style="color: #4a3b32; margin: 0; font-size: 24px;">Manju's Atelier</h1>
+    </div>
+    <div style="padding: 30px; background-color: #ffffff;">
+      <h2 style="color: #4a3b32; margin-top: 0;">Order Received!</h2>
+      <p style="color: #666666; line-height: 1.6;">Thank you for your order (<strong>#${order.customOrderId}</strong>). We have received your order details.</p>
+      <p style="color: #666666; line-height: 1.6;">If you haven't already, please complete your UPI payment and submit the UTR number on your account page so we can process your order.</p>
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="${process.env.CLIENT_URL || 'https://manjusatelier.in'}/account?tab=orders" style="display: inline-block; background-color: #c19b6c; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; font-size: 16px;">View Order</a>
+      </div>
+    </div>
+  </div>
+`;
+
+export const getPaymentVerifiedTemplate = (order) => `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #f8f5f0; padding: 20px; text-align: center;">
+      <h1 style="color: #4a3b32; margin: 0; font-size: 24px;">Manju's Atelier</h1>
+    </div>
+    <div style="padding: 30px; background-color: #ffffff;">
+      <h2 style="color: #4a3b32; margin-top: 0;">Payment Verified!</h2>
+      <p style="color: #666666; line-height: 1.6;">Great news! Your payment for order <strong>#${order.customOrderId}</strong> has been successfully verified.</p>
+      <p style="color: #666666; line-height: 1.6;">We are now preparing your items for shipment. We will notify you as soon as they are dispatched.</p>
+    </div>
+  </div>
+`;
+
+export const getOrderShippedTemplate = (order) => `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #f8f5f0; padding: 20px; text-align: center;">
+      <h1 style="color: #4a3b32; margin: 0; font-size: 24px;">Manju's Atelier</h1>
+    </div>
+    <div style="padding: 30px; background-color: #ffffff;">
+      <h2 style="color: #4a3b32; margin-top: 0;">Your Order has Shipped!</h2>
+      <p style="color: #666666; line-height: 1.6;">Your order <strong>#${order.customOrderId}</strong> has been dispatched and is on its way to you.</p>
+      <p style="color: #666666; line-height: 1.6;">You can track the status of your delivery directly on your account dashboard.</p>
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="${process.env.CLIENT_URL || 'https://manjusatelier.in'}/order/${order.customOrderId}" style="display: inline-block; background-color: #c19b6c; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; font-size: 16px;">Track Order</a>
+      </div>
+    </div>
+  </div>
+`;
+
+export const getAbandonedCartTemplate = (userName, discountCode) => `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #f8f5f0; padding: 20px; text-align: center;">
+      <h1 style="color: #4a3b32; margin: 0; font-size: 24px;">Manju's Atelier</h1>
+    </div>
+    <div style="padding: 30px; background-color: #ffffff;">
+      <h2 style="color: #4a3b32; margin-top: 0;">Did you forget something, ${userName}?</h2>
+      <p style="color: #666666; line-height: 1.6;">We noticed you left some beautiful handmade items in your cart. They are still waiting for you!</p>
+      
+      <div style="margin: 30px 0; padding: 20px; background-color: #fcf9f2; border: 2px dashed #c19b6c; text-align: center; border-radius: 8px;">
+        <p style="margin: 0; color: #4a3b32; font-weight: bold; text-transform: uppercase;">Use this code to get 5% off!</p>
+        <p style="margin: 10px 0 0; font-size: 28px; font-weight: 800; color: #c19b6c; letter-spacing: 2px;">${discountCode}</p>
+      </div>
+      
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="${process.env.CLIENT_URL || 'https://manjusatelier.in'}/cart" style="display: inline-block; background-color: #c19b6c; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; font-size: 16px;">Return to Cart</a>
+      </div>
+    </div>
+  </div>
+`;
