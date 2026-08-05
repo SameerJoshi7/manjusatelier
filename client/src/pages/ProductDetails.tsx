@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Heart,
   Share2,
@@ -46,28 +46,7 @@ export default function ProductDetails() {
   const { user } = useAuth();
   const { notify } = useToast();
 
-  const touchStartX = useRef<number | null>(null);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null || !product) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartX.current - touchEndX;
-
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) {
-        // Swiped left -> Next image
-        setActiveImg((prev) => Math.min(product.images.length - 1, prev + 1));
-      } else {
-        // Swiped right -> Previous image
-        setActiveImg((prev) => Math.max(0, prev - 1));
-      }
-    }
-    touchStartX.current = null;
-  };
+  // Touch handlers removed in favor of native scroll snap
 
   usePageMeta({
     title: product ? `${product.name} — Manju's Atelier` : 'Loading…',
@@ -148,7 +127,7 @@ export default function ProductDetails() {
         <div className="flex flex-col-reverse gap-4 sm:flex-row">
 
           <div
-            className="relative aspect-square flex-1 cursor-zoom-in overflow-hidden rounded-2xl bg-beige/40"
+            className="relative aspect-square flex-1 overflow-hidden rounded-2xl bg-beige/40"
             onMouseMove={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
               setZoom({
@@ -157,26 +136,31 @@ export default function ProductDetails() {
               });
             }}
             onMouseLeave={() => setZoom(null)}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
           >
-            <AnimatePresence mode="wait">
-              <motion.img
-                key={activeImg}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-                src={product.images[activeImg]}
-                alt={product.name}
-                className="h-full w-full object-cover transition-transform duration-200"
-                style={
-                  zoom
-                    ? { transform: 'scale(1.8)', transformOrigin: `${zoom.x}% ${zoom.y}%` }
-                    : undefined
-                }
-              />
-            </AnimatePresence>
+            <div
+              id="product-carousel"
+              className="flex h-full w-full snap-x snap-mandatory overflow-x-auto scrollbar-hide"
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                const index = Math.round(el.scrollLeft / el.clientWidth);
+                if (index !== activeImg) setActiveImg(index);
+              }}
+            >
+              {product.images.map((img, i) => (
+                <div key={i} className="relative h-full w-full shrink-0 snap-center cursor-zoom-in overflow-hidden">
+                  <img
+                    src={img}
+                    alt={`${product.name} ${i + 1}`}
+                    className="h-full w-full object-cover transition-transform duration-200"
+                    style={
+                      zoom && activeImg === i
+                        ? { transform: 'scale(1.8)', transformOrigin: `${zoom.x}% ${zoom.y}%` }
+                        : undefined
+                    }
+                  />
+                </div>
+              ))}
+            </div>
             <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
               {product.badges?.map((b) => (
                 <Badge key={b} type={b} />
@@ -189,7 +173,16 @@ export default function ProductDetails() {
                 {product.images.map((_, i) => (
                   <button
                     key={i}
-                    onClick={() => setActiveImg(i)}
+                    onClick={() => {
+                      setActiveImg(i);
+                      const container = document.getElementById('product-carousel');
+                      if (container) {
+                        container.scrollTo({
+                          left: container.clientWidth * i,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }}
                     aria-label={`Go to image ${i + 1}`}
                     className={cn(
                       'h-1.5 rounded-full transition-all duration-300 hover:bg-brown',
