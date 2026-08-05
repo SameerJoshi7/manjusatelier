@@ -278,6 +278,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
   try {
     getSocket().to(`user_${order.user._id.toString()}`).emit('order_update', { orderId: order._id });
+    getSocket().to('admins').emit('order_update', { orderId: order._id });
   } catch (err) {
     console.error('Socket emission failed:', err);
   }
@@ -405,6 +406,7 @@ export const verifyUtr = asyncHandler(async (req, res) => {
 
   try {
     getSocket().to(`user_${order.user._id.toString()}`).emit('order_update', { orderId: order._id });
+    getSocket().to('admins').emit('order_update', { orderId: order._id });
   } catch (err) {
     console.error('Socket emission failed:', err);
   }
