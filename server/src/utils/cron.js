@@ -69,7 +69,7 @@ export const initCronJobs = () => {
             user.cartReminderSentAt = new Date();
             await user.save();
           } catch (e) {
-            console.error(\`Failed to send abandoned cart email to \${user.email}:\`, e);
+            console.error(`Failed to send abandoned cart email to ${user.email}:`, e);
           }
         }
       }
