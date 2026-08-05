@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart,
   Share2,
@@ -37,7 +37,7 @@ export default function ProductDetails() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeImg, setActiveImg] = useState(0);
-  const [zoom, setZoom] = useState<{ x: number; y: number } | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState<Tab>('Description');
 
@@ -140,24 +140,12 @@ export default function ProductDetails() {
                 <div
                   key={i}
                   className="relative aspect-square w-full shrink-0 snap-center overflow-hidden rounded-2xl bg-beige/40"
-                  onMouseMove={(e) => {
-                    const r = e.currentTarget.getBoundingClientRect();
-                    setZoom({
-                      x: ((e.clientX - r.left) / r.width) * 100,
-                      y: ((e.clientY - r.top) / r.height) * 100,
-                    });
-                  }}
-                  onMouseLeave={() => setZoom(null)}
                 >
                   <img
                     src={img}
                     alt={`${product.name} ${i + 1}`}
-                    className="h-full w-full cursor-zoom-in object-cover transition-transform duration-200"
-                    style={
-                      zoom && activeImg === i
-                        ? { transform: 'scale(1.8)', transformOrigin: `${zoom.x}% ${zoom.y}%` }
-                        : undefined
-                    }
+                    onClick={() => setLightboxOpen(true)}
+                    className="h-full w-full cursor-pointer object-cover transition-transform duration-200"
                   />
                 </div>
               ))}
@@ -368,6 +356,89 @@ export default function ProductDetails() {
           </div>
         </section>
       )}
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {lightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex flex-col bg-black/95 backdrop-blur-sm"
+          >
+            <div className="flex justify-end p-4">
+              <button
+                onClick={() => setLightboxOpen(false)}
+                className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+                aria-label="Close fullscreen"
+              >
+                <Plus className="rotate-45" size={24} />
+              </button>
+            </div>
+            
+            <div
+              id="lightbox-carousel"
+              className="flex flex-1 snap-x snap-mandatory overflow-x-auto scrollbar-hide"
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                const index = Math.round(el.scrollLeft / el.clientWidth);
+                if (index !== activeImg) {
+                  setActiveImg(index);
+                  // Sync main carousel
+                  const mainContainer = document.getElementById('product-carousel');
+                  if (mainContainer) {
+                    mainContainer.scrollTo({
+                      left: (mainContainer.clientWidth + 16) * index,
+                      behavior: 'auto'
+                    });
+                  }
+                }
+              }}
+              ref={(el) => {
+                // Ensure it opens exactly to the active image
+                if (el && el.scrollLeft === 0 && activeImg > 0) {
+                  el.scrollLeft = el.clientWidth * activeImg;
+                }
+              }}
+            >
+              {product.images.map((img, i) => (
+                <div key={i} className="flex h-full w-full shrink-0 snap-center items-center justify-center p-4">
+                  <img
+                    src={img}
+                    alt={`${product.name} ${i + 1}`}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination dots for lightbox */}
+            {product.images.length > 1 && (
+              <div className="flex justify-center gap-2 p-6">
+                {product.images.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setActiveImg(i);
+                      const container = document.getElementById('lightbox-carousel');
+                      if (container) {
+                        container.scrollTo({
+                          left: container.clientWidth * i,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }}
+                    className={cn(
+                      'h-2 rounded-full transition-all duration-300',
+                      activeImg === i ? 'w-6 bg-white' : 'w-2 bg-white/30'
+                    )}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
