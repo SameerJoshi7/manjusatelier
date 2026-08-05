@@ -10,6 +10,7 @@ import {
   verifyUtr,
   editUtr,
   trackOrder,
+  getPendingOrderCount,
 } from '../controllers/orderController.js';
 
 const router = Router();
@@ -24,6 +25,7 @@ router.put('/:id/edit-utr', editUtr);
 router.get('/mine', getMyOrders);
 
 // Admin
+router.get('/pending-count', adminOnly, getPendingOrderCount);
 router.get('/', adminOnly, getAllOrders);
 router.patch('/:id/status', adminOnly, updateOrderStatus);
 router.patch('/:id/verify-utr', adminOnly, verifyUtr);

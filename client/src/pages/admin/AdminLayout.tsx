@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -17,6 +17,9 @@ import { useAuth } from '@/context/AuthContext';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { cn } from '@/lib/utils';
+import { useSocket } from '@/hooks/useSocket';
+import { api } from '@/lib/api';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const nav = [
   { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
@@ -32,7 +35,41 @@ export default function AdminLayout() {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [newOrderPrompt, setNewOrderPrompt] = useState<{show: boolean, orderId: string | null}>({show: false, orderId: null});
+  
+  const socket = useSocket();
   usePageMeta({ title: "Admin — Manju's Atelier" });
+
+  const fetchPendingCount = useCallback(async () => {
+    if (!user || user.role !== 'admin') return;
+    try {
+      const data = await api.get<{success: boolean, count: number}>('/orders/pending-count');
+      setPendingCount(data.count || 0);
+    } catch (err) {
+      console.error('Failed to fetch pending count', err);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchPendingCount();
+  }, [fetchPendingCount]);
+
+  useEffect(() => {
+    if (!socket || !user || user.role !== 'admin') return;
+
+    const onOrderUpdate = (data: any) => {
+      fetchPendingCount();
+      if (data.type === 'NEW_ORDER') {
+        setNewOrderPrompt({ show: true, orderId: data.orderId });
+      }
+    };
+
+    socket.on('order_update', onOrderUpdate);
+    return () => {
+      socket.off('order_update', onOrderUpdate);
+    };
+  }, [socket, user, fetchPendingCount]);
 
   if (loading) return <PageLoader />;
 
@@ -86,15 +123,20 @@ export default function AdminLayout() {
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors',
+                'flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-colors',
                 isActive
                   ? 'bg-brown text-cream'
                   : 'text-brown-dark hover:bg-beige/50 dark:text-beige dark:hover:bg-beige/10'
               )
             }
           >
-            <item.icon size={18} />
-            {item.label}
+            <div className="flex items-center gap-3">
+              <item.icon size={18} />
+              {item.label}
+            </div>
+            {item.label === 'Orders' && (
+              <div className={cn("h-2 w-2 rounded-full", pendingCount > 0 ? "bg-red-500 animate-pulse" : "bg-green-500")} />
+            )}
           </NavLink>
         ))}
       </nav>
@@ -153,6 +195,51 @@ export default function AdminLayout() {
           <Outlet />
         </div>
       </main>
+
+      {/* New Order Prompt */}
+      <AnimatePresence>
+        {newOrderPrompt.show && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-6 right-6 z-[100] flex w-80 flex-col gap-3 rounded-2xl bg-white p-5 shadow-lift dark:bg-[#26201a] border border-brown/10 dark:border-beige/10"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2 text-red-500">
+                <Megaphone size={20} className="animate-pulse" />
+                <h3 className="font-bold">New Order Arrived!</h3>
+              </div>
+              <button 
+                onClick={() => setNewOrderPrompt({ show: false, orderId: null })}
+                className="text-brown-dark/50 hover:text-brown-dark dark:text-beige/50 dark:hover:text-beige transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <p className="text-sm text-brown-dark/80 dark:text-beige/80">
+              A new order has been placed. Please verify the UTR on top priority!
+            </p>
+            <div className="mt-2 flex justify-end gap-2">
+              <button 
+                onClick={() => setNewOrderPrompt({ show: false, orderId: null })}
+                className="rounded-full px-4 py-2 text-xs font-medium text-brown-dark hover:bg-beige/50 dark:text-beige dark:hover:bg-beige/10 transition-colors"
+              >
+                Dismiss
+              </button>
+              <button 
+                onClick={() => {
+                  setNewOrderPrompt({ show: false, orderId: null });
+                  navigate('/admin/orders');
+                }}
+                className="rounded-full bg-red-500 px-4 py-2 text-xs font-medium text-white hover:bg-red-600 transition-colors"
+              >
+                View Orders
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

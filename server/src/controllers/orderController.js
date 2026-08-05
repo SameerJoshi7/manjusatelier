@@ -88,7 +88,7 @@ export const createOrder = asyncHandler(async (req, res) => {
   });
 
   try {
-    getSocket().to('admins').emit('order_update', { orderId: order._id });
+    getSocket().to('admins').emit('order_update', { orderId: order._id, type: 'NEW_ORDER' });
   } catch (err) {
     console.error('Socket emission failed:', err);
   }
@@ -163,6 +163,15 @@ export const getMyOrders = asyncHandler(async (req, res) => {
 });
 
 // ---------------- Admin ----------------
+
+/** GET /api/orders/pending-count (admin) */
+export const getPendingOrderCount = asyncHandler(async (req, res) => {
+  const count = await Order.countDocuments({
+    paymentStatus: { $in: ['PAYMENT_PENDING', 'UTR_VERIFICATION_PENDING', 'UTR_MISMATCH_RETRY'] },
+    orderStatus: { $nin: ['cancelled', 'delivered'] }
+  });
+  res.json({ success: true, count });
+});
 
 /** GET /api/orders  (admin) — all orders, newest first, optional status filter. */
 export const getAllOrders = asyncHandler(async (req, res) => {
