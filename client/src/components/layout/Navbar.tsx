@@ -52,7 +52,7 @@ export function Navbar() {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
   const isHome = location.pathname === '/';
-  const showHero = isHome && !sessionStorage.getItem('hasSeenHero');
+  const showHero = isHome && !localStorage.getItem('hasSeenHero');
   const transparent = showHero && !scrolled && !mobileOpen;
 
   useEffect(() => {

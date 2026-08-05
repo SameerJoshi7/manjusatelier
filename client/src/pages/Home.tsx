@@ -5,11 +5,11 @@ import { ProductFeed } from '@/components/home/ProductFeed';
 import { usePageMeta } from '@/hooks/usePageMeta';
 
 export default function Home() {
-  const [showHero] = useState(() => !sessionStorage.getItem('hasSeenHero'));
+  const [showHero] = useState(() => !localStorage.getItem('hasSeenHero'));
 
   useEffect(() => {
     if (showHero) {
-      sessionStorage.setItem('hasSeenHero', 'true');
+      localStorage.setItem('hasSeenHero', 'true');
     }
   }, [showHero]);
 

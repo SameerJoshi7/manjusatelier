@@ -13,7 +13,7 @@ export function Layout() {
   }, [pathname]);
 
   const isHome = pathname === '/';
-  const showHero = isHome && !sessionStorage.getItem('hasSeenHero');
+  const showHero = isHome && !localStorage.getItem('hasSeenHero');
 
   return (
     <div className="flex min-h-screen flex-col">

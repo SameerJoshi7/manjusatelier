@@ -29,7 +29,7 @@ export default function Login() {
       else await register(form.name, form.email, form.password);
       
       // Allow the Hero to show again as a welcome after login
-      sessionStorage.removeItem('hasSeenHero');
+      localStorage.removeItem('hasSeenHero');
       
       notify(mode === 'login' ? 'Welcome back!' : 'Account created!');
       navigate(redirect);
@@ -187,7 +187,7 @@ export default function Login() {
                     await googleLogin(credentialResponse.credential);
                     
                     // Allow the Hero to show again as a welcome after login
-                    sessionStorage.removeItem('hasSeenHero');
+                    localStorage.removeItem('hasSeenHero');
                     
                     notify(mode === 'login' ? 'Welcome back!' : 'Account created!');
                     navigate(redirect);
