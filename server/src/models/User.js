@@ -4,6 +4,8 @@ import crypto from 'crypto';
 
 const addressSchema = new mongoose.Schema(
   {
+    fullName: { type: String, trim: true },
+    phone: { type: String, trim: true },
     line1: { type: String, trim: true },
     line2: { type: String, trim: true },
     city: { type: String, trim: true },

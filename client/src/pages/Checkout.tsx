@@ -32,6 +32,10 @@ export default function Checkout() {
   const [utrNumber, setUtrNumber] = useState('');
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   
+  const [addressIndex, setAddressIndex] = useState<number | 'new'>(
+    user?.addresses?.length ? 0 : 'new'
+  );
+
   const [address, setAddress] = useState<Address>(user?.addresses?.[0] || {
     fullName: user?.name || '',
     phone: user?.phone || '',
@@ -42,16 +46,10 @@ export default function Checkout() {
     postalCode: '',
     country: 'India',
   });
-  const [birthday, setBirthday] = useState(user?.birthday || '');
-  const [gender, setGender] = useState(user?.gender || '');
 
   useEffect(() => {
     if (user && !user.addresses?.length) {
       setAddress((a) => ({ ...a, fullName: a.fullName || user.name, phone: a.phone || user.phone || '' }));
-    }
-    if (user) {
-      if (user.birthday) setBirthday(user.birthday);
-      if (user.gender) setGender(user.gender);
     }
   }, [user]);
 
@@ -105,13 +103,17 @@ export default function Checkout() {
     setProcessing(true);
     try {
       if (user) {
-        const isNewAddress = !user.addresses?.some(a => a.line1 === address.line1 && a.city === address.city);
+        let newAddresses = [...(user.addresses || [])];
+        if (addressIndex === 'new') {
+          newAddresses.push(address);
+        } else {
+          newAddresses[addressIndex] = address;
+        }
+
         await api.put('/auth/profile', {
-          birthday: birthday || undefined,
-          gender: gender || undefined,
           phone: address.phone,
-          addresses: isNewAddress ? [...(user.addresses || []), address] : user.addresses
-        }).catch(() => {}); // ignore error
+          addresses: newAddresses
+        }).catch(() => {});
       }
 
       const { order } = await api.post<CreateOrderResponse>('/orders', {
@@ -194,26 +196,31 @@ export default function Checkout() {
                 Shipping & Details
               </h2>
               
-              {user?.addresses && user.addresses.length > 0 && (
                 <Field label="Saved Addresses">
                   <select 
                     className="input mb-4" 
+                    value={addressIndex}
                     onChange={(e) => {
-                      if (e.target.value === 'new') {
-                        setAddress({ fullName: user.name, phone: user.phone || '', line1: '', line2: '', city: '', state: '', postalCode: '', country: 'India' });
+                      const val = e.target.value;
+                      if (val === 'new') {
+                        setAddressIndex('new');
+                        setAddress({ fullName: user?.name, phone: user?.phone || '', line1: '', line2: '', city: '', state: '', postalCode: '', country: 'India' });
                       } else {
-                        const selected = user.addresses![Number(e.target.value)];
-                        setAddress({ ...selected, fullName: address.fullName || user.name, phone: address.phone || user.phone || '' });
+                        const idx = Number(val);
+                        setAddressIndex(idx);
+                        const selected = user?.addresses?.[idx];
+                        if (selected) {
+                          setAddress({ ...selected, fullName: selected.fullName || user?.name, phone: selected.phone || user?.phone || '' });
+                        }
                       }
                     }}
                   >
                     <option value="new">Add New Address</option>
-                    {user.addresses.map((a, i) => (
+                    {user?.addresses?.map((a, i) => (
                       <option key={i} value={i}>{a.line1}, {a.city}</option>
                     ))}
                   </select>
                 </Field>
-              )}
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Full Name">
@@ -223,20 +230,7 @@ export default function Checkout() {
                   <input className="input" value={address.phone} onChange={(e) => setAddress({ ...address, phone: e.target.value })} />
                 </Field>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Birthday">
-                  <input type="date" className="input" value={birthday ? birthday.split('T')[0] : ''} onChange={(e) => setBirthday(e.target.value)} />
-                </Field>
-                <Field label="Gender">
-                  <select className="input" value={gender} onChange={(e) => setGender(e.target.value)}>
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                    <option value="prefer_not_to_say">Prefer not to say</option>
-                  </select>
-                </Field>
-              </div>
+
               <Field label="Address Line 1">
                 <input className="input" value={address.line1} onChange={(e) => setAddress({ ...address, line1: e.target.value })} />
               </Field>
