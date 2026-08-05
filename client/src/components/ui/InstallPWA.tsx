@@ -13,8 +13,14 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function InstallPWA({ className }: { className?: string }) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isPWA, setIsPWA] = useState(false);
 
   useEffect(() => {
+    // Check if running as a standalone PWA
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+      setIsPWA(true);
+    }
+
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -41,11 +47,13 @@ export function InstallPWA({ className }: { className?: string }) {
     }
   };
 
+  if (isPWA) return null;
+
   return (
     <Button
       variant="secondary"
       size="sm"
-      className={`gap-2 ${className || ''}`}
+      className={`gap-2 sm:hidden ${className || ''}`}
       onClick={handleInstall}
     >
       <Download size={16} /> Install App
