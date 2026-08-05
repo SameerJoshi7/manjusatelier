@@ -206,10 +206,10 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     title = 'Wow! Your Order Has Shipped!! 🚚✨';
     body = `Great news! Your order ${order.customOrderId} is on its way to you.`;
   } else if (orderStatus === 'delivered') {
-    title = 'It\\'s Here! Your package has arrived! 🎁';
+    title = "It's Here! Your package has arrived! 🎁";
     body = `Your order ${order.customOrderId} has been delivered. Enjoy!`;
   } else if (orderStatus === 'processing') {
-    title = 'We\\'re on it! 🛠️';
+    title = "We're on it! 🛠️";
     body = `Your order ${order.customOrderId} is now being processed.`;
   } else if (orderStatus === 'confirmed') {
     title = 'Woohoo! Order Confirmed! 🎉';
