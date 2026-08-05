@@ -31,7 +31,7 @@ export const sendEmail = async (options) => {
  * @param {Array} emailsData Array of objects: { to, subject, html, text }
  */
 export const sendBatchEmail = async (emailsData) => {
-  const from = `${process.env.FROM_NAME || "Manju's Atelier"} <${process.env.EMAIL_FROM || 'help@manjusatelier.in'}>`;
+  const from = `${process.env.FROM_NAME || "Manju's Atelier"} <${process.env.PROMO_EMAIL_FROM || 'promotions@manjusatelier.in'}>`;
   
   const payload = emailsData.map((email) => ({
     from,
