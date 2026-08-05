@@ -79,6 +79,22 @@ export const getOrderShippedTemplate = (order) => `
   </div>
 `;
 
+export const getOrderDeliveredTemplate = (order) => `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #f8f5f0; padding: 20px; text-align: center;">
+      <h1 style="color: #4a3b32; margin: 0; font-size: 24px;">Manju's Atelier</h1>
+    </div>
+    <div style="padding: 30px; background-color: #ffffff;">
+      <h2 style="color: #4a3b32; margin-top: 0;">It's Here! Your package has arrived! 🎁</h2>
+      <p style="color: #666666; line-height: 1.6;">Hooray! Your order <strong>#${order.customOrderId}</strong> has been successfully delivered.</p>
+      <p style="color: #666666; line-height: 1.6;">We hope you love your handmade items! If you have a moment, we'd love it if you could leave a review.</p>
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="${process.env.CLIENT_URL || 'https://manjusatelier.in'}/account?tab=orders" style="display: inline-block; background-color: #c19b6c; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; font-size: 16px;">View Order</a>
+      </div>
+    </div>
+  </div>
+`;
+
 export const getAbandonedCartTemplate = (userName, discountCode) => `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
     <div style="background-color: #f8f5f0; padding: 20px; text-align: center;">

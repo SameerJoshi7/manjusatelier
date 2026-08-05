@@ -8,7 +8,7 @@ import { asyncHandler, ApiError } from '../middleware/error.js';
 import { getRazorpay, verifyPaymentSignature } from '../utils/razorpay.js';
 import { getSocket } from '../socket.js';
 import { sendEmail } from '../utils/sendEmail.js';
-import { getOrderReceivedTemplate, getPaymentVerifiedTemplate, getOrderShippedTemplate } from '../utils/emailTemplates.js';
+import { getOrderReceivedTemplate, getPaymentVerifiedTemplate, getOrderShippedTemplate, getOrderDeliveredTemplate } from '../utils/emailTemplates.js';
 
 /**
  * Recompute the cart total from the DATABASE (never trust client prices).
@@ -244,6 +244,16 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
       });
     } catch (err) {
       console.error('Failed to send shipped email:', err);
+    }
+  } else if (orderStatus === 'delivered' && order.user.email) {
+    try {
+      await sendEmail({
+        email: order.user.email,
+        subject: `It's Here! Your package has arrived! 🎁 - #${order.customOrderId}`,
+        html: getOrderDeliveredTemplate(order)
+      });
+    } catch (err) {
+      console.error('Failed to send delivered email:', err);
     }
   }
 
