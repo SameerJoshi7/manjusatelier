@@ -25,15 +25,21 @@ export function InstallPWA({ className }: { className?: string }) {
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setDeferredPrompt(null);
+    if (deferredPrompt) {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else {
+      // Fallback for iOS Safari and browsers that don't support the automatic prompt
+      alert(
+        'To install the app:\n\n' +
+        '• iOS Safari: Tap the "Share" icon at the bottom, then select "Add to Home Screen".\n' +
+        '• Android/Chrome: Tap the browser menu (⋮) and select "Install App" or "Add to Home screen".'
+      );
     }
   };
-
-  if (!deferredPrompt) return null;
 
   return (
     <Button

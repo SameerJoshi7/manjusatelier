@@ -27,11 +27,11 @@ export function ProductFeed() {
         </header>
 
         {/* Category Pills */}
-        <div className="mb-10 flex flex-wrap justify-center gap-3">
+        <div className="mb-8 flex overflow-x-auto gap-3 pb-4 px-4 -mx-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <Button
             variant={selectedCategory === null ? 'primary' : 'secondary'}
             size="sm"
-            className="rounded-full"
+            className="shrink-0 rounded-full"
             onClick={() => setSelectedCategory(null)}
           >
             All Items
@@ -41,7 +41,7 @@ export function ProductFeed() {
               key={cat._id}
               variant={selectedCategory === cat.slug ? 'primary' : 'secondary'}
               size="sm"
-              className="rounded-full"
+              className="shrink-0 rounded-full"
               onClick={() => setSelectedCategory(cat.slug)}
             >
               {cat.name}
