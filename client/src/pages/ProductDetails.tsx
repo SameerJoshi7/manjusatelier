@@ -123,13 +123,13 @@ export default function ProductDetails() {
       <div className="grid gap-10 lg:grid-cols-2">
         {/* Gallery */}
         <div className="flex flex-col-reverse gap-4 sm:flex-row">
-          <div className="flex gap-3 sm:flex-col">
+          <div className="flex gap-3 overflow-x-auto pb-2 sm:flex-col sm:overflow-visible sm:pb-0 scrollbar-hide">
             {product.images.map((img, i) => (
               <button
                 key={i}
                 onClick={() => setActiveImg(i)}
                 className={cn(
-                  'h-20 w-20 overflow-hidden rounded-xl border-2 transition',
+                  'h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition',
                   activeImg === i ? 'border-brown' : 'border-transparent opacity-70'
                 )}
               >
