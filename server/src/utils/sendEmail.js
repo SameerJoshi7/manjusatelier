@@ -56,6 +56,14 @@ export const sendBatchEmail = async (emailsData) => {
     
     const successful = results.filter(r => r.status === 'fulfilled').length;
     console.log(`Batch emails finished: ${successful}/${emailsData.length} sent successfully`);
+    
+    // Log detailed reasons for any failures to help with debugging
+    results.forEach((r, index) => {
+      if (r.status === 'rejected') {
+        console.error(`Email ${index + 1} to ${emailsData[index].to} failed:`, r.reason.message || r.reason);
+      }
+    });
+
     return results;
   } catch (error) {
     console.error('Error sending batch emails via Nodemailer:', error);
