@@ -25,10 +25,10 @@ export function ProductCard({ product }: ProductCardProps) {
     <motion.article
       whileHover={{ y: -4 }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className="group card-surface flex flex-row sm:flex-col overflow-hidden"
+      className="group card-surface flex flex-row sm:flex-col overflow-hidden relative"
     >
-      {/* Image Section */}
-      <div className="relative aspect-square w-[40%] shrink-0 sm:w-full overflow-hidden bg-beige/40">
+      {/* Image Section - Completely clean */}
+      <div className="relative aspect-square w-[45%] shrink-0 sm:w-full overflow-hidden bg-beige/40">
         <Link to={`/product/${product.slug}`} aria-label={product.name}>
           <LazyImage
             src={product.images[0]}
@@ -37,28 +37,6 @@ export function ProductCard({ product }: ProductCardProps) {
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         </Link>
-
-        {/* Badges */}
-        <div className="absolute left-2 top-2 flex flex-col gap-1 sm:left-3 sm:top-3">
-          {product.badges?.slice(0, 2).map((b) => (
-            <Badge key={b} type={b} />
-          ))}
-        </div>
-
-        {/* Wishlist */}
-        <button
-          onClick={() => {
-            toggle(product._id);
-            notify(wished ? 'Removed from wishlist' : 'Added to wishlist', 'info');
-          }}
-          aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
-          className="absolute right-2 top-2 grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full bg-white/90 text-brown shadow-soft backdrop-blur transition hover:scale-110"
-        >
-          <Heart
-            size={16}
-            className={cn(wished && 'fill-red-500 text-red-500 animate-heart-pop')}
-          />
-        </button>
 
         {/* Desktop Quick Actions (Hidden on Mobile) */}
         <div className="hidden absolute inset-x-3 bottom-3 sm:flex translate-y-4 gap-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
@@ -84,11 +62,35 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Details Section */}
-      <div className="flex flex-1 flex-col p-3 sm:p-4">
+      <div className="relative flex flex-1 flex-col p-3 sm:p-4">
+        {/* Desktop Wishlist */}
+        <button
+          onClick={() => {
+            toggle(product._id);
+            notify(wished ? 'Removed from wishlist' : 'Added to wishlist', 'info');
+          }}
+          aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
+          className="absolute right-3 top-3 hidden h-8 w-8 place-items-center rounded-full bg-white/50 text-brown transition hover:bg-white sm:grid"
+        >
+          <Heart
+            size={16}
+            className={cn(wished && 'fill-red-500 text-red-500 animate-heart-pop')}
+          />
+        </button>
+
+        {/* Badges moved to details area */}
+        {product.badges && product.badges.length > 0 && (
+          <div className="mb-2 flex flex-wrap gap-1">
+            {product.badges.slice(0, 2).map((b) => (
+              <Badge key={b} type={b} />
+            ))}
+          </div>
+        )}
+
         <p className="text-[10px] sm:text-xs uppercase tracking-wide text-brown/50 dark:text-beige/50">
           {categoryName(product)}
         </p>
-        <Link to={`/product/${product.slug}`} className="mt-1">
+        <Link to={`/product/${product.slug}`} className="mt-1 pr-6 sm:pr-8">
           <h3 className="font-serif text-sm sm:text-lg leading-snug text-brown-dark transition-colors group-hover:text-brown dark:text-beige line-clamp-2">
             {product.name}
           </h3>
@@ -118,7 +120,20 @@ export function ProductCard({ product }: ProductCardProps) {
            {product.inStock && <span className="text-[10px] text-forest">In Stock</span>}
         </div>
 
-        <div className="mt-auto pt-2 sm:hidden">
+        <div className="mt-auto pt-3 flex items-center gap-2 sm:hidden">
+          <button
+            onClick={() => {
+              toggle(product._id);
+              notify(wished ? 'Removed from wishlist' : 'Added to wishlist', 'info');
+            }}
+            aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
+            className="grid shrink-0 h-9 w-9 place-items-center rounded-full border border-brown/20 bg-white text-brown shadow-sm"
+          >
+            <Heart
+              size={15}
+              className={cn(wished && 'fill-red-500 text-red-500 animate-heart-pop')}
+            />
+          </button>
           <button
             onClick={() => {
               if (!product.inStock) return;
@@ -126,7 +141,7 @@ export function ProductCard({ product }: ProductCardProps) {
               notify('Added to cart');
             }}
             disabled={!product.inStock}
-            className="w-full rounded-full bg-[#FFD814] px-3 py-2 text-xs font-medium text-black shadow-sm transition hover:bg-[#F7CA00] disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-500"
+            className="flex-1 rounded-full bg-[#FFD814] px-3 py-2 text-xs font-medium text-black shadow-sm transition hover:bg-[#F7CA00] disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-500"
           >
             Add to Cart
           </button>
