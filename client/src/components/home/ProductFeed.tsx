@@ -17,9 +17,9 @@ export function ProductFeed() {
   const { data, loading: prodLoading } = useProducts(query);
 
   return (
-    <section className="section bg-beige/30 dark:bg-[#231d17]">
+    <section className="py-10 md:py-16 bg-beige/30 dark:bg-[#231d17]">
       <div className="container-x">
-        <header className="mb-10 text-center">
+        <header className="mb-6 text-center">
           <h2 className="font-serif text-3xl text-brown-dark dark:text-beige">Our Collection</h2>
           <p className="mt-2 text-sm text-brown/60 dark:text-beige/60">
             Explore all our handmade pieces or select a category below.
@@ -27,7 +27,7 @@ export function ProductFeed() {
         </header>
 
         {/* Category Pills */}
-        <div className="mb-8 flex overflow-x-auto gap-3 pb-4 px-4 -mx-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="mb-6 flex overflow-x-auto gap-3 pb-2 px-4 -mx-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <Button
             variant={selectedCategory === null ? 'primary' : 'secondary'}
             size="sm"
