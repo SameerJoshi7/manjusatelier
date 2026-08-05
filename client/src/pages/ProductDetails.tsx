@@ -139,10 +139,10 @@ export default function ProductDetails() {
           >
             <div
               id="product-carousel"
-              className="flex h-full w-full snap-x snap-mandatory overflow-x-auto scrollbar-hide"
+              className="flex h-full w-full snap-x snap-mandatory gap-4 overflow-x-auto scrollbar-hide"
               onScroll={(e) => {
                 const el = e.currentTarget;
-                const index = Math.round(el.scrollLeft / el.clientWidth);
+                const index = Math.round(el.scrollLeft / (el.clientWidth + 16));
                 if (index !== activeImg) setActiveImg(index);
               }}
             >
@@ -179,7 +179,7 @@ export default function ProductDetails() {
                     const container = document.getElementById('product-carousel');
                     if (container) {
                       container.scrollTo({
-                        left: container.clientWidth * i,
+                        left: (container.clientWidth + 16) * i,
                         behavior: 'smooth'
                       });
                     }
