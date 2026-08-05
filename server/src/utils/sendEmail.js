@@ -1,16 +1,23 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-// Initialize Resend with the API key from environment variables
-const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key');
+// Initialize Nodemailer transporter
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+  port: process.env.SMTP_PORT || 587,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS, // Brevo SMTP Key
+  },
+});
 
 /**
- * Send a single email using Resend
+ * Send a single email using Nodemailer
  */
 export const sendEmail = async (options) => {
   const from = `${process.env.FROM_NAME || "Manju's Atelier"} <${process.env.EMAIL_FROM || 'help@manjusatelier.in'}>`;
 
   try {
-    const data = await resend.emails.send({
+    const info = await transporter.sendMail({
       from,
       to: options.email,
       subject: options.subject,
@@ -18,36 +25,40 @@ export const sendEmail = async (options) => {
       html: options.html, // Optional
     });
     
-    console.log('Email sent:', data.id);
-    return data;
+    console.log('Email sent:', info.messageId);
+    return info;
   } catch (error) {
-    console.error('Error sending email via Resend:', error);
+    console.error('Error sending email via Nodemailer:', error);
     throw error;
   }
 };
 
 /**
- * Send batch emails using Resend (for promotional broadcasts)
+ * Send batch emails using Nodemailer (for promotional broadcasts)
  * @param {Array} emailsData Array of objects: { to, subject, html, text }
  */
 export const sendBatchEmail = async (emailsData) => {
   const from = `${process.env.FROM_NAME || "Manju's Atelier"} <${process.env.PROMO_EMAIL_FROM || 'promotions@manjusatelier.in'}>`;
   
-  const payload = emailsData.map((email) => ({
-    from,
-    to: email.to,
-    subject: email.subject,
-    html: email.html,
-    text: email.text,
-  }));
-
   try {
-    // Resend batch API supports up to 100 emails at a time
-    const data = await resend.batch.send(payload);
-    console.log('Batch emails sent successfully');
-    return data;
+    // Send emails concurrently using Promise.allSettled
+    const promises = emailsData.map((email) => 
+      transporter.sendMail({
+        from,
+        to: email.to,
+        subject: email.subject,
+        html: email.html,
+        text: email.text,
+      })
+    );
+    
+    const results = await Promise.allSettled(promises);
+    
+    const successful = results.filter(r => r.status === 'fulfilled').length;
+    console.log(`Batch emails finished: ${successful}/${emailsData.length} sent successfully`);
+    return results;
   } catch (error) {
-    console.error('Error sending batch emails via Resend:', error);
+    console.error('Error sending batch emails via Nodemailer:', error);
     throw error;
   }
 };
