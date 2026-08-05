@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { SectionHeading } from './SectionHeading';
 import { ProductCard } from '@/components/product/ProductCard';
-import { QuickView } from '@/components/product/QuickView';
 import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import { Reveal } from '@/components/ui/Reveal';
@@ -13,7 +12,6 @@ import type { Product } from '@/types';
 export function FeaturedProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [quick, setQuick] = useState<Product | null>(null);
 
   useEffect(() => {
     api
@@ -36,7 +34,7 @@ export function FeaturedProducts() {
           {loading
             ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
             : products.map((p) => (
-                <ProductCard key={p._id} product={p} onQuickView={setQuick} />
+                <ProductCard key={p._id} product={p} />
               ))}
         </div>
 
@@ -49,7 +47,6 @@ export function FeaturedProducts() {
         </Reveal>
       </div>
 
-      <QuickView product={quick} onClose={() => setQuick(null)} />
     </section>
   );
 }

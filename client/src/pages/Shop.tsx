@@ -6,7 +6,6 @@ import { useProducts } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { ProductCard } from '@/components/product/ProductCard';
-import { QuickView } from '@/components/product/QuickView';
 import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import { cn, formatPrice, finalPrice, categoryName } from '@/lib/utils';
@@ -31,7 +30,6 @@ export default function Shop() {
   const { categories } = useCategories();
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [quick, setQuick] = useState<Product | null>(null);
   const [maxPrice, setMaxPrice] = useState<number>(Number(params.get('maxPrice')) || 5000);
 
   usePageMeta({ title: "Shop — Manju's Atelier" });
@@ -246,7 +244,7 @@ export default function Shop() {
             view === 'grid' ? (
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:gap-6">
                 {data.products.map((p: Product) => (
-                  <ProductCard key={p._id} product={p} onQuickView={setQuick} />
+                  <ProductCard key={p._id} product={p} />
                 ))}
               </div>
             ) : (
@@ -325,7 +323,6 @@ export default function Shop() {
         )}
       </AnimatePresence>
 
-      <QuickView product={quick} onClose={() => setQuick(null)} />
     </div>
   );
 }

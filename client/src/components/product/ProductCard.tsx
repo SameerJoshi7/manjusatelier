@@ -12,10 +12,9 @@ import { useToast } from '@/components/ui/Toast';
 
 interface ProductCardProps {
   product: Product;
-  onQuickView?: (p: Product) => void;
 }
 
-export function ProductCard({ product, onQuickView }: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps) {
   const { has, toggle } = useWishlist();
   const { add } = useCart();
   const { notify } = useToast();

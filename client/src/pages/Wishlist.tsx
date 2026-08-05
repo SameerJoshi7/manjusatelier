@@ -6,7 +6,6 @@ import type { Product } from '@/types';
 import { useWishlist } from '@/context/WishlistContext';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { ProductCard } from '@/components/product/ProductCard';
-import { QuickView } from '@/components/product/QuickView';
 import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 
@@ -14,7 +13,6 @@ export default function Wishlist() {
   const { ids } = useWishlist();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [quick, setQuick] = useState<Product | null>(null);
   usePageMeta({ title: "Wishlist — Manju's Atelier" });
 
   useEffect(() => {
@@ -59,12 +57,11 @@ export default function Wishlist() {
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
           {products.map((p) => (
-            <ProductCard key={p._id} product={p} onQuickView={setQuick} />
+            <ProductCard key={p._id} product={p} />
           ))}
         </div>
       )}
 
-      <QuickView product={quick} onClose={() => setQuick(null)} />
     </div>
   );
 }

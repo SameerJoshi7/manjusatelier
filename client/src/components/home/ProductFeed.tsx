@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { useProducts } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import { ProductCard } from '@/components/product/ProductCard';
-import { QuickView } from '@/components/product/QuickView';
 import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import type { Product } from '@/types';
@@ -10,8 +9,6 @@ import type { Product } from '@/types';
 export function ProductFeed() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { categories, loading: catLoading } = useCategories();
-  const [quick, setQuick] = useState<Product | null>(null);
-
   const query = useMemo(() => ({
     category: selectedCategory || undefined,
     limit: 12,
@@ -57,7 +54,7 @@ export function ProductFeed() {
           {prodLoading
             ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
             : data?.products.map((p: Product) => (
-                <ProductCard key={p._id} product={p} onQuickView={setQuick} />
+                <ProductCard key={p._id} product={p} />
               ))}
         </div>
 
@@ -68,7 +65,6 @@ export function ProductFeed() {
         )}
 
       </div>
-      <QuickView product={quick} onClose={() => setQuick(null)} />
     </section>
   );
 }
