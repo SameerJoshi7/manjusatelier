@@ -124,10 +124,10 @@ export default function ProductDetails() {
 
       <div className="grid gap-10 lg:grid-cols-2">
         {/* Gallery */}
-        <div className="flex flex-col-reverse gap-4 sm:flex-row">
+        <div className="flex flex-col gap-4">
 
           <div
-            className="relative aspect-square flex-1 overflow-hidden rounded-2xl bg-beige/40"
+            className="relative aspect-square w-full overflow-hidden rounded-2xl bg-beige/40"
             onMouseMove={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
               setZoom({
@@ -166,33 +166,33 @@ export default function ProductDetails() {
                 <Badge key={b} type={b} />
               ))}
             </div>
-
-            {/* Pagination dots */}
-            {product.images.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
-                {product.images.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      setActiveImg(i);
-                      const container = document.getElementById('product-carousel');
-                      if (container) {
-                        container.scrollTo({
-                          left: container.clientWidth * i,
-                          behavior: 'smooth'
-                        });
-                      }
-                    }}
-                    aria-label={`Go to image ${i + 1}`}
-                    className={cn(
-                      'h-1.5 rounded-full transition-all duration-300 hover:bg-brown',
-                      activeImg === i ? 'w-5 bg-brown' : 'w-1.5 bg-brown/30'
-                    )}
-                  />
-                ))}
-              </div>
-            )}
           </div>
+
+          {/* Pagination dots */}
+          {product.images.length > 1 && (
+            <div className="flex justify-center gap-1.5">
+              {product.images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setActiveImg(i);
+                    const container = document.getElementById('product-carousel');
+                    if (container) {
+                      container.scrollTo({
+                        left: container.clientWidth * i,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
+                  aria-label={`Go to image ${i + 1}`}
+                  className={cn(
+                    'h-1.5 rounded-full transition-all duration-300 hover:bg-brown',
+                    activeImg === i ? 'w-5 bg-brown' : 'w-1.5 bg-brown/30'
+                  )}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Info */}
