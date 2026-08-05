@@ -146,20 +146,6 @@ export default function ProductDetails() {
       <div className="grid gap-10 lg:grid-cols-2">
         {/* Gallery */}
         <div className="flex flex-col-reverse gap-4 sm:flex-row">
-          <div className="hidden sm:flex gap-3 sm:flex-col sm:overflow-visible sm:pb-0 scrollbar-hide">
-            {product.images.map((img, i) => (
-              <button
-                key={i}
-                onClick={() => setActiveImg(i)}
-                className={cn(
-                  'h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition',
-                  activeImg === i ? 'border-brown' : 'border-transparent opacity-70'
-                )}
-              >
-                <img src={img} alt="" className="h-full w-full object-cover" />
-              </button>
-            ))}
-          </div>
 
           <div
             className="relative aspect-square flex-1 cursor-zoom-in overflow-hidden rounded-2xl bg-beige/40"
@@ -197,14 +183,16 @@ export default function ProductDetails() {
               ))}
             </div>
 
-            {/* Pagination dots (mobile only) */}
+            {/* Pagination dots */}
             {product.images.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5 sm:hidden">
+              <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
                 {product.images.map((_, i) => (
-                  <div
+                  <button
                     key={i}
+                    onClick={() => setActiveImg(i)}
+                    aria-label={`Go to image ${i + 1}`}
                     className={cn(
-                      'h-1.5 rounded-full transition-all duration-300',
+                      'h-1.5 rounded-full transition-all duration-300 hover:bg-brown',
                       activeImg === i ? 'w-5 bg-brown' : 'w-1.5 bg-brown/30'
                     )}
                   />
