@@ -69,9 +69,9 @@ export const getOrderShippedTemplate = (order) => `
       <h1 style="color: #4a3b32; margin: 0; font-size: 24px;">Manju's Atelier</h1>
     </div>
     <div style="padding: 30px; background-color: #ffffff;">
-      <h2 style="color: #4a3b32; margin-top: 0;">Your Order has Shipped!</h2>
-      <p style="color: #666666; line-height: 1.6;">Your order <strong>#${order.customOrderId}</strong> has been dispatched and is on its way to you.</p>
-      <p style="color: #666666; line-height: 1.6;">You can track the status of your delivery directly on your account dashboard.</p>
+      <h2 style="color: #4a3b32; margin-top: 0;">Wow! Your Order Has Shipped!! 🚚✨</h2>
+      <p style="color: #666666; line-height: 1.6;">Great news! Your order <strong>#${order.customOrderId}</strong> has been dispatched and is making its way to you right now.</p>
+      <p style="color: #666666; line-height: 1.6;">We can't wait for you to receive it! You can track the status of your delivery directly on your account dashboard.</p>
       <div style="text-align: center; margin-top: 30px;">
         <a href="${process.env.CLIENT_URL || 'https://manjusatelier.in'}/order/${order.customOrderId}" style="display: inline-block; background-color: #c19b6c; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; font-size: 16px;">Track Order</a>
       </div>

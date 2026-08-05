@@ -182,19 +182,22 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   ).populate('user', 'name email');
   if (!order) throw new ApiError(404, 'Order not found');
 
-  const title = orderStatus === 'shipped' ? 'ORDER SHIPPED' : 'Order Status Updated';
+  const title = orderStatus === 'shipped' ? 'Wow! Your Order Has Shipped!! 🚚✨' : 'Order Status Updated';
+  const body = orderStatus === 'shipped'
+    ? `Great news! Your order ${order.customOrderId} is on its way to you.`
+    : `Your order ${order.customOrderId} is now ${orderStatus}.`;
 
   await Notification.create({
     user: order.user._id,
     title,
-    message: `Your order ${order.customOrderId} is now ${orderStatus}.`,
+    message: body,
     link: `/account?tab=orders`,
   });
 
   const { sendPushToUser } = await import('../utils/push.js');
   await sendPushToUser(order.user._id, {
     title,
-    body: `Your order ${order.customOrderId} is now ${orderStatus}.`,
+    body,
     icon: '/pwa-192x192.png',
     url: '/account?tab=orders'
   });
@@ -204,7 +207,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     try {
       await sendEmail({
         email: order.user.email,
-        subject: `Your Order has Shipped! - #${order.customOrderId}`,
+        subject: `Wow! Your Order Has Shipped!! 🚚✨ - #${order.customOrderId}`,
         html: getOrderShippedTemplate(order)
       });
     } catch (err) {
