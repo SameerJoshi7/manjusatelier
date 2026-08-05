@@ -99,12 +99,29 @@ export const createOrder = asyncHandler(async (req, res) => {
     if (populatedUser && populatedUser.email) {
       await sendEmail({
         email: populatedUser.email,
-        subject: `Order Received - #${order.customOrderId}`,
+        subject: `Yay! We got your order! 🎉 - #${order.customOrderId}`,
         html: getOrderReceivedTemplate(order)
       });
     }
+
+    // In-app notification
+    await Notification.create({
+      user: req.user._id,
+      title: 'Yay! We got your order! 🎉',
+      message: `Thank you for your order #${order.customOrderId}. Please complete your UPI payment.`,
+      link: `/account?tab=orders`,
+    });
+
+    // Push notification
+    const { sendPushToUser } = await import('../utils/push.js');
+    await sendPushToUser(req.user._id, {
+      title: 'Yay! We got your order! 🎉',
+      body: `Thank you! Please submit your UTR to verify your payment.`,
+      icon: '/pwa-192x192.png',
+      url: '/account?tab=orders'
+    });
   } catch (err) {
-    console.error('Failed to send order received email:', err);
+    console.error('Failed to send order received notifications:', err);
   }
 
   res.status(201).json({
@@ -182,10 +199,25 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   ).populate('user', 'name email');
   if (!order) throw new ApiError(404, 'Order not found');
 
-  const title = orderStatus === 'shipped' ? 'Wow! Your Order Has Shipped!! 🚚✨' : 'Order Status Updated';
-  const body = orderStatus === 'shipped'
-    ? `Great news! Your order ${order.customOrderId} is on its way to you.`
-    : `Your order ${order.customOrderId} is now ${orderStatus}.`;
+  let title = 'Order Status Updated';
+  let body = `Your order ${order.customOrderId} is now ${orderStatus}.`;
+  
+  if (orderStatus === 'shipped') {
+    title = 'Wow! Your Order Has Shipped!! 🚚✨';
+    body = `Great news! Your order ${order.customOrderId} is on its way to you.`;
+  } else if (orderStatus === 'delivered') {
+    title = 'It\\'s Here! Your package has arrived! 🎁';
+    body = `Your order ${order.customOrderId} has been delivered. Enjoy!`;
+  } else if (orderStatus === 'processing') {
+    title = 'We\\'re on it! 🛠️';
+    body = `Your order ${order.customOrderId} is now being processed.`;
+  } else if (orderStatus === 'confirmed') {
+    title = 'Woohoo! Order Confirmed! 🎉';
+    body = `Your order ${order.customOrderId} has been confirmed.`;
+  } else if (orderStatus === 'cancelled') {
+    title = 'Order Cancelled 😔';
+    body = `Your order ${order.customOrderId} has been cancelled.`;
+  }
 
   await Notification.create({
     user: order.user._id,
@@ -257,14 +289,14 @@ export const verifyUtr = asyncHandler(async (req, res) => {
 
       await Notification.create({
         user: order.user._id,
-        title: 'PAYMENT CONFIRMED',
+        title: 'Woohoo! Payment Successful! 💸',
         message: `Your payment for order ${order.customOrderId} has been verified successfully.`,
         link: `/account?tab=orders`,
       });
 
       const { sendPushToUser } = await import('../utils/push.js');
       await sendPushToUser(order.user._id, {
-        title: 'PAYMENT CONFIRMED',
+        title: 'Woohoo! Payment Successful! 💸',
         body: `Your payment for order ${order.customOrderId} has been verified.`,
         icon: '/pwa-192x192.png',
         url: '/account?tab=orders'
@@ -274,7 +306,7 @@ export const verifyUtr = asyncHandler(async (req, res) => {
         try {
           await sendEmail({
             email: order.user.email,
-            subject: `Payment Verified - #${order.customOrderId}`,
+            subject: `Woohoo! Payment Successful! 💸 - #${order.customOrderId}`,
             html: getPaymentVerifiedTemplate(order)
           });
         } catch (err) {

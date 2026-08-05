@@ -40,7 +40,7 @@ export const getOrderReceivedTemplate = (order) => `
       <h1 style="color: #4a3b32; margin: 0; font-size: 24px;">Manju's Atelier</h1>
     </div>
     <div style="padding: 30px; background-color: #ffffff;">
-      <h2 style="color: #4a3b32; margin-top: 0;">Order Received!</h2>
+      <h2 style="color: #4a3b32; margin-top: 0;">Yay! We got your order! 🎉</h2>
       <p style="color: #666666; line-height: 1.6;">Thank you for your order (<strong>#${order.customOrderId}</strong>). We have received your order details.</p>
       <p style="color: #666666; line-height: 1.6;">If you haven't already, please complete your UPI payment and submit the UTR number on your account page so we can process your order.</p>
       <div style="text-align: center; margin-top: 30px;">
@@ -56,7 +56,7 @@ export const getPaymentVerifiedTemplate = (order) => `
       <h1 style="color: #4a3b32; margin: 0; font-size: 24px;">Manju's Atelier</h1>
     </div>
     <div style="padding: 30px; background-color: #ffffff;">
-      <h2 style="color: #4a3b32; margin-top: 0;">Payment Verified!</h2>
+      <h2 style="color: #4a3b32; margin-top: 0;">Woohoo! Payment Successful! 💸</h2>
       <p style="color: #666666; line-height: 1.6;">Great news! Your payment for order <strong>#${order.customOrderId}</strong> has been successfully verified.</p>
       <p style="color: #666666; line-height: 1.6;">We are now preparing your items for shipment. We will notify you as soon as they are dispatched.</p>
     </div>
