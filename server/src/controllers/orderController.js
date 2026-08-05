@@ -182,16 +182,18 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   ).populate('user', 'name email');
   if (!order) throw new ApiError(404, 'Order not found');
 
+  const title = orderStatus === 'shipped' ? 'ORDER SHIPPED' : 'Order Status Updated';
+
   await Notification.create({
     user: order.user._id,
-    title: 'Order Status Updated',
+    title,
     message: `Your order ${order.customOrderId} is now ${orderStatus}.`,
     link: `/account?tab=orders`,
   });
 
   const { sendPushToUser } = await import('../utils/push.js');
   await sendPushToUser(order.user._id, {
-    title: 'Order Status Updated',
+    title,
     body: `Your order ${order.customOrderId} is now ${orderStatus}.`,
     icon: '/pwa-192x192.png',
     url: '/account?tab=orders'
@@ -252,14 +254,14 @@ export const verifyUtr = asyncHandler(async (req, res) => {
 
       await Notification.create({
         user: order.user._id,
-        title: 'Payment Verified',
+        title: 'PAYMENT CONFIRMED',
         message: `Your payment for order ${order.customOrderId} has been verified successfully.`,
         link: `/account?tab=orders`,
       });
 
       const { sendPushToUser } = await import('../utils/push.js');
       await sendPushToUser(order.user._id, {
-        title: 'Payment Verified',
+        title: 'PAYMENT CONFIRMED',
         body: `Your payment for order ${order.customOrderId} has been verified.`,
         icon: '/pwa-192x192.png',
         url: '/account?tab=orders'
