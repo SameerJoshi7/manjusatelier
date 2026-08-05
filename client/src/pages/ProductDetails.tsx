@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart,
   Share2,
@@ -146,7 +146,7 @@ export default function ProductDetails() {
       <div className="grid gap-10 lg:grid-cols-2">
         {/* Gallery */}
         <div className="flex flex-col-reverse gap-4 sm:flex-row">
-          <div className="flex gap-3 overflow-x-auto pb-2 sm:flex-col sm:overflow-visible sm:pb-0 scrollbar-hide">
+          <div className="hidden sm:flex gap-3 sm:flex-col sm:overflow-visible sm:pb-0 scrollbar-hide">
             {product.images.map((img, i) => (
               <button
                 key={i}
@@ -174,21 +174,43 @@ export default function ProductDetails() {
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
-            <img
-              src={product.images[activeImg]}
-              alt={product.name}
-              className="h-full w-full object-cover transition-transform duration-200"
-              style={
-                zoom
-                  ? { transform: 'scale(1.8)', transformOrigin: `${zoom.x}% ${zoom.y}%` }
-                  : undefined
-              }
-            />
-            <div className="absolute left-3 top-3 flex flex-col gap-1.5">
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={activeImg}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                src={product.images[activeImg]}
+                alt={product.name}
+                className="h-full w-full object-cover transition-transform duration-200"
+                style={
+                  zoom
+                    ? { transform: 'scale(1.8)', transformOrigin: `${zoom.x}% ${zoom.y}%` }
+                    : undefined
+                }
+              />
+            </AnimatePresence>
+            <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
               {product.badges?.map((b) => (
                 <Badge key={b} type={b} />
               ))}
             </div>
+
+            {/* Pagination dots (mobile only) */}
+            {product.images.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5 sm:hidden">
+                {product.images.map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      'h-1.5 rounded-full transition-all duration-300',
+                      activeImg === i ? 'w-5 bg-brown' : 'w-1.5 bg-brown/30'
+                    )}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
