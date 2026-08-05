@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, X, Upload, Package } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Upload, Package, Eye } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatPrice, finalPrice, cn } from '@/lib/utils';
 import { useCategories } from '@/hooks/useCategories';
@@ -185,7 +185,7 @@ function ProductForm({
 }) {
   const { notify } = useToast();
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [form, setForm] = useState<FormState>(() =>
     product
       ? {
@@ -209,28 +209,32 @@ function ProductForm({
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    if (form.images.length + files.length > 6) {
-      return notify('Maximum 6 images allowed per product', 'error');
-    }
-    setUploading(true);
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingIndex(index);
     try {
-      const uploadedUrls = [];
-      for (const file of files) {
-        const fd = new FormData();
-        fd.append('image', file);
-        const { url } = await api.upload<{ url: string }>('/admin/upload', fd);
-        uploadedUrls.push(url);
-      }
-      set('images', [...form.images, ...uploadedUrls]);
-      notify(`${files.length} image(s) uploaded`);
+      const fd = new FormData();
+      fd.append('image', file);
+      const { url } = await api.upload<{ url: string }>('/admin/upload', fd);
+      
+      const newImages = [...form.images];
+      newImages[index] = url;
+      set('images', newImages);
+      notify('Image uploaded');
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Upload failed', 'error');
     } finally {
-      setUploading(false);
+      setUploadingIndex(null);
+      e.target.value = '';
     }
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = [...form.images];
+    newImages.splice(index, 1);
+    set('images', newImages);
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -248,7 +252,7 @@ function ProductForm({
       dimensions: form.dimensions,
       color: form.color,
       description: form.description,
-      images: form.images,
+      images: form.images.filter(Boolean),
       badges: form.badges,
       featured: form.featured,
     };
@@ -283,35 +287,72 @@ function ProductForm({
         </div>
 
         <form onSubmit={submit} className="space-y-4">
-          {/* Image */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-4">
-              <div>
-                <label className="btn cursor-pointer border border-brown/30 px-4 py-2 text-sm text-brown hover:bg-brown/10">
-                  <Upload size={15} /> {uploading ? 'Uploading…' : 'Upload images'}
-                  <input type="file" multiple accept="image/*" className="hidden" onChange={onFile} />
-                </label>
-                <p className="mt-1.5 text-xs text-brown/50 dark:text-beige/50">
-                  Select up to 6 images (JPG, PNG, WEBP).
-                </p>
-              </div>
-            </div>
-            {form.images.length > 0 && (
-              <div className="flex flex-wrap gap-3">
-                {form.images.map((img, i) => (
-                  <div key={i} className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-brown/10 bg-beige/40">
-                    <img src={img} alt="" className="h-full w-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => set('images', form.images.filter((_, idx) => idx !== i))}
-                      className="absolute right-1 top-1 rounded-full bg-red-500 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
-                    >
-                      <X size={12} />
-                    </button>
+          {/* Image Grid */}
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-brown-dark dark:text-beige">Product Images</span>
+            <p className="text-xs text-brown/50 dark:text-beige/50">
+              Upload up to 6 images. First image will be the cover.
+            </p>
+            <div className="mt-2 grid grid-cols-3 gap-3 sm:grid-cols-6">
+              {Array.from({ length: 6 }).map((_, i) => {
+                const img = form.images[i];
+                return (
+                  <div key={i} className="group relative aspect-square overflow-hidden rounded-xl border border-brown/20 bg-beige/10">
+                    {img ? (
+                      <>
+                        <img src={img} alt="" className={cn("h-full w-full object-cover", uploadingIndex === i && "opacity-50 blur-sm")} />
+                        {uploadingIndex === i ? (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-brown border-t-transparent" />
+                          </div>
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/60 opacity-0 backdrop-blur-[2px] transition-all duration-200 group-hover:opacity-100">
+                            <button
+                              type="button"
+                              onClick={() => window.open(img, '_blank')}
+                              className="rounded-full bg-white/20 p-1.5 text-white transition-colors hover:bg-white/40"
+                              title="View image"
+                            >
+                              <Eye size={14} />
+                            </button>
+                            <label
+                              className="cursor-pointer rounded-full bg-white/20 p-1.5 text-white transition-colors hover:bg-white/40"
+                              title="Replace image"
+                            >
+                              <Upload size={14} />
+                              <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, i)} />
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => removeImage(i)}
+                              className="rounded-full bg-red-500/80 p-1.5 text-white transition-colors hover:bg-red-500"
+                              title="Remove image"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <label className={cn(
+                        "flex h-full w-full cursor-pointer flex-col items-center justify-center text-brown/40 transition-colors",
+                        uploadingIndex === i ? "bg-beige/20" : "hover:bg-beige/30 hover:text-brown"
+                      )}>
+                        {uploadingIndex === i ? (
+                           <div className="h-5 w-5 animate-spin rounded-full border-2 border-brown border-t-transparent" />
+                        ) : (
+                          <>
+                            <Plus size={24} />
+                            <span className="mt-1 text-[10px] font-medium uppercase tracking-wider">Add</span>
+                          </>
+                        )}
+                        <input type="file" accept="image/*" disabled={uploadingIndex !== null} className="hidden" onChange={(e) => handleImageUpload(e, i)} />
+                      </label>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
+                );
+              })}
+            </div>
           </div>
 
           <Field label="Name">
@@ -394,7 +435,7 @@ function ProductForm({
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={saving || uploading}>
+            <Button type="submit" disabled={saving || uploadingIndex !== null}>
               {saving ? 'Saving…' : product ? 'Save changes' : 'Create product'}
             </Button>
           </div>
