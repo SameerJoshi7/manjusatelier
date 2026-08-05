@@ -1,24 +1,16 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-// Initialize Nodemailer transporter for Gmail
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.SMTP_USER, // Your Gmail address
-    pass: process.env.SMTP_PASS, // Your 16-character App Password
-  },
-});
+// Initialize Resend with the API key from environment variables
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key');
 
 /**
- * Send a single email using Nodemailer (Gmail)
+ * Send a single email using Resend
  */
 export const sendEmail = async (options) => {
-  // Gmail will automatically rewrite the sender address to match SMTP_USER, 
-  // but we can still set the display name.
-  const from = `${process.env.FROM_NAME || "Manju's Atelier"} <${process.env.SMTP_USER || 'manjusatelier@gmail.com'}>`;
+  const from = `${process.env.FROM_NAME || "Manju's Atelier"} <${process.env.EMAIL_FROM || 'help@manjusatelier.in'}>`;
 
   try {
-    const info = await transporter.sendMail({
+    const data = await resend.emails.send({
       from,
       to: options.email,
       subject: options.subject,
@@ -26,48 +18,36 @@ export const sendEmail = async (options) => {
       html: options.html, // Optional
     });
     
-    console.log('Email sent:', info.messageId);
-    return info;
+    console.log('Email sent via Resend:', data.id);
+    return data;
   } catch (error) {
-    console.error('Error sending email via Gmail:', error);
+    console.error('Error sending email via Resend:', error);
     throw error;
   }
 };
 
 /**
- * Send batch emails using Nodemailer (Gmail)
+ * Send batch emails using Resend (for promotional broadcasts)
  * @param {Array} emailsData Array of objects: { to, subject, html, text }
  */
 export const sendBatchEmail = async (emailsData) => {
-  const from = `${process.env.FROM_NAME || "Manju's Atelier"} <${process.env.SMTP_USER || 'manjusatelier@gmail.com'}>`;
+  const from = `${process.env.FROM_NAME || "Manju's Atelier"} <${process.env.PROMO_EMAIL_FROM || 'promotions@manjusatelier.in'}>`;
   
-  try {
-    // Send emails concurrently using Promise.allSettled
-    const promises = emailsData.map((email) => 
-      transporter.sendMail({
-        from,
-        to: email.to,
-        subject: email.subject,
-        html: email.html,
-        text: email.text,
-      })
-    );
-    
-    const results = await Promise.allSettled(promises);
-    
-    const successful = results.filter(r => r.status === 'fulfilled').length;
-    console.log(`Batch emails finished: ${successful}/${emailsData.length} sent successfully`);
-    
-    // Log detailed reasons for any failures
-    results.forEach((r, index) => {
-      if (r.status === 'rejected') {
-        console.error(`Email ${index + 1} to ${emailsData[index].to} failed:`, r.reason.message || r.reason);
-      }
-    });
+  const payload = emailsData.map((email) => ({
+    from,
+    to: email.to,
+    subject: email.subject,
+    html: email.html,
+    text: email.text,
+  }));
 
-    return results;
+  try {
+    // Resend batch API supports up to 100 emails at a time
+    const data = await resend.batch.send(payload);
+    console.log('Batch emails sent via Resend successfully');
+    return data;
   } catch (error) {
-    console.error('Error sending batch emails via Gmail:', error);
+    console.error('Error sending batch emails via Resend:', error);
     throw error;
   }
 };
