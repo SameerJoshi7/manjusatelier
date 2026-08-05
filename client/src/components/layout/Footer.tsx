@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+// import { useState } from 'react';
 import { Instagram, Facebook, Mail, MapPin, Phone } from 'lucide-react';
 
 const XIcon = ({ size = 16 }: { size?: number }) => (
@@ -17,8 +17,8 @@ const XIcon = ({ size = 16 }: { size?: number }) => (
     <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
   </svg>
 );
-import { Button } from '@/components/ui/Button';
-import { useToast } from '@/components/ui/Toast';
+// import { Button } from '@/components/ui/Button';
+// import { useToast } from '@/components/ui/Toast';
 
 const columns = [
   {
@@ -50,6 +50,7 @@ const columns = [
 ];
 
 export function Footer() {
+  /*
   const { notify } = useToast();
   const [email, setEmail] = useState('');
 
@@ -60,6 +61,7 @@ export function Footer() {
       setEmail('');
     }
   };
+  */
 
   return (
     <footer className="mt-20 bg-brown-dark text-beige">
