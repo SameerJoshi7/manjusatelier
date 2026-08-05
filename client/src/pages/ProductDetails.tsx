@@ -126,20 +126,10 @@ export default function ProductDetails() {
         {/* Gallery */}
         <div className="flex flex-col gap-4">
 
-          <div
-            className="relative aspect-square w-full overflow-hidden rounded-2xl bg-beige/40"
-            onMouseMove={(e) => {
-              const r = e.currentTarget.getBoundingClientRect();
-              setZoom({
-                x: ((e.clientX - r.left) / r.width) * 100,
-                y: ((e.clientY - r.top) / r.height) * 100,
-              });
-            }}
-            onMouseLeave={() => setZoom(null)}
-          >
+          <div className="relative w-full">
             <div
               id="product-carousel"
-              className="flex h-full w-full snap-x snap-mandatory gap-4 overflow-x-auto scrollbar-hide"
+              className="flex w-full snap-x snap-mandatory gap-4 overflow-x-auto scrollbar-hide pb-2"
               onScroll={(e) => {
                 const el = e.currentTarget;
                 const index = Math.round(el.scrollLeft / (el.clientWidth + 16));
@@ -147,11 +137,22 @@ export default function ProductDetails() {
               }}
             >
               {product.images.map((img, i) => (
-                <div key={i} className="relative h-full w-full shrink-0 snap-center cursor-zoom-in overflow-hidden">
+                <div
+                  key={i}
+                  className="relative aspect-square w-full shrink-0 snap-center overflow-hidden rounded-2xl bg-beige/40"
+                  onMouseMove={(e) => {
+                    const r = e.currentTarget.getBoundingClientRect();
+                    setZoom({
+                      x: ((e.clientX - r.left) / r.width) * 100,
+                      y: ((e.clientY - r.top) / r.height) * 100,
+                    });
+                  }}
+                  onMouseLeave={() => setZoom(null)}
+                >
                   <img
                     src={img}
                     alt={`${product.name} ${i + 1}`}
-                    className="h-full w-full object-cover transition-transform duration-200"
+                    className="h-full w-full cursor-zoom-in object-cover transition-transform duration-200"
                     style={
                       zoom && activeImg === i
                         ? { transform: 'scale(1.8)', transformOrigin: `${zoom.x}% ${zoom.y}%` }
@@ -161,7 +162,8 @@ export default function ProductDetails() {
                 </div>
               ))}
             </div>
-            <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
+
+            <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-1.5">
               {product.badges?.map((b) => (
                 <Badge key={b} type={b} />
               ))}
