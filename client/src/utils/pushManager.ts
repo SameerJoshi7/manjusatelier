@@ -41,6 +41,12 @@ export async function subscribeToPushNotifications() {
 
   const applicationServerKey = urlBase64ToUint8Array(publicKey);
 
+  // Unsubscribe from any existing subscription to ensure we use the new VAPID key
+  const existingSubscription = await registration.pushManager.getSubscription();
+  if (existingSubscription) {
+    await existingSubscription.unsubscribe();
+  }
+
   // 2. Subscribe to the push manager
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
