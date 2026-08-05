@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -45,6 +45,29 @@ export default function ProductDetails() {
   const { has, toggle } = useWishlist();
   const { user } = useAuth();
   const { notify } = useToast();
+
+  const touchStartX = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || !product) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX;
+
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        // Swiped left -> Next image
+        setActiveImg((prev) => Math.min(product.images.length - 1, prev + 1));
+      } else {
+        // Swiped right -> Previous image
+        setActiveImg((prev) => Math.max(0, prev - 1));
+      }
+    }
+    touchStartX.current = null;
+  };
 
   usePageMeta({
     title: product ? `${product.name} — Manju's Atelier` : 'Loading…',
@@ -148,6 +171,8 @@ export default function ProductDetails() {
               });
             }}
             onMouseLeave={() => setZoom(null)}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
           >
             <img
               src={product.images[activeImg]}
