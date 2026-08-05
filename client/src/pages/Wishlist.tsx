@@ -37,7 +37,7 @@ export default function Wishlist() {
       </h1>
 
       {loading ? (
-        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
@@ -55,7 +55,7 @@ export default function Wishlist() {
           </Link>
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:gap-6">
           {products.map((p) => (
             <ProductCard key={p._id} product={p} />
           ))}
