@@ -81,6 +81,7 @@ export function Footer() {
             intention, and a story worth sharing.
           </p>
 
+          {/* 
           <form onSubmit={subscribe} className="mt-6 max-w-sm">
             <label htmlFor="newsletter" className="text-sm font-medium text-cream">
               Join our newsletter
@@ -100,6 +101,7 @@ export function Footer() {
               </Button>
             </div>
           </form>
+          */}
         </div>
 
         {/* Link columns */}

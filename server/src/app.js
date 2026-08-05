@@ -20,6 +20,7 @@ import placeholderRoutes from './routes/placeholderRoutes.js';
 import adminRoutes, { uploadDir } from './routes/adminRoutes.js';
 import settingRoutes from './routes/settingRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import pushRoutes from './routes/pushRoutes.js';
 
 export function createApp() {
   const app = express();
@@ -80,6 +81,7 @@ export function createApp() {
   app.use('/api/admin', adminRoutes);
   app.use('/api/settings', settingRoutes);
   app.use('/api/notifications', notificationRoutes);
+  app.use('/api/push', pushRoutes);
 
   // --- Errors ---
   app.use(notFound);

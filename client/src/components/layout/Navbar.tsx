@@ -23,6 +23,8 @@ import { useTheme } from '@/context/ThemeContext';
 import { useNotifications } from '@/context/NotificationContext';
 import { useCategories } from '@/hooks/useCategories';
 import { InstallPWA } from '@/components/ui/InstallPWA';
+import { useToast } from '@/components/ui/Toast';
+import { requestNotificationPermission, subscribeToPushNotifications } from '@/utils/pushManager';
 
 const navLinks = [
   { to: '/', label: 'Home' },
@@ -50,6 +52,28 @@ export function Navbar() {
   const { theme, toggle } = useTheme();
   const { categories } = useCategories();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { notify } = useToast();
+
+  const [pushSupported] = useState('serviceWorker' in navigator && 'PushManager' in window);
+  const [pushPermission, setPushPermission] = useState(
+    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+  );
+
+  const handleEnablePush = async () => {
+    try {
+      const perm = await requestNotificationPermission();
+      setPushPermission(perm);
+      if (perm === 'granted') {
+        await subscribeToPushNotifications();
+        notify('Push notifications enabled!');
+      } else {
+        notify('Notification permission denied', 'error');
+      }
+    } catch (err: any) {
+      console.error(err);
+      notify(err.message || 'Failed to enable notifications', 'error');
+    }
+  };
 
   const isHome = location.pathname === '/';
   const showHero = isHome && !localStorage.getItem('hasSeenHero');
@@ -210,6 +234,19 @@ export function Navbar() {
               {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
             </IconButton>
           </div>
+
+          {pushSupported && pushPermission !== 'granted' && (
+            <div className="hidden md:block">
+              <IconButton 
+                label="Enable Push Notifications" 
+                transparent={transparent} 
+                onClick={handleEnablePush}
+                title="Enable Push Notifications"
+              >
+                <Bell size={20} className="animate-pulse text-gold" />
+              </IconButton>
+            </div>
+          )}
 
           <Link to="/wishlist" className="relative hidden md:block">
             <IconButton label="Wishlist" transparent={transparent}>
@@ -404,13 +441,20 @@ export function Navbar() {
                 </li>
               ))}
               <li className="mt-2 border-t border-brown/10 pt-2 flex gap-2 px-4 pb-2">
-                 <button onClick={() => { toggle(); setMobileOpen(false); }} className="flex-1 rounded-xl bg-beige/20 dark:bg-beige/5 py-2 text-center text-brown-dark dark:text-beige flex items-center justify-center gap-2">
+                  <button onClick={() => { toggle(); setMobileOpen(false); }} className="flex-1 rounded-xl bg-beige/20 dark:bg-beige/5 py-2 text-center text-brown-dark dark:text-beige flex items-center justify-center gap-2">
                    {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />} {theme === 'dark' ? 'Dark Theme' : 'Light Theme'}
                  </button>
                  <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="flex-1 rounded-xl bg-beige/20 dark:bg-beige/5 py-2 text-center text-brown-dark dark:text-beige flex items-center justify-center gap-2">
                    <Heart size={16} /> Wishlist
                  </Link>
               </li>
+              {pushSupported && pushPermission !== 'granted' && (
+                <li className="px-4 pb-2">
+                  <button onClick={handleEnablePush} className="w-full rounded-xl bg-gold/20 py-2 text-center text-brown-dark dark:text-beige flex items-center justify-center gap-2 font-medium">
+                    <Bell size={16} className="text-gold" /> Enable Notifications
+                  </button>
+                </li>
+              )}
               {user ? (
                 <li className="border-t border-brown/10 pt-2">
                   <button

@@ -1,6 +1,7 @@
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
+import PushSubscription from '../models/PushSubscription.js';
 import { asyncHandler } from '../middleware/error.js';
 
 const LOW_STOCK_THRESHOLD = 5;
@@ -52,7 +53,7 @@ export const uploadImage = asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, url: req.file.path });
 });
 
-/** POST /api/admin/marketing/broadcast — Send a promotional email to all opted-in users. */
+/** POST /api/admin/marketing/broadcast — Send a promotional email and push to all opted-in users. */
 export const sendBroadcastEmail = asyncHandler(async (req, res) => {
   const { title, content, couponCode, discountPercentage } = req.body;
 
@@ -60,36 +61,54 @@ export const sendBroadcastEmail = asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: 'Title and content are required' });
   }
 
-  // Dynamically import the email utility and templates
-  const { sendBatchEmail } = await import('../utils/sendEmail.js');
-  const { getPromotionalTemplate } = await import('../utils/emailTemplates.js');
+  // Fetch all users who opted in and all push subscriptions concurrently
+  const [users, pushSubscriptions] = await Promise.all([
+    User.find({ 'emailPreferences.promotional': true }).select('email'),
+    PushSubscription.find()
+  ]);
 
-  // Fetch all users who have opted into promotional emails
-  const users = await User.find({ 'emailPreferences.promotional': true }).select('email');
-
-  if (users.length === 0) {
-    return res.json({ success: true, message: 'No opted-in users found' });
+  if (users.length === 0 && pushSubscriptions.length === 0) {
+    return res.json({ success: true, message: 'No opted-in users or push subscribers found' });
   }
 
-  const html = getPromotionalTemplate(title, content, couponCode, discountPercentage);
+  // 1. Send Emails
+  if (users.length > 0) {
+    const { sendBatchEmail } = await import('../utils/sendEmail.js');
+    const { getPromotionalTemplate } = await import('../utils/emailTemplates.js');
+    
+    const html = getPromotionalTemplate(title, content, couponCode, discountPercentage);
+    const emailsData = users.map((user) => ({
+      to: user.email,
+      subject: title,
+      html,
+      text: content,
+    }));
 
-  const emailsData = users.map((user) => ({
-    to: user.email,
-    subject: title,
-    html,
-    text: content, // Plain text fallback
-  }));
+    const chunkSize = 100;
+    for (let i = 0; i < emailsData.length; i += chunkSize) {
+      const chunk = emailsData.slice(i, i + chunkSize);
+      await sendBatchEmail(chunk);
+    }
+  }
 
-  // Chunk array into chunks of 100 (Resend limit)
-  const chunkSize = 100;
-  for (let i = 0; i < emailsData.length; i += chunkSize) {
-    const chunk = emailsData.slice(i, i + chunkSize);
-    await sendBatchEmail(chunk);
+  // 2. Send Push Notifications
+  if (pushSubscriptions.length > 0) {
+    const { sendBatchPushNotification } = await import('../utils/push.js');
+    
+    // Construct the notification payload
+    const pushPayload = {
+      title,
+      body: content,
+      icon: '/pwa-192x192.png',
+      url: '/shop'
+    };
+    
+    // Fire and forget (or await it). We await to ensure we don't end request prematurely
+    await sendBatchPushNotification(pushSubscriptions, pushPayload);
   }
 
   res.json({
     success: true,
-    message: `Broadcast sent successfully to ${users.length} users`,
-    count: users.length,
+    message: `Broadcast sent successfully (Emails: ${users.length}, Push: ${pushSubscriptions.length})`,
   });
 });

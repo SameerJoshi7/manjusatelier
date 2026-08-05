@@ -189,6 +189,14 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     link: `/account?tab=orders`,
   });
 
+  const { sendPushToUser } = await import('../utils/push.js');
+  await sendPushToUser(order.user._id, {
+    title: 'Order Status Updated',
+    body: `Your order ${order.customOrderId} is now ${orderStatus}.`,
+    icon: '/pwa-192x192.png',
+    url: '/account?tab=orders'
+  });
+
   // Send email if shipped
   if (orderStatus === 'shipped' && order.user.email) {
     try {
@@ -249,6 +257,14 @@ export const verifyUtr = asyncHandler(async (req, res) => {
         link: `/account?tab=orders`,
       });
 
+      const { sendPushToUser } = await import('../utils/push.js');
+      await sendPushToUser(order.user._id, {
+        title: 'Payment Verified',
+        body: `Your payment for order ${order.customOrderId} has been verified.`,
+        icon: '/pwa-192x192.png',
+        url: '/account?tab=orders'
+      });
+
       if (order.user.email) {
         try {
           await sendEmail({
@@ -272,6 +288,14 @@ export const verifyUtr = asyncHandler(async (req, res) => {
           title: 'UTR Rejected',
           message: `The UTR for order ${order.customOrderId} was rejected. Please check and enter the correct UTR (you have one edit left).`,
           link: `/account?tab=orders`,
+        });
+
+        const { sendPushToUser } = await import('../utils/push.js');
+        await sendPushToUser(order.user._id, {
+          title: 'Action Required: UTR Rejected',
+          body: `The UTR for order ${order.customOrderId} was rejected. Please update it.`,
+          icon: '/pwa-192x192.png',
+          url: '/account?tab=orders'
         });
       } else {
         // Second rejection: cancel order
