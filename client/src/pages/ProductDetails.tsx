@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   RefreshCw,
   ChevronRight,
+  ChevronLeft,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Product, Review } from '@/types';
@@ -156,6 +157,46 @@ export default function ProductDetails() {
                 <Badge key={b} type={b} />
               ))}
             </div>
+
+            {/* Navigation Arrows */}
+            {product.images.length > 1 && (
+              <>
+                <button
+                  onClick={() => {
+                    const next = Math.max(0, activeImg - 1);
+                    setActiveImg(next);
+                    const container = document.getElementById('product-carousel');
+                    if (container) {
+                      container.scrollTo({ left: (container.clientWidth + 16) * next, behavior: 'smooth' });
+                    }
+                  }}
+                  className={cn(
+                    "absolute left-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/40 p-2 text-brown opacity-60 backdrop-blur-md transition-all hover:bg-white hover:opacity-100",
+                    activeImg === 0 && "hidden"
+                  )}
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button
+                  onClick={() => {
+                    const next = Math.min(product.images.length - 1, activeImg + 1);
+                    setActiveImg(next);
+                    const container = document.getElementById('product-carousel');
+                    if (container) {
+                      container.scrollTo({ left: (container.clientWidth + 16) * next, behavior: 'smooth' });
+                    }
+                  }}
+                  className={cn(
+                    "absolute right-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/40 p-2 text-brown opacity-60 backdrop-blur-md transition-all hover:bg-white hover:opacity-100",
+                    activeImg === product.images.length - 1 && "hidden"
+                  )}
+                  aria-label="Next image"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </>
+            )}
           </div>
 
           {/* Pagination dots */}
@@ -402,7 +443,7 @@ export default function ProductDetails() {
               }}
             >
               {product.images.map((img, i) => (
-                <div key={i} className="flex h-full w-full shrink-0 snap-center items-center justify-center p-4">
+                <div key={i} className="flex h-full w-full shrink-0 snap-center items-center justify-center p-4 relative">
                   <img
                     src={img}
                     alt={`${product.name} ${i + 1}`}
@@ -411,6 +452,46 @@ export default function ProductDetails() {
                 </div>
               ))}
             </div>
+
+            {/* Lightbox Navigation Arrows */}
+            {product.images.length > 1 && (
+              <>
+                <button
+                  onClick={() => {
+                    const next = Math.max(0, activeImg - 1);
+                    setActiveImg(next);
+                    const container = document.getElementById('lightbox-carousel');
+                    if (container) {
+                      container.scrollTo({ left: container.clientWidth * next, behavior: 'smooth' });
+                    }
+                  }}
+                  className={cn(
+                    "absolute left-4 top-1/2 -translate-y-1/2 z-50 rounded-full bg-white/10 p-3 text-white opacity-50 backdrop-blur-md transition-all hover:bg-white/30 hover:opacity-100",
+                    activeImg === 0 && "hidden"
+                  )}
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft size={32} />
+                </button>
+                <button
+                  onClick={() => {
+                    const next = Math.min(product.images.length - 1, activeImg + 1);
+                    setActiveImg(next);
+                    const container = document.getElementById('lightbox-carousel');
+                    if (container) {
+                      container.scrollTo({ left: container.clientWidth * next, behavior: 'smooth' });
+                    }
+                  }}
+                  className={cn(
+                    "absolute right-4 top-1/2 -translate-y-1/2 z-50 rounded-full bg-white/10 p-3 text-white opacity-50 backdrop-blur-md transition-all hover:bg-white/30 hover:opacity-100",
+                    activeImg === product.images.length - 1 && "hidden"
+                  )}
+                  aria-label="Next image"
+                >
+                  <ChevronRight size={32} />
+                </button>
+              </>
+            )}
 
             {/* Pagination dots for lightbox */}
             {product.images.length > 1 && (
