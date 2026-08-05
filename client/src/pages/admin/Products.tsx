@@ -306,7 +306,7 @@ function ProductForm({
                             <div className="h-5 w-5 animate-spin rounded-full border-2 border-brown border-t-transparent" />
                           </div>
                         ) : (
-                          <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/60 opacity-0 backdrop-blur-[2px] transition-all duration-200 group-hover:opacity-100">
+                          <div className="absolute inset-0 flex flex-wrap items-center justify-center gap-1 bg-black/40 opacity-100 backdrop-blur-[2px] transition-all duration-200 lg:gap-1.5 lg:bg-black/60 lg:opacity-0 lg:group-hover:opacity-100">
                             <button
                               type="button"
                               onClick={() => window.open(img, '_blank')}

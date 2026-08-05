@@ -61,15 +61,13 @@ export function ProductCard({ product, onQuickView }: ProductCardProps) {
         </button>
 
         {/* Quick actions */}
-        <div className="absolute inset-x-3 bottom-3 flex translate-y-4 gap-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          {onQuickView && (
-            <button
-              onClick={() => onQuickView(product)}
-              className="btn flex-1 bg-white/95 py-2.5 text-sm text-brown backdrop-blur hover:bg-white"
-            >
-              <Eye size={16} /> Quick View
-            </button>
-          )}
+        <div className="absolute inset-x-2 bottom-2 flex translate-y-0 gap-2 opacity-100 transition-all duration-300 lg:inset-x-3 lg:bottom-3 lg:translate-y-4 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100">
+          <Link
+            to={`/product/${product.slug}`}
+            className="btn flex-1 bg-white/95 py-2 px-2 text-xs text-brown backdrop-blur hover:bg-white sm:py-2.5 sm:px-3 sm:text-sm"
+          >
+            <Eye size={16} /> <span className="hidden sm:inline">View Details</span>
+          </Link>
           <button
             onClick={() => {
               if (!product.inStock) return;
@@ -78,7 +76,7 @@ export function ProductCard({ product, onQuickView }: ProductCardProps) {
             }}
             disabled={!product.inStock}
             aria-label="Add to cart"
-            className="btn bg-brown px-3 py-2.5 text-cream hover:bg-brown-dark"
+            className="btn bg-brown px-3 py-2 text-cream hover:bg-brown-dark sm:py-2.5"
           >
             <ShoppingBag size={16} />
           </button>
