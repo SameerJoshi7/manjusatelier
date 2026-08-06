@@ -25,7 +25,7 @@ Analyze this product image and generate a structured JSON object containing:
 Return ONLY the raw JSON object. Do not include markdown code blocks or any other text.`;
 
     const response = await groq.chat.completions.create({
-      model: 'llama-3.2-11b-vision-preview',
+      model: 'qwen/qwen3.6-27b',
       messages: [
         {
           role: 'user',
