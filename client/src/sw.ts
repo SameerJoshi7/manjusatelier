@@ -20,7 +20,7 @@ self.addEventListener('push', (event) => {
 
   console.log('Push event received with data:', event.data.text());
   
-  let data = {};
+  let data: any = {};
   try {
     data = event.data.json();
   } catch (err) {
