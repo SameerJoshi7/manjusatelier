@@ -235,14 +235,16 @@ export default function Shop() {
 
           {/* Results */}
           {loading ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            <div className="columns-1 sm:columns-2 md:columns-3 gap-4 lg:gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
-                <ProductCardSkeleton key={i} />
+                <div key={i} className="break-inside-avoid mb-4 sm:mb-6">
+                  <ProductCardSkeleton />
+                </div>
               ))}
             </div>
           ) : data && data.products.length > 0 ? (
             view === 'grid' ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:gap-6">
+              <div className="columns-1 sm:columns-2 md:columns-3 gap-4 lg:gap-6">
                 {data.products.map((p: Product) => (
                   <ProductCard key={p._id} product={p} />
                 ))}
