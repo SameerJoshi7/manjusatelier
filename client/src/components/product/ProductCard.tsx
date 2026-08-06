@@ -25,16 +25,16 @@ export function ProductCard({ product }: ProductCardProps) {
     <motion.article
       whileHover={{ y: -4 }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className="group card-surface flex flex-col overflow-hidden relative break-inside-avoid mb-4 sm:mb-6"
+      className="group card-surface flex flex-row sm:flex-col overflow-hidden relative"
     >
-      {/* Image Section */}
-      <div className="relative w-full overflow-hidden bg-beige/40">
+      {/* Image Section - Completely clean */}
+      <div className="relative aspect-square w-[45%] shrink-0 sm:w-full overflow-hidden bg-beige/40">
         <Link to={`/product/${product.slug}`} aria-label={product.name}>
           <LazyImage
             src={product.images[0]}
             alt={product.name}
-            wrapperClassName="w-full"
-            className="w-full object-cover transition-transform duration-700 group-hover:scale-110"
+            wrapperClassName="h-full w-full"
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         </Link>
 

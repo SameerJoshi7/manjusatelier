@@ -47,13 +47,11 @@ export function QuickView({ product, onClose }: QuickViewProps) {
               <X size={18} />
             </button>
 
-            <div className="flex w-full items-center justify-center rounded-xl bg-beige/10">
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className="max-h-[50vh] w-auto max-w-full rounded-xl object-contain md:max-h-[60vh]"
-              />
-            </div>
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="aspect-square w-full rounded-xl object-cover"
+            />
 
             <div className="flex flex-col">
               <div className="flex gap-1.5">
