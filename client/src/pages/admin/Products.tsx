@@ -262,6 +262,7 @@ function ProductForm({
           ...prev,
           name: prev.name || data.name || '',
           description: prev.description || data.description || '',
+          category: prev.category || data.category || '',
           badges: newBadges
         };
       });
