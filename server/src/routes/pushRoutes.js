@@ -93,4 +93,9 @@ router.get('/vapid-public-key', (req, res) => {
   });
 });
 
+import { recentPushErrors } from '../utils/push.js';
+router.get('/errors', (req, res) => {
+  res.status(200).json({ success: true, errors: recentPushErrors });
+});
+
 export default router;

@@ -4,6 +4,9 @@ import PushSubscription from '../models/PushSubscription.js';
 const publicVapidKey = process.env.VAPID_PUBLIC_KEY;
 const privateVapidKey = process.env.VAPID_PRIVATE_KEY;
 
+export const recentPushErrors = [];
+
+
 if (publicVapidKey && privateVapidKey) {
   webpush.setVapidDetails(
     `mailto:${process.env.EMAIL_FROM || 'help@manjusatelier.in'}`,
@@ -29,6 +32,8 @@ export const sendPushNotification = async (subscription, payload) => {
       await PushSubscription.findOneAndDelete({ endpoint: subscription.endpoint });
     } else {
       console.error('Error sending push notification:', error);
+      recentPushErrors.unshift({ time: new Date().toISOString(), error: error.message, statusCode: error.statusCode, body: error.body });
+      if (recentPushErrors.length > 20) recentPushErrors.pop();
     }
     return false;
   }
