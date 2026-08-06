@@ -130,7 +130,7 @@ export default function ProductDetails() {
           <div className="relative w-full">
             <div
               id="product-carousel"
-              className="flex w-full snap-x snap-mandatory gap-4 overflow-x-auto scrollbar-hide pb-2"
+              className="flex items-start w-full snap-x snap-mandatory gap-4 overflow-x-auto scrollbar-hide pb-2"
               onScroll={(e) => {
                 const el = e.currentTarget;
                 const index = Math.round(el.scrollLeft / (el.clientWidth + 16));
@@ -140,7 +140,7 @@ export default function ProductDetails() {
               {product.images.map((img, i) => (
                   <div
                     key={i}
-                    className="relative flex w-full shrink-0 snap-center overflow-hidden rounded-2xl"
+                    className="relative w-full shrink-0 snap-center overflow-hidden rounded-2xl"
                   >
                     <img
                       src={img}
