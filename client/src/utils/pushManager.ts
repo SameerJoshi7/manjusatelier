@@ -54,9 +54,15 @@ export async function subscribeToPushNotifications() {
   });
 
   // 3. Send the subscription to our backend
+  const token = localStorage.getItem('token');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const saveResponse = await fetch('/api/push/subscribe', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ subscription }),
   });
 
