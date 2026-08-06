@@ -44,7 +44,7 @@ Return ONLY the raw JSON object. Do not include markdown code blocks or any othe
       }
     });
 
-    const aiMessage = response.text();
+    const aiMessage = response.text;
     
     // Attempt to parse JSON. Sometimes LLMs return markdown anyway.
     let jsonStr = aiMessage.trim();
