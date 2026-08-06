@@ -93,9 +93,23 @@ router.get('/vapid-public-key', (req, res) => {
   });
 });
 
-import { recentPushErrors } from '../utils/push.js';
+import { recentPushErrors, sendBatchPushNotification } from '../utils/push.js';
 router.get('/errors', (req, res) => {
   res.status(200).json({ success: true, errors: recentPushErrors });
+});
+
+router.get('/test', async (req, res) => {
+  try {
+    const subs = await PushSubscription.find({});
+    const results = await sendBatchPushNotification(subs, {
+      title: 'Live Server Push Test',
+      body: 'This push was initiated by the live Render server!',
+      url: '/'
+    });
+    res.status(200).json({ success: true, subsCount: subs.length, results });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 export default router;
