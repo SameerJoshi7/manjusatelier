@@ -140,13 +140,13 @@ export default function ProductDetails() {
               {product.images.map((img, i) => (
                   <div
                     key={i}
-                    className="relative flex w-full shrink-0 snap-center items-center justify-center overflow-hidden rounded-2xl bg-beige/10"
+                    className="relative flex w-full shrink-0 snap-center overflow-hidden rounded-2xl"
                   >
                     <img
                       src={img}
                       alt={`${product.name} ${i + 1}`}
                       onClick={() => setLightboxOpen(true)}
-                      className="h-auto max-h-[80vh] w-full cursor-pointer object-contain transition-transform duration-200"
+                      className="h-auto w-full cursor-pointer transition-transform duration-200"
                     />
                   </div>
               ))}
