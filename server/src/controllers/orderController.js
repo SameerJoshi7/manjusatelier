@@ -7,7 +7,6 @@ import Setting from '../models/Setting.js';
 import Notification from '../models/Notification.js';
 import { asyncHandler, ApiError } from '../middleware/error.js';
 import { getRazorpay, verifyPaymentSignature } from '../utils/razorpay.js';
-import { getSocket } from '../socket.js';
 import { sendEmail } from '../utils/sendEmail.js';
 import { getOrderReceivedTemplate, getPaymentVerifiedTemplate, getOrderShippedTemplate, getOrderDeliveredTemplate, getOrderCancelledTemplate } from '../utils/emailTemplates.js';
 
