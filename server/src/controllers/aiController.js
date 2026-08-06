@@ -34,7 +34,7 @@ Analyze this product image and generate a structured JSON object containing:
 Return ONLY the raw JSON object. Do not include markdown code blocks or any other text.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.6-flash',
       contents: [
         prompt,
         { inlineData: { data: base64Image, mimeType } }
