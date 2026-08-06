@@ -138,17 +138,17 @@ export default function ProductDetails() {
               }}
             >
               {product.images.map((img, i) => (
-                <div
-                  key={i}
-                  className="relative aspect-square w-full shrink-0 snap-center overflow-hidden rounded-2xl bg-beige/40"
-                >
-                  <img
-                    src={img}
-                    alt={`${product.name} ${i + 1}`}
-                    onClick={() => setLightboxOpen(true)}
-                    className="h-full w-full cursor-pointer object-cover transition-transform duration-200"
-                  />
-                </div>
+                  <div
+                    key={i}
+                    className="relative flex w-full shrink-0 snap-center items-center justify-center overflow-hidden rounded-2xl bg-beige/10"
+                  >
+                    <img
+                      src={img}
+                      alt={`${product.name} ${i + 1}`}
+                      onClick={() => setLightboxOpen(true)}
+                      className="h-auto max-h-[80vh] w-full cursor-pointer object-contain transition-transform duration-200"
+                    />
+                  </div>
               ))}
             </div>
 
