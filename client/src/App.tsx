@@ -40,7 +40,11 @@ export default function App() {
     updateServiceWorker,
   } = useRegisterSW({
     onRegistered(r) {
-      console.log('SW Registered: ' + r);
+      if (r) {
+        setInterval(() => {
+          r.update();
+        }, 60 * 1000);
+      }
     },
     onRegisterError(error) {
       console.log('SW registration error', error);
