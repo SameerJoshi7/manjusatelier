@@ -64,5 +64,16 @@ export async function subscribeToPushNotifications() {
     throw new Error('Failed to save push subscription to the server');
   }
 
+  // Fire a local test notification to bypass the server completely
+  try {
+    if (registration && registration.showNotification) {
+      await registration.showNotification('Local OS Test', {
+        body: 'If you see this, your OS is allowing notifications!',
+      });
+    }
+  } catch (e) {
+    console.error('Local notification failed', e);
+  }
+
   return subscription;
 }
