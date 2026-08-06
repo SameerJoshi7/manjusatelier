@@ -31,10 +31,9 @@ export function useProducts(query: ProductQuery) {
 
   const page = query.page || 1;
   
-  // We track baseKey to reset data when non-pagination filters change
+  // We track baseQuery to reset data when non-pagination filters change
   const baseQuery = { ...query };
   delete baseQuery.page;
-  const baseKey = toQueryString(baseQuery);
   const key = toQueryString(query);
 
   useEffect(() => {
