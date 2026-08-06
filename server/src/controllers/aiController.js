@@ -29,6 +29,7 @@ Analyze this product image and generate a structured JSON object containing:
 - "name": A catchy, SEO-friendly name for this product (max 60 characters).
 - "description": A beautiful, compelling product description (1-2 paragraphs) highlighting its craftsmanship, aesthetic appeal, and potential uses.
 - "category": Choose the single most appropriate category from: ['crochet', 'bags', 'home-decor', 'accessories', 'amigurumi', 'clothing']. If none fit perfectly, pick the closest one or suggest a simple 1-word lowercase category.
+- "color": The primary dominant color of the product in lowercase (e.g., "red", "beige", "navy blue", "multicolor").
 - "tags": An array of 3 to 6 relevant lowercase tags (e.g., ["handmade", "gift", "boho", "sustainable"]).
 
 Return ONLY the raw JSON object. Do not include markdown code blocks or any other text.`;
