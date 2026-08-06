@@ -107,23 +107,25 @@ export function Footer() {
         </div>
 
         {/* Link columns */}
-        {columns.map((col) => (
-          <div key={col.title}>
-            <h4 className="font-serif text-lg text-cream">{col.title}</h4>
-            <ul className="mt-4 space-y-2.5">
-              {col.links.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    to={link.to}
-                    className="text-sm text-beige/70 transition-colors hover:text-gold"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:col-span-1 lg:col-span-3">
+          {columns.map((col) => (
+            <div key={col.title}>
+              <h4 className="font-serif text-lg text-cream">{col.title}</h4>
+              <ul className="mt-4 space-y-2.5">
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      to={link.to}
+                      className="text-sm text-beige/70 transition-colors hover:text-gold"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="border-t border-cream/10">
