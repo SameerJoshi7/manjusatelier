@@ -13,22 +13,34 @@ precacheAndRoute(self.__WB_MANIFEST);
 
 // Handle Push Events
 self.addEventListener('push', (event) => {
-  if (!event.data) return;
-
-  try {
-    const data = event.data.json();
-    const title = data.title || "Manju's Atelier";
-    const options = {
-      body: data.body,
-      data: {
-        url: data.url || '/',
-      },
-    };
-
-    event.waitUntil(self.registration.showNotification(title, options));
-  } catch (error) {
-    console.error('Error parsing push event data:', error);
+  if (!event.data) {
+    console.warn('Push event received with no data');
+    return;
   }
+
+  console.log('Push event received with data:', event.data.text());
+  
+  let data = {};
+  try {
+    data = event.data.json();
+  } catch (err) {
+    console.error('Failed to parse push data as JSON, using fallback', err);
+    data = { title: 'Notification', body: event.data.text() };
+  }
+
+  const title = data.title || "Manju's Atelier";
+  const options = {
+    body: data.body || 'You have a new notification.',
+    data: {
+      url: data.url || '/',
+    },
+  };
+
+  const promise = self.registration.showNotification(title, options)
+    .then(() => console.log('showNotification success'))
+    .catch((err) => console.error('showNotification failed:', err));
+
+  event.waitUntil(promise);
 });
 
 // Handle Notification Clicks
