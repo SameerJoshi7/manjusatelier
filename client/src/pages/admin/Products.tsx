@@ -248,23 +248,23 @@ function ProductForm({
     try {
       const { data } = await api.post<{ data: any }>('/ai/generate-product', { imageUrl: coverImage });
       
-      setForm(prev => ({
-        ...prev,
-        name: prev.name || data.name || '',
-        description: prev.description || data.description || '',
-      }));
-      
-      if (data.tags && Array.isArray(data.tags)) {
-        // Find existing badges
-        const newBadges = [...prev.badges];
-        data.tags.forEach(tag => {
-           const capitalized = tag.charAt(0).toUpperCase() + tag.slice(1);
-           if (!newBadges.includes(capitalized as Badge) && ALL_BADGES.includes(capitalized as Badge)) {
-             newBadges.push(capitalized as Badge);
-           }
-        });
-        set('badges', newBadges);
-      }
+      setForm(prev => {
+        let newBadges = [...prev.badges];
+        if (data.tags && Array.isArray(data.tags)) {
+          data.tags.forEach((tag: string) => {
+             const capitalized = tag.charAt(0).toUpperCase() + tag.slice(1);
+             if (!newBadges.includes(capitalized as Badge) && ALL_BADGES.includes(capitalized as Badge)) {
+               newBadges.push(capitalized as Badge);
+             }
+          });
+        }
+        return {
+          ...prev,
+          name: prev.name || data.name || '',
+          description: prev.description || data.description || '',
+          badges: newBadges
+        };
+      });
       notify('AI Auto-fill complete! Review the suggestions.');
     } catch (err) {
       notify(err instanceof Error ? err.message : 'AI generation failed', 'error');
