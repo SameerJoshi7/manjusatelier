@@ -1,6 +1,7 @@
 import Product from '../models/Product.js';
 import Category from '../models/Category.js';
 import { asyncHandler, ApiError } from '../middleware/error.js';
+import { getCache, setCache, clearCachePattern } from '../utils/cache.js';
 
 /**
  * GET /api/products
@@ -8,6 +9,10 @@ import { asyncHandler, ApiError } from '../middleware/error.js';
  * inStock, sort, page, limit.
  */
 export const getProducts = asyncHandler(async (req, res) => {
+  const cacheKey = `products:${req.originalUrl}`;
+  const cached = await getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   const {
     search,
     category,
@@ -61,23 +66,37 @@ export const getProducts = asyncHandler(async (req, res) => {
     Product.countDocuments(filter),
   ]);
 
-  res.json({
+  const responseData = {
     success: true,
     products,
     total,
     page: pageNum,
     pages: Math.ceil(total / limitNum),
-  });
+  };
+
+  await setCache(cacheKey, responseData, 3600);
+  res.json(responseData);
 });
 
 export const getFeatured = asyncHandler(async (req, res) => {
+  const cacheKey = 'products:featured';
+  const cached = await getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   const products = await Product.find({ featured: true })
     .populate('category', 'name slug')
     .limit(8);
-  res.json({ success: true, products });
+    
+  const responseData = { success: true, products };
+  await setCache(cacheKey, responseData, 3600);
+  res.json(responseData);
 });
 
 export const getProductBySlug = asyncHandler(async (req, res) => {
+  const cacheKey = `products:slug:${req.params.slug}`;
+  const cached = await getCache(cacheKey);
+  if (cached) return res.json(cached);
+
   const product = await Product.findOne({ slug: req.params.slug }).populate(
     'category',
     'name slug'
@@ -91,7 +110,9 @@ export const getProductBySlug = asyncHandler(async (req, res) => {
     .limit(4)
     .populate('category', 'name slug');
 
-  res.json({ success: true, product, related });
+  const responseData = { success: true, product, related };
+  await setCache(cacheKey, responseData, 3600);
+  res.json(responseData);
 });
 
 // ---- Admin ----
@@ -105,11 +126,11 @@ const slugify = (str) =>
 export const createProduct = asyncHandler(async (req, res) => {
   const data = { ...req.body };
   if (!data.slug && data.name) data.slug = slugify(data.name);
-  // Ensure slug uniqueness by appending a short suffix if needed.
   if (data.slug && (await Product.exists({ slug: data.slug }))) {
     data.slug = `${data.slug}-${Date.now().toString(36).slice(-4)}`;
   }
   const product = await Product.create(data);
+  await clearCachePattern('products');
   res.status(201).json({ success: true, product });
 });
 
@@ -119,11 +140,13 @@ export const updateProduct = asyncHandler(async (req, res) => {
     runValidators: true,
   });
   if (!product) throw new ApiError(404, 'Product not found');
+  await clearCachePattern('products');
   res.json({ success: true, product });
 });
 
 export const deleteProduct = asyncHandler(async (req, res) => {
   const product = await Product.findByIdAndDelete(req.params.id);
   if (!product) throw new ApiError(404, 'Product not found');
+  await clearCachePattern('products');
   res.json({ success: true, message: 'Product deleted' });
 });

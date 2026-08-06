@@ -20,6 +20,7 @@ import { usePageMeta } from '@/hooks/usePageMeta';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
+import { optimizeCloudinaryUrl } from '@/lib/image';
 import { useToast } from '@/components/ui/Toast';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -143,7 +144,7 @@ export default function ProductDetails() {
                     className="relative w-full shrink-0 snap-center overflow-hidden rounded-2xl"
                   >
                     <img
-                      src={img}
+                      src={optimizeCloudinaryUrl(img, 1200)}
                       alt={`${product.name} ${i + 1}`}
                       onClick={() => setLightboxOpen(true)}
                       className="h-auto w-full cursor-pointer transition-transform duration-200"

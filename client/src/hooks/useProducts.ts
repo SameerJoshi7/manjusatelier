@@ -29,23 +29,45 @@ export function useProducts(query: ProductQuery) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const page = query.page || 1;
+  
+  // We track baseKey to reset data when non-pagination filters change
+  const baseQuery = { ...query };
+  delete baseQuery.page;
+  const baseKey = toQueryString(baseQuery);
   const key = toQueryString(query);
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
+    
+    // Only show hard loading state on initial fetch or filter change (page 1)
+    if (page === 1) {
+      setLoading(true);
+      setData(null);
+    }
+    
     setError(null);
     api
       .get<Paginated<Product> & { success: boolean }>(`/products?${key}`)
       .then((res) => {
-        if (active) setData(res);
+        if (active) {
+          setData((prev) => {
+            // If it's page 1, or we don't have data, just replace it
+            if (page === 1 || !prev) return res;
+            // Otherwise, append the new products
+            return {
+              ...res,
+              products: [...prev.products, ...res.products],
+            };
+          });
+        }
       })
       .catch((err) => active && setError(err.message))
       .finally(() => active && setLoading(false));
     return () => {
       active = false;
     };
-  }, [key]);
+  }, [key, page]);
 
   return { data, loading, error };
 }

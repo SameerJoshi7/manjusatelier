@@ -1,11 +1,14 @@
 import { useState, ImgHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 import { placeholder } from '@/lib/placeholder';
+import { optimizeCloudinaryUrl } from '@/lib/image';
 
 interface LazyImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   wrapperClassName?: string;
   /** Optional label baked into the fallback placeholder. */
   fallbackLabel?: string;
+  /** Cloudinary width transform (defaults to 800) */
+  optWidth?: number;
 }
 
 /** Image with native lazy-loading, a shimmer placeholder, and a branded
@@ -16,6 +19,7 @@ export function LazyImage({
   alt,
   src,
   fallbackLabel,
+  optWidth = 800,
   ...props
 }: LazyImageProps) {
   const [loaded, setLoaded] = useState(false);
@@ -23,7 +27,7 @@ export function LazyImage({
 
   const effectiveSrc = errored
     ? placeholder(String(alt || src || 'manjus'), 800, 800, fallbackLabel ?? String(alt || ''))
-    : src;
+    : src ? optimizeCloudinaryUrl(src, optWidth) : src;
 
   return (
     <div className={cn('relative overflow-hidden', wrapperClassName)}>

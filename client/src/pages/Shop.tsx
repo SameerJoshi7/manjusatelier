@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal, LayoutGrid, List, X, Search } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -52,6 +52,27 @@ export default function Shop() {
   );
 
   const { data, loading } = useProducts(query);
+  const observerTarget = React.useRef<HTMLDivElement>(null);
+
+  // Infinite Scroll Observer
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loading && data && page < data.pages) {
+          const next = new URLSearchParams(params);
+          next.set('page', String(page + 1));
+          setParams(next, { replace: true });
+        }
+      },
+      { rootMargin: '100px' } // fetch a bit before they hit the absolute bottom
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loading, data, page, params, setParams]);
 
   const update = (key: string, value?: string) => {
     const next = new URLSearchParams(params);
@@ -269,22 +290,13 @@ export default function Shop() {
           )}
 
           {/* Pagination */}
-          {data && data.pages > 1 && (
-            <div className="mt-12 flex justify-center gap-2">
-              {Array.from({ length: data.pages }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => update('page', String(i + 1))}
-                  className={cn(
-                    'grid h-10 w-10 place-items-center rounded-full text-sm font-medium transition-colors',
-                    page === i + 1
-                      ? 'bg-brown text-cream'
-                      : 'border border-brown/15 hover:bg-beige/40'
-                  )}
-                >
-                  {i + 1}
-                </button>
-              ))}
+          {/* Infinite Scroll Observer Target */}
+          {data && page < data.pages && (
+            <div
+              ref={observerTarget}
+              className="mt-12 flex items-center justify-center py-6 text-brown/60 dark:text-beige/60"
+            >
+              Loading more products...
             </div>
           )}
         </div>
