@@ -21,6 +21,7 @@ import adminRoutes, { uploadDir } from './routes/adminRoutes.js';
 import settingRoutes from './routes/settingRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import pushRoutes from './routes/pushRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 
 export function createApp() {
   const app = express();
@@ -82,6 +83,7 @@ export function createApp() {
   app.use('/api/settings', settingRoutes);
   app.use('/api/notifications', notificationRoutes);
   app.use('/api/push', pushRoutes);
+  app.use('/api/ai', aiRoutes);
 
   // --- Errors ---
   app.use(notFound);

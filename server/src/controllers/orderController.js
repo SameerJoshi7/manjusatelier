@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Product from '../models/Product.js';
+import { getSocket } from '../socket.js';
 import Order from '../models/Order.js';
 import Coupon from '../models/Coupon.js';
 import Setting from '../models/Setting.js';
@@ -115,11 +116,17 @@ export const createOrder = asyncHandler(async (req, res) => {
     // Push notification
     const { sendPushToUser } = await import('../utils/push.js');
     await sendPushToUser(req.user._id, {
-      title: 'Yay! We got your order! 🎉',
-      body: `Thank you! Please submit your UTR to verify your payment.`,
+      title: 'Order Received 🎉',
+      body: `We have received your order #${order.customOrderId}.`,
       icon: '/pwa-192x192.png',
       url: '/account?tab=orders'
     });
+
+    try {
+      getSocket().to('admins').emit('order_update', { type: 'NEW_ORDER', orderId: order._id });
+    } catch (err) {
+      console.error('Socket error:', err);
+    }
   } catch (err) {
     console.error('Failed to send order received notifications:', err);
   }
@@ -203,10 +210,15 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
   const order = await Order.findByIdAndUpdate(
     req.params.id,
-    { orderStatus },
+    { orderStatus: req.body.orderStatus },
     { new: true }
-  ).populate('user', 'name email');
+  );
   if (!order) throw new ApiError(404, 'Order not found');
+
+  try {
+    getSocket().to('admins').emit('order_update', { type: 'STATUS_UPDATE', orderId: order._id });
+    getSocket().to(`user_${order.user}`).emit('order_update', { type: 'STATUS_UPDATE', orderId: order._id });
+  } catch (err) {}
 
   let title = 'Order Status Updated';
   let body = `Your order ${order.customOrderId} is now ${orderStatus}.`;
@@ -306,16 +318,40 @@ export const verifyUtr = asyncHandler(async (req, res) => {
       
       await session.withTransaction(async () => {
         for (const item of order.items) {
-          await Product.updateOne(
+          const p = await Product.findOneAndUpdate(
             { _id: item.product },
             { $inc: { stock: -item.quantity } },
-            { session }
+            { session, new: true }
           );
+          // Check for Low Stock
+          if (p && p.stock <= 10) {
+            try {
+              const { sendBatchPushNotification } = await import('../utils/push.js');
+              const PushSubscription = (await import('../models/PushSubscription.js')).default;
+              const adminSubs = await PushSubscription.find({}).populate('user');
+              const subsToNotify = adminSubs.filter(sub => sub.user && sub.user.role === 'admin');
+              if (subsToNotify.length > 0) {
+                await sendBatchPushNotification(subsToNotify, {
+                  title: 'Low Stock Alert ⚠️',
+                  body: `${p.name} is running low! Only ${p.stock} left in stock.`,
+                  icon: p.images[0] || '/pwa-192x192.png',
+                  url: '/admin/products'
+                });
+              }
+            } catch (err) {
+              console.error('Failed to send low stock notification', err);
+            }
+          }
         }
         order.paymentStatus = 'UTR_VERIFIED';
         order.orderStatus = 'confirmed';
         await order.save({ session });
       });
+
+      try {
+        getSocket().to('admins').emit('order_update', { type: 'UTR_VERIFIED', orderId: order._id });
+        getSocket().to(`user_${order.user._id}`).emit('order_update', { type: 'UTR_VERIFIED', orderId: order._id });
+      } catch (err) {}
 
       await Notification.create({
         user: order.user._id,
@@ -364,6 +400,11 @@ export const verifyUtr = asyncHandler(async (req, res) => {
           icon: '/pwa-192x192.png',
           url: '/account?tab=orders'
         });
+
+        try {
+          getSocket().to('admins').emit('order_update', { type: 'UTR_REJECTED', orderId: order._id });
+          getSocket().to(`user_${order.user._id}`).emit('order_update', { type: 'UTR_REJECTED', orderId: order._id });
+        } catch (err) {}
       } else {
         // Second rejection: cancel order
         order.paymentStatus = 'FAILED';
@@ -384,6 +425,11 @@ export const verifyUtr = asyncHandler(async (req, res) => {
           icon: '/pwa-192x192.png',
           url: '/account?tab=orders'
         });
+
+        try {
+          getSocket().to('admins').emit('order_update', { type: 'ORDER_CANCELLED', orderId: order._id });
+          getSocket().to(`user_${order.user._id}`).emit('order_update', { type: 'ORDER_CANCELLED', orderId: order._id });
+        } catch (err) {}
 
         if (order.user.email) {
           try {

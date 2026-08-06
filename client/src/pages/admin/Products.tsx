@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, X, Upload, Package, Eye } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Upload, Package, Eye, Sparkles } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatPrice, finalPrice, cn } from '@/lib/utils';
 import { useCategories } from '@/hooks/useCategories';
@@ -185,6 +185,7 @@ function ProductForm({
 }) {
   const { notify } = useToast();
   const [saving, setSaving] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [form, setForm] = useState<FormState>(() =>
     product
@@ -235,6 +236,41 @@ function ProductForm({
     const newImages = [...form.images];
     newImages.splice(index, 1);
     set('images', newImages);
+  };
+
+  const handleAIAutofill = async () => {
+    const coverImage = form.images[0];
+    if (!coverImage) {
+      return notify('Please upload a cover image first so AI can analyze it.', 'error');
+    }
+
+    setGeneratingAI(true);
+    try {
+      const { data } = await api.post<{ data: any }>('/ai/generate-product', { imageUrl: coverImage });
+      
+      setForm(prev => ({
+        ...prev,
+        name: prev.name || data.name || '',
+        description: prev.description || data.description || '',
+      }));
+      
+      if (data.tags && Array.isArray(data.tags)) {
+        // Find existing badges
+        const newBadges = [...prev.badges];
+        data.tags.forEach(tag => {
+           const capitalized = tag.charAt(0).toUpperCase() + tag.slice(1);
+           if (!newBadges.includes(capitalized as Badge) && ALL_BADGES.includes(capitalized as Badge)) {
+             newBadges.push(capitalized as Badge);
+           }
+        });
+        set('badges', newBadges);
+      }
+      notify('AI Auto-fill complete! Review the suggestions.');
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'AI generation failed', 'error');
+    } finally {
+      setGeneratingAI(false);
+    }
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -353,6 +389,25 @@ function ProductForm({
                 );
               })}
             </div>
+            
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleAIAutofill}
+              disabled={generatingAI || !form.images[0]}
+              className="mt-4 w-max border-gold/40 bg-gold/10 text-brown-dark hover:bg-gold/20 dark:text-beige"
+            >
+              {generatingAI ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-brown border-t-transparent dark:border-beige dark:border-t-transparent" />
+                  Generating details with Groq AI...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Sparkles size={16} className="text-gold" /> Auto-fill details with AI
+                </div>
+              )}
+            </Button>
           </div>
 
           <Field label="Name">
@@ -361,7 +416,7 @@ function ProductForm({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Category">
-              <select className="input" value={form.category} onChange={(e) => set('category', e.target.value)}>
+              <select className="input" required value={form.category} onChange={(e) => set('category', e.target.value)}>
                 <option value="">Select…</option>
                 {categories.map((c) => (
                   <option key={c._id} value={c._id}>
@@ -371,7 +426,7 @@ function ProductForm({
               </select>
             </Field>
             <Field label="Color">
-              <input className="input" value={form.color} onChange={(e) => set('color', e.target.value)} />
+              <input className="input" required value={form.color} onChange={(e) => set('color', e.target.value)} />
             </Field>
           </div>
 
@@ -380,19 +435,19 @@ function ProductForm({
               <input type="number" min="0" className="input" required value={form.price} onChange={(e) => set('price', e.target.value)} />
             </Field>
             <Field label="Discount (%)">
-              <input type="number" min="0" max="100" className="input" value={form.discount} onChange={(e) => set('discount', e.target.value)} />
+              <input type="number" min="0" max="100" required className="input" value={form.discount} onChange={(e) => set('discount', e.target.value)} />
             </Field>
             <Field label="Stock">
-              <input type="number" min="0" className="input" value={form.stock} onChange={(e) => set('stock', e.target.value)} />
+              <input type="number" min="0" required className="input" value={form.stock} onChange={(e) => set('stock', e.target.value)} />
             </Field>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Material">
-              <input className="input" value={form.material} onChange={(e) => set('material', e.target.value)} />
+              <input className="input" required value={form.material} onChange={(e) => set('material', e.target.value)} />
             </Field>
             <Field label="Dimensions">
-              <input className="input" value={form.dimensions} onChange={(e) => set('dimensions', e.target.value)} />
+              <input className="input" required value={form.dimensions} onChange={(e) => set('dimensions', e.target.value)} />
             </Field>
           </div>
 
@@ -435,7 +490,7 @@ function ProductForm({
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={saving || uploadingIndex !== null}>
+            <Button type="submit" disabled={saving || uploadingIndex !== null || generatingAI}>
               {saving ? 'Saving…' : product ? 'Save changes' : 'Create product'}
             </Button>
           </div>
