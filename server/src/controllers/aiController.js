@@ -1,5 +1,5 @@
 import { asyncHandler, ApiError } from '../middleware/error.js';
-import Groq from 'groq-sdk';
+import { GoogleGenAI } from '@google/genai';
 
 export const generateProductDetails = asyncHandler(async (req, res) => {
   const { imageUrl } = req.body;
@@ -7,14 +7,23 @@ export const generateProductDetails = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Image URL is required');
   }
 
-  const apiKey = process.env.GROQ_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new ApiError(500, 'GROQ_API_KEY is not configured in the backend.');
+    throw new ApiError(500, 'GEMINI_API_KEY is not configured in the backend.');
   }
 
-  const groq = new Groq({ apiKey });
+  const ai = new GoogleGenAI({ apiKey });
 
   try {
+    // 1. Fetch the image to get its base64 buffer since Gemini requires inline data
+    const imageResponse = await fetch(imageUrl);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to fetch image from ${imageUrl}`);
+    }
+    const arrayBuffer = await imageResponse.arrayBuffer();
+    const base64Image = Buffer.from(arrayBuffer).toString('base64');
+    const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
+
     const prompt = `You are an AI assistant for a handmade crafts store called "Manju's Atelier".
 Analyze this product image and generate a structured JSON object containing:
 - "name": A catchy, SEO-friendly name for this product (max 60 characters).
@@ -24,22 +33,18 @@ Analyze this product image and generate a structured JSON object containing:
 
 Return ONLY the raw JSON object. Do not include markdown code blocks or any other text.`;
 
-    const response = await groq.chat.completions.create({
-      model: 'qwen/qwen3.6-27b',
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: prompt },
-            { type: 'image_url', image_url: { url: imageUrl } }
-          ]
-        }
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [
+        prompt,
+        { inlineData: { data: base64Image, mimeType } }
       ],
-      temperature: 0.4,
-      max_tokens: 512,
+      config: {
+        temperature: 0.4,
+      }
     });
 
-    const aiMessage = response.choices[0].message.content;
+    const aiMessage = response.text();
     
     // Attempt to parse JSON. Sometimes LLMs return markdown anyway.
     let jsonStr = aiMessage.trim();
@@ -57,7 +62,7 @@ Return ONLY the raw JSON object. Do not include markdown code blocks or any othe
 
     res.json({ success: true, data: parsed });
   } catch (error) {
-    console.error('Groq AI Error:', error);
+    console.error('Gemini AI Error:', error);
     throw new ApiError(500, 'Failed to generate product details with AI. ' + (error.message || ''));
   }
 });

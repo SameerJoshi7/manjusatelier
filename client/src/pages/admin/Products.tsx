@@ -400,7 +400,7 @@ function ProductForm({
               {generatingAI ? (
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-brown border-t-transparent dark:border-beige dark:border-t-transparent" />
-                  Generating details with Groq AI...
+                  Generating details with Gemini AI...
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
