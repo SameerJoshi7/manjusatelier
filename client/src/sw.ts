@@ -31,6 +31,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || "Manju's Atelier";
   const options = {
     body: data.body || 'You have a new notification.',
+    icon: data.icon || '/pwa-192x192.png',
+    badge: '/favicon.png',
     data: {
       url: data.url || '/',
     },
