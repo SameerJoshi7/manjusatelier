@@ -83,3 +83,34 @@ export async function subscribeToPushNotifications() {
 
   return subscription;
 }
+
+/**
+ * Silently sync an existing push subscription with the backend,
+ * ensuring it's tied to the currently logged-in user.
+ */
+export async function syncPushSubscription() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    return;
+  }
+
+  const registration = await navigator.serviceWorker.ready;
+  const subscription = await registration.pushManager.getSubscription();
+  
+  if (!subscription) return; // Not subscribed on this device
+
+  const token = localStorage.getItem('token');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  try {
+    await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ subscription }),
+    });
+  } catch (e) {
+    console.error('Failed to sync push subscription', e);
+  }
+}

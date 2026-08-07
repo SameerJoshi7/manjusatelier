@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, useCallback, ReactNode 
 import { api } from '@/lib/api';
 import type { User } from '@/types';
 
+import { syncPushSubscription } from '@/utils/pushManager';
+
 interface AuthState {
   user: User | null;
   loading: boolean;
@@ -35,6 +37,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  // Sync device push subscription with backend when user logs in/changes
+  useEffect(() => {
+    if (user && !loading) {
+      syncPushSubscription();
+    }
+  }, [user, loading]);
 
   const login = async (email: string, password: string) => {
     const { user, token } = await api.post<{ user: User, token: string }>('/auth/login', { email, password });
