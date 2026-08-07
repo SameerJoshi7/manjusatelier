@@ -95,10 +95,13 @@ export const sendBroadcastEmail = asyncHandler(async (req, res) => {
   if (pushSubscriptions.length > 0) {
     const { sendBatchPushNotification } = await import('../utils/push.js');
     
+    // Strip HTML tags for the push notification body
+    const plainTextContent = content.replace(/<[^>]*>?/gm, '').substring(0, 150) + (content.length > 150 ? '...' : '');
+
     // Construct the notification payload
     const pushPayload = {
       title,
-      body: content,
+      body: plainTextContent,
       icon: '/pwa-192x192.png',
       url: '/shop'
     };
