@@ -90,7 +90,9 @@ export const Chatbot = () => {
     }
   };
 
-  const baseQuestions = [
+  type QuickReply = { text: string; type: 'chat' | 'link'; href?: string };
+
+  const baseQuestions: QuickReply[] = [
     { text: "Where is my order?", type: 'chat' },
     { text: "What is your return policy?", type: 'link', href: '/terms' },
     { text: "Do you ship internationally?", type: 'chat' },
@@ -99,10 +101,10 @@ export const Chatbot = () => {
     { text: "How can I contact support?", type: 'link', href: '/contact' }
   ];
 
-  const suggestedQuestions = [
+  const suggestedQuestions: QuickReply[] = [
     ...userOrders.map(o => {
       const id = o.customOrderId || o._id.slice(-8).toUpperCase();
-      return { text: `Track order #${id}`, type: 'chat' };
+      return { text: `Track order #${id}`, type: 'chat' as const };
     }),
     ...baseQuestions
   ];
