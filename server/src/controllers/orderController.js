@@ -207,9 +207,14 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   const allowed = ['processing', 'confirmed', 'shipped', 'delivered', 'cancelled'];
   if (!allowed.includes(orderStatus)) throw new ApiError(400, 'Invalid order status');
 
+  const updateData = { orderStatus: req.body.orderStatus };
+  if (orderStatus === 'delivered') {
+    updateData.deliveredAt = new Date();
+  }
+
   const order = await Order.findByIdAndUpdate(
     req.params.id,
-    { orderStatus: req.body.orderStatus },
+    updateData,
     { new: true }
   );
   if (!order) throw new ApiError(404, 'Order not found');
@@ -524,3 +529,88 @@ export const trackOrder = asyncHandler(async (req, res) => {
   });
 });
 
+/** POST /api/orders/:id/request-return (user) */
+export const requestReturnExchange = asyncHandler(async (req, res) => {
+  const { actionType, reason } = req.body;
+  
+  if (!['return', 'exchange'].includes(actionType)) {
+    throw new ApiError(400, 'Invalid action type');
+  }
+  if (!reason || reason.trim().length === 0) {
+    throw new ApiError(400, 'Reason is required');
+  }
+
+  const order = await Order.findOne({ _id: req.params.id, user: req.user._id });
+  if (!order) throw new ApiError(404, 'Order not found');
+
+  if (order.orderStatus !== 'delivered') {
+    throw new ApiError(400, 'You can only request a return or exchange for delivered orders');
+  }
+
+  if (order.returnExchange && order.returnExchange.status !== 'rejected') {
+    throw new ApiError(400, 'A request has already been submitted for this order');
+  }
+
+  const deliveredDate = order.deliveredAt ? new Date(order.deliveredAt) : new Date(order.updatedAt);
+  const diffTime = Math.abs(new Date() - deliveredDate);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+  if (diffDays > 7) {
+    throw new ApiError(400, 'The 7-day return/exchange window has expired for this order');
+  }
+
+  order.returnExchange = {
+    actionType,
+    reason,
+    status: 'pending',
+    requestedAt: new Date()
+  };
+
+  await order.save();
+
+  try {
+    getSocket().to('admins').emit('order_update', { type: 'RETURN_REQUESTED', orderId: order._id });
+  } catch (err) {}
+
+  res.json({ success: true, order });
+});
+
+/** PATCH /api/orders/:id/return-status (admin) */
+export const updateReturnStatus = asyncHandler(async (req, res) => {
+  const { status, adminNote } = req.body;
+  
+  if (!['approved', 'rejected', 'completed'].includes(status)) {
+    throw new ApiError(400, 'Invalid return status');
+  }
+
+  const order = await Order.findById(req.params.id);
+  if (!order) throw new ApiError(404, 'Order not found');
+
+  if (!order.returnExchange) {
+    throw new ApiError(400, 'No return/exchange request exists for this order');
+  }
+
+  order.returnExchange.status = status;
+  if (adminNote) {
+    order.returnExchange.adminNote = adminNote;
+  }
+
+  await order.save();
+
+  let title = \`Request \${status.charAt(0).toUpperCase() + status.slice(1)}\`;
+  let body = \`Your \${order.returnExchange.actionType} request for order \${order.customOrderId} has been \${status}.\`;
+
+  await Notification.create({
+    user: order.user,
+    title,
+    message: body,
+    link: \`/account?tab=orders\`,
+  });
+
+  try {
+    getSocket().to(\`user_\${order.user.toString()}\`).emit('order_update', { orderId: order._id });
+    getSocket().to('admins').emit('order_update', { orderId: order._id });
+  } catch (err) {}
+
+  res.json({ success: true, order });
+});

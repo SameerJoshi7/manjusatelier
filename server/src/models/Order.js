@@ -44,6 +44,14 @@ const orderSchema = new mongoose.Schema(
       enum: ['processing', 'confirmed', 'shipped', 'delivered', 'cancelled'],
       default: 'processing',
     },
+    deliveredAt: { type: Date },
+    returnExchange: {
+      actionType: { type: String, enum: ['return', 'exchange'] },
+      reason: String,
+      status: { type: String, enum: ['pending', 'approved', 'rejected', 'completed'] },
+      requestedAt: Date,
+      adminNote: String
+    }
   },
   { timestamps: true }
 );

@@ -12,6 +12,14 @@ interface AdminOrder extends Omit<Order, 'user'> {
   user?: { _id: string; name: string; email: string } | string;
   customOrderId?: string;
   utrNumber?: string;
+  deliveredAt?: string;
+  returnExchange?: {
+    actionType: 'return' | 'exchange';
+    reason: string;
+    status: 'pending' | 'approved' | 'rejected' | 'completed';
+    requestedAt: string;
+    adminNote?: string;
+  };
 }
 
 const statuses = ['processing', 'confirmed', 'shipped', 'delivered', 'cancelled'] as const;
@@ -112,6 +120,26 @@ export default function Orders() {
     }
   };
 
+  const [returnStatus, setReturnStatus] = useState<'pending' | 'approved' | 'rejected' | 'completed'>('pending');
+  const [adminNote, setAdminNote] = useState('');
+
+  const processReturn = async (id: string) => {
+    setUpdating(id);
+    try {
+      const { order } = await api.patch<{ order: AdminOrder }>(`/orders/${id}/return-status`, {
+        status: returnStatus,
+        adminNote
+      });
+      setOrders((prev) => prev.map((o) => (o._id === id ? { ...o, returnExchange: order.returnExchange } : o)));
+      notify('Return/Exchange request updated.');
+      setAdminNote('');
+    } catch (e) {
+      notify(e instanceof Error ? e.message : 'Update failed', 'error');
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const customerName = (o: AdminOrder) =>
     typeof o.user === 'object' && o.user ? o.user.name : o.shippingAddress.fullName || 'Customer';
 
@@ -163,7 +191,10 @@ export default function Orders() {
       ) : (
         <div className="space-y-3">
           {orders.map((o) => (
-            <div key={o._id} className={cn("card-surface overflow-hidden", o.paymentStatus === 'UTR_VERIFICATION_PENDING' && "border-2 border-purple-400")}>
+            <div key={o._id} className={cn("card-surface overflow-hidden", 
+              o.paymentStatus === 'UTR_VERIFICATION_PENDING' && "border-2 border-purple-400",
+              o.returnExchange?.status === 'pending' && "border-2 border-orange-400"
+            )}>
               <button
                 onClick={() => setExpanded(expanded === o._id ? null : o._id)}
                 className="flex w-full items-center gap-4 p-4 text-left"
@@ -182,6 +213,11 @@ export default function Orders() {
                 <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold capitalize', statusColor[o.orderStatus])}>
                   {o.orderStatus}
                 </span>
+                {o.returnExchange && o.returnExchange.status === 'pending' && (
+                  <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-700 capitalize hidden sm:inline">
+                    {o.returnExchange.actionType} Req
+                  </span>
+                )}
                 <span className="w-24 text-right font-semibold text-brown-dark dark:text-beige">
                   {formatPrice(o.total)}
                 </span>
@@ -311,6 +347,53 @@ export default function Orders() {
                         </option>
                       ))}
                     </select>
+
+                    {o.returnExchange && (
+                      <div className="mt-6 rounded-xl border border-orange-200 bg-orange-50 p-4 dark:bg-orange-900/10 dark:border-orange-900/30">
+                        <h3 className="text-sm font-semibold text-orange-900 dark:text-orange-200 mb-2 capitalize">
+                          {o.returnExchange.actionType} Request ({o.returnExchange.status})
+                        </h3>
+                        <p className="text-sm text-orange-800 dark:text-orange-300/80 mb-1">
+                          <span className="font-medium">Reason:</span> {o.returnExchange.reason}
+                        </p>
+                        {o.returnExchange.adminNote && (
+                          <p className="text-sm text-orange-800 dark:text-orange-300/80 mb-3">
+                            <span className="font-medium">Admin Note:</span> {o.returnExchange.adminNote}
+                          </p>
+                        )}
+                        
+                        <div className="mt-3 space-y-2 border-t border-orange-200 pt-3 dark:border-orange-900/30">
+                          <label className="text-xs font-semibold text-orange-900 dark:text-orange-200">Update Request Status</label>
+                          <div className="flex gap-2">
+                            <select 
+                              className="input flex-1 text-sm py-1.5"
+                              value={returnStatus}
+                              onChange={(e) => setReturnStatus(e.target.value as any)}
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="approved">Approve</option>
+                              <option value="rejected">Reject</option>
+                              <option value="completed">Complete</option>
+                            </select>
+                          </div>
+                          <input 
+                            type="text" 
+                            className="input w-full text-sm py-1.5" 
+                            placeholder="Add a note for the user (optional)" 
+                            value={adminNote}
+                            onChange={(e) => setAdminNote(e.target.value)}
+                          />
+                          <Button 
+                            size="sm" 
+                            className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                            disabled={updating === o._id}
+                            onClick={() => processReturn(o._id)}
+                          >
+                            Update Request
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

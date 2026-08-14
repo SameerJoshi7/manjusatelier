@@ -40,6 +40,12 @@ export default function Account() {
   const [newUtr, setNewUtr] = useState('');
   const [updatingUtr, setUpdatingUtr] = useState(false);
 
+  // Return Modal state
+  const [returnPrompt, setReturnPrompt] = useState<string | null>(null);
+  const [returnType, setReturnType] = useState<'return' | 'exchange'>('return');
+  const [returnReason, setReturnReason] = useState('');
+  const [submittingReturn, setSubmittingReturn] = useState(false);
+
   usePageMeta({ title: "My Account — Manju's Atelier" });
 
   useEffect(() => {
@@ -108,6 +114,26 @@ export default function Account() {
       notify(e.response?.data?.error || 'Failed to update UTR.', 'error');
     } finally {
       setUpdatingUtr(false);
+    }
+  };
+
+  const submitReturn = async () => {
+    if (!returnPrompt) return;
+    setSubmittingReturn(true);
+    try {
+      const { order } = await api.post<{ order: Order }>(`/orders/${returnPrompt}/request-return`, {
+        actionType: returnType,
+        reason: returnReason
+      });
+      setOrders((prev) => prev.map((o) => (o._id === returnPrompt ? order : o)));
+      notify('Request submitted successfully.');
+      setReturnPrompt(null);
+      setReturnReason('');
+    } catch (error: unknown) {
+      const e = error as { response?: { data?: { error?: string } } };
+      notify(e.response?.data?.error || 'Failed to submit request.', 'error');
+    } finally {
+      setSubmittingReturn(false);
     }
   };
 
@@ -297,7 +323,12 @@ export default function Account() {
           </div>
         ) : (
           <div className="mt-6 space-y-4">
-            {orders.map((order) => (
+            {orders.map((order) => {
+              const deliveredDate = order.deliveredAt ? new Date(order.deliveredAt) : new Date(order.createdAt);
+              const diffDays = Math.ceil(Math.abs(new Date().getTime() - deliveredDate.getTime()) / (1000 * 60 * 60 * 24));
+              const canReturn = order.orderStatus === 'delivered' && diffDays <= 7 && !order.returnExchange;
+
+              return (
               <div key={order._id} className="card-surface p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brown/10 pb-3">
                   <div>
@@ -343,6 +374,22 @@ export default function Account() {
                     </button>
                   </div>
                 )}
+                
+                {order.returnExchange && (
+                  <div className="mt-3 rounded-lg bg-orange-50 p-3 text-sm text-orange-800 border border-orange-200">
+                    <p className="font-medium capitalize">{order.returnExchange.actionType} Request: {order.returnExchange.status}</p>
+                    {order.returnExchange.adminNote && <p className="mt-1 opacity-80 text-xs">Note: {order.returnExchange.adminNote}</p>}
+                  </div>
+                )}
+                
+                {canReturn && (
+                  <div className="mt-3">
+                    <Button variant="secondary" size="sm" onClick={() => setReturnPrompt(order._id)}>
+                      Request Return / Exchange
+                    </Button>
+                  </div>
+                )}
+
                 <div className="mt-3 flex flex-wrap gap-3">
                   {order.items.map((item) => (
                     <div key={item.product} className="flex items-center gap-2">
@@ -357,7 +404,7 @@ export default function Account() {
                   ))}
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         )}
       </section>
@@ -390,6 +437,47 @@ export default function Account() {
                 }}
               >
                 Submit
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Return/Exchange Modal */}
+      {returnPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-brown-dark">
+            <h3 className="mb-2 text-lg font-serif text-brown-dark dark:text-beige">Request Return / Exchange</h3>
+            <p className="mb-4 text-sm text-brown/70 dark:text-beige/70">
+              Please note that custom items cannot be returned.
+            </p>
+            
+            <label className="block text-sm font-medium mb-1 dark:text-beige">Action</label>
+            <select 
+              className="w-full rounded-xl border border-brown/20 bg-cream px-4 py-2 mb-4 dark:border-beige/20 dark:bg-[#2c2621] outline-none focus:border-gold text-brown-dark dark:text-beige"
+              value={returnType}
+              onChange={(e) => setReturnType(e.target.value as 'return' | 'exchange')}
+            >
+              <option value="return">Return</option>
+              <option value="exchange">Exchange</option>
+            </select>
+
+            <label className="block text-sm font-medium mb-1 dark:text-beige">Reason</label>
+            <textarea
+              className="w-full rounded-xl border border-brown/20 bg-cream px-4 py-2 mb-4 dark:border-beige/20 dark:bg-[#2c2621] outline-none focus:border-gold text-brown-dark dark:text-beige resize-none"
+              rows={3}
+              value={returnReason}
+              onChange={(e) => setReturnReason(e.target.value)}
+              placeholder="Please explain why..."
+            />
+
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" onClick={() => setReturnPrompt(null)}>Cancel</Button>
+              <Button 
+                disabled={returnReason.trim().length === 0 || submittingReturn}
+                onClick={submitReturn}
+              >
+                Submit Request
               </Button>
             </div>
           </div>

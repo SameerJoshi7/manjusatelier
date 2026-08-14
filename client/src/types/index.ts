@@ -102,6 +102,14 @@ export interface Order {
   customOrderId?: string;
   razorpayOrderId?: string;
   createdAt: string;
+  deliveredAt?: string;
+  returnExchange?: {
+    actionType: 'return' | 'exchange';
+    reason: string;
+    status: 'pending' | 'approved' | 'rejected' | 'completed';
+    requestedAt: string;
+    adminNote?: string;
+  };
 }
 
 export interface Notification {
