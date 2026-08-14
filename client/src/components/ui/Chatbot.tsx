@@ -171,7 +171,7 @@ export const Chatbot = () => {
         {messages.map((msg, idx) => (
           <div 
             key={idx} 
-            className={`max-w-[80%] p-3 rounded-2xl text-sm ${
+            className={`max-w-[80%] p-3 rounded-2xl text-sm shrink-0 ${
               msg.role === 'user' 
                 ? 'bg-brown text-white self-end rounded-tr-sm shadow-sm' 
                 : 'bg-white dark:bg-[#26201a] text-brown-dark dark:text-beige self-start rounded-tl-sm shadow-sm border border-beige dark:border-brown'
@@ -183,7 +183,7 @@ export const Chatbot = () => {
 
         {/* Quick Replies */}
         {!isLoading && messages.length > 0 && messages[messages.length - 1].role === 'model' && (
-          <div className="flex gap-2 mt-2 w-full overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-2 mt-2 w-full overflow-x-auto pb-4 scrollbar-hide shrink-0">
             {suggestedQuestions.map((q, i) => (
               <button
                 key={i}
@@ -204,13 +204,13 @@ export const Chatbot = () => {
         )}
 
         {isLoading && (
-          <div className="bg-white dark:bg-[#26201a] text-brown-dark dark:text-beige self-start p-3 rounded-2xl rounded-tl-sm shadow-sm border border-beige dark:border-brown flex items-center gap-2">
+          <div className="bg-white dark:bg-[#26201a] text-brown-dark dark:text-beige self-start p-3 rounded-2xl rounded-tl-sm shadow-sm border border-beige dark:border-brown flex items-center gap-2 shrink-0">
              <div className="w-2 h-2 bg-brown-light rounded-full animate-bounce"></div>
              <div className="w-2 h-2 bg-brown rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
              <div className="w-2 h-2 bg-brown-dark rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
           </div>
         )}
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} className="h-px shrink-0" />
       </div>
 
       {/* Input Area */}
