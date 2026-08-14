@@ -81,7 +81,7 @@ export const Chatbot = () => {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 p-4 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 transition-colors z-50 flex items-center justify-center"
+        className="fixed bottom-6 right-6 p-4 bg-brown text-white rounded-full shadow-lg hover:bg-brown-dark transition-colors z-50 flex items-center justify-center"
       >
         <MessageCircle size={28} />
       </button>
@@ -91,10 +91,10 @@ export const Chatbot = () => {
   return (
     <div className="fixed bottom-6 right-6 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col z-50 overflow-hidden" style={{ height: '500px', maxHeight: '80vh' }}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 text-white flex justify-between items-center shadow-md z-10">
+      <div className="bg-gradient-to-r from-brown-dark to-brown p-4 text-white flex justify-between items-center shadow-md z-10">
         <div>
           <h3 className="font-semibold text-lg">{language === 'en' ? 'ManjuBot' : 'मंजूबॉट'}</h3>
-          <p className="text-xs text-purple-100">{language === 'en' ? 'Order Tracking & Help' : 'ऑर्डर ट्रैकिंग और मदद'}</p>
+          <p className="text-xs text-beige">{language === 'en' ? 'Order Tracking & Help' : 'ऑर्डर ट्रैकिंग और मदद'}</p>
         </div>
         <div className="flex items-center gap-2">
           {language && (
@@ -121,11 +121,11 @@ export const Chatbot = () => {
             <div className="flex gap-2">
                 <button 
                     onClick={() => { setLanguage('en'); setShowSettings(false); }}
-                    className={`px-3 py-1 rounded text-sm ${language === 'en' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                    className={`px-3 py-1 rounded text-sm ${language === 'en' ? 'bg-brown text-white' : 'bg-gray-200 text-gray-700'}`}
                 >English</button>
                 <button 
                     onClick={() => { setLanguage('hi'); setShowSettings(false); }}
-                    className={`px-3 py-1 rounded text-sm ${language === 'hi' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                    className={`px-3 py-1 rounded text-sm ${language === 'hi' ? 'bg-brown text-white' : 'bg-gray-200 text-gray-700'}`}
                 >हिंदी</button>
             </div>
         </div>
@@ -133,22 +133,22 @@ export const Chatbot = () => {
 
       {/* Language Selection Screen */}
       {!language ? (
-        <div className="flex-1 p-6 flex flex-col items-center justify-center bg-gray-50 text-center">
-          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4 text-purple-600">
+        <div className="flex-1 p-6 flex flex-col items-center justify-center bg-cream text-center">
+          <div className="w-16 h-16 bg-beige rounded-full flex items-center justify-center mb-4 text-brown-dark">
             <Globe size={32} />
           </div>
-          <h4 className="text-lg font-semibold text-gray-800 mb-2">Choose your language</h4>
-          <p className="text-sm text-gray-500 mb-6">अपनी भाषा चुनें</p>
+          <h4 className="text-lg font-semibold text-brown-dark mb-2">Choose your language</h4>
+          <p className="text-sm text-brown/70 mb-6">अपनी भाषा चुनें</p>
           <div className="flex flex-col w-full gap-3">
             <button 
               onClick={() => setLanguage('en')}
-              className="w-full py-3 bg-white border-2 border-purple-100 hover:border-purple-600 rounded-lg font-medium text-gray-700 transition-colors shadow-sm"
+              className="w-full py-3 bg-white border-2 border-beige hover:border-brown rounded-lg font-medium text-brown-dark transition-colors shadow-sm"
             >
               English
             </button>
             <button 
               onClick={() => setLanguage('hi')}
-              className="w-full py-3 bg-white border-2 border-purple-100 hover:border-purple-600 rounded-lg font-medium text-gray-700 transition-colors shadow-sm"
+              className="w-full py-3 bg-white border-2 border-beige hover:border-brown rounded-lg font-medium text-brown-dark transition-colors shadow-sm"
             >
               हिंदी (Hindi)
             </button>
@@ -157,43 +157,43 @@ export const Chatbot = () => {
       ) : (
         <>
           {/* Chat Messages */}
-          <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col gap-3">
+          <div className="flex-1 p-4 overflow-y-auto bg-cream flex flex-col gap-3">
             {messages.map((msg, idx) => (
               <div 
                 key={idx} 
                 className={`max-w-[80%] p-3 rounded-2xl text-sm ${
                   msg.role === 'user' 
-                    ? 'bg-purple-600 text-white self-end rounded-tr-sm shadow-sm' 
-                    : 'bg-white text-gray-800 self-start rounded-tl-sm shadow-sm border border-gray-100'
+                    ? 'bg-brown text-white self-end rounded-tr-sm shadow-sm' 
+                    : 'bg-white text-brown-dark self-start rounded-tl-sm shadow-sm border border-beige'
                 }`}
               >
                 {msg.text}
               </div>
             ))}
             {isLoading && (
-              <div className="bg-white text-gray-800 self-start p-3 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 flex items-center gap-2">
-                 <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-                 <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                 <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              <div className="bg-white text-brown-dark self-start p-3 rounded-2xl rounded-tl-sm shadow-sm border border-beige flex items-center gap-2">
+                 <div className="w-2 h-2 bg-brown-light rounded-full animate-bounce"></div>
+                 <div className="w-2 h-2 bg-brown rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                 <div className="w-2 h-2 bg-brown-dark rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
           {/* Input Area */}
-          <div className="p-3 bg-white border-t border-gray-100 flex items-center gap-2">
+          <div className="p-3 bg-white border-t border-beige flex items-center gap-2">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={language === 'en' ? "Type a message..." : "एक संदेश लिखें..."}
-              className="flex-1 bg-gray-100 text-sm rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-600/50"
+              className="flex-1 bg-cream text-sm rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brown/50"
             />
             <button
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
-              className="p-2.5 bg-purple-600 text-white rounded-full hover:bg-purple-700 disabled:opacity-50 disabled:hover:bg-purple-600 transition-colors flex-shrink-0"
+              className="p-2.5 bg-brown text-white rounded-full hover:bg-brown-dark disabled:opacity-50 disabled:hover:bg-brown transition-colors flex-shrink-0"
             >
               <Send size={18} />
             </button>
