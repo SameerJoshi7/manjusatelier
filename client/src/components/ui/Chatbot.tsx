@@ -188,7 +188,7 @@ export const Chatbot = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={language === 'en' ? "Type a message..." : "एक संदेश लिखें..."}
-              className="flex-1 bg-cream text-base rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brown/50"
+              className="flex-1 bg-cream text-brown-dark text-base placeholder-brown/50 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brown/50"
             />
             <button
               onClick={handleSend}
