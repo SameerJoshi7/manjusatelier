@@ -63,7 +63,7 @@ export const handleChat = async (req, res, next) => {
          const orderData = await getOrderStatus(orderId);
          
          const functionResponse = {
-            role: 'function',
+            role: 'user',
             parts: [{
                 functionResponse: {
                     name: 'get_order_status',
