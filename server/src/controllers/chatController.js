@@ -44,7 +44,7 @@ export const handleChat = async (req, res, next) => {
     contents.push({ role: 'user', parts: [{ text: message }] });
 
     const response = await ai.models.generateContent({
-      model: 'gemini-flash-latest',
+      model: 'gemini-1.5-flash-8b',
       contents: contents,
       config: {
         systemInstruction,
@@ -83,7 +83,7 @@ export const handleChat = async (req, res, next) => {
          ];
 
          const followupResponse = await ai.models.generateContent({
-            model: 'gemini-flash-latest',
+            model: 'gemini-1.5-flash-8b',
             contents: followupContents,
             config: {
                 systemInstruction,
