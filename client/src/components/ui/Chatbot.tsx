@@ -82,14 +82,20 @@ export const Chatbot = () => {
 
   const suggestedQuestions = {
     en: [
-      "Where is my order 1001?",
-      "Where is my order 1002?",
-      "How do I track my order?"
+      "Where is my order?",
+      "What is your return policy?",
+      "Do you ship internationally?",
+      "What payment methods are accepted?",
+      "How do I exchange an item?",
+      "How can I contact support?"
     ],
     hi: [
-      "मेरा ऑर्डर 1001 कहाँ है?",
-      "मेरा ऑर्डर 1002 कहाँ है?",
-      "मैं अपना ऑर्डर कैसे ट्रैक करूं?"
+      "मेरा ऑर्डर कहाँ है?",
+      "आपकी वापसी (return) नीति क्या है?",
+      "क्या आप अंतरराष्ट्रीय शिपिंग करते हैं?",
+      "आप कौन-से भुगतान तरीके स्वीकार करते हैं?",
+      "मैं किसी वस्तु को कैसे बदलूं (exchange)?",
+      "मैं कस्टमर सपोर्ट से कैसे संपर्क करूं?"
     ]
   };
 
@@ -189,13 +195,13 @@ export const Chatbot = () => {
 
             {/* Quick Replies */}
             {messages.length === 1 && language && (
-              <div className="flex flex-wrap gap-2 mt-2 max-w-[90%]">
+              <div className="flex gap-2 mt-2 w-full overflow-x-auto pb-2 scrollbar-hide">
                 {suggestedQuestions[language].map((q, i) => (
                   <button
                     key={i}
                     onClick={() => handleSend(q)}
                     disabled={isLoading}
-                    className="text-xs text-left bg-white border border-brown text-brown px-3 py-1.5 rounded-2xl hover:bg-brown hover:text-white transition-colors shadow-sm disabled:opacity-50"
+                    className="text-xs whitespace-nowrap flex-shrink-0 bg-white border border-brown text-brown px-3 py-1.5 rounded-2xl hover:bg-brown hover:text-white transition-colors shadow-sm disabled:opacity-50"
                   >
                     {q}
                   </button>
