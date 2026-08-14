@@ -17,7 +17,7 @@ export const submitContactForm = async (req, res) => {
     `;
 
     await sendEmail({
-      email: 'queries@manjusatelier.com',
+      email: 'queries@manjusatelier.in',
       subject: `Contact Form: ${subject || 'New Inquiry from ' + name}`,
       html: emailHtml,
       message: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
