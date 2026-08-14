@@ -10,12 +10,23 @@ interface Message {
   text: string;
 }
 
+type QuickReply = { 
+  text: string; 
+  type: 'chat' | 'link' | 'action'; 
+  href?: string;
+  action?: 'show_orders' | 'load_more' | 'cancel_orders';
+};
+
 export const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [userOrders, setUserOrders] = useState<Order[]>([]);
+  
+  // Order selection state
+  const [showOrderSelection, setShowOrderSelection] = useState(false);
+  const [ordersPage, setOrdersPage] = useState(1);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -90,23 +101,42 @@ export const Chatbot = () => {
     }
   };
 
-  type QuickReply = { text: string; type: 'chat' | 'link'; href?: string };
+  const handleQuickReply = (q: QuickReply) => {
+    if (q.type === 'link' && q.href) {
+      setIsOpen(false);
+      navigate(q.href);
+    } else if (q.type === 'action') {
+      if (q.action === 'show_orders') {
+        setShowOrderSelection(true);
+        setOrdersPage(1);
+      } else if (q.action === 'load_more') {
+        setOrdersPage(p => p + 1);
+      } else if (q.action === 'cancel_orders') {
+        setShowOrderSelection(false);
+        setOrdersPage(1);
+      }
+    } else {
+      // type === 'chat'
+      setShowOrderSelection(false);
+      setOrdersPage(1);
+      handleSend(q.text);
+    }
+  };
 
-  const baseQuestions: QuickReply[] = [
-    { text: "Where is my order?", type: 'chat' },
-    { text: "What is your return policy?", type: 'link', href: '/terms' },
-    { text: "Do you ship internationally?", type: 'chat' },
-    { text: "What payment methods are accepted?", type: 'chat' },
-    { text: "How do I exchange an item?", type: 'link', href: '/terms' },
-    { text: "How can I contact support?", type: 'link', href: '/contact' }
-  ];
-
-  const suggestedQuestions: QuickReply[] = [
-    ...userOrders.map(o => {
+  const suggestedQuestions: QuickReply[] = showOrderSelection ? [
+    ...userOrders.slice(0, ordersPage * 3).map(o => {
       const id = o.customOrderId || o._id.slice(-8).toUpperCase();
       return { text: `Track order #${id}`, type: 'chat' as const };
     }),
-    ...baseQuestions
+    ...(userOrders.length > ordersPage * 3 ? [{ text: "Load more orders...", type: 'action' as const, action: 'load_more' as const }] : []),
+    { text: "Cancel", type: 'action' as const, action: 'cancel_orders' as const }
+  ] : [
+    { text: "Where is my order?", type: userOrders.length > 0 ? 'action' as const : 'chat' as const, action: 'show_orders' as const },
+    { text: "What is your return policy?", type: 'link' as const, href: '/terms' },
+    { text: "Do you ship internationally?", type: 'chat' as const },
+    { text: "What payment methods are accepted?", type: 'chat' as const },
+    { text: "How do I exchange an item?", type: 'link' as const, href: '/terms' },
+    { text: "How can I contact support?", type: 'link' as const, href: '/contact' }
   ];
 
   if (!isOpen) {
@@ -151,22 +181,21 @@ export const Chatbot = () => {
           </div>
         ))}
 
-        {/* Quick Replies (show when not loading and last message is from model) */}
+        {/* Quick Replies */}
         {!isLoading && messages.length > 0 && messages[messages.length - 1].role === 'model' && (
           <div className="flex gap-2 mt-2 w-full overflow-x-auto pb-2 scrollbar-hide">
             {suggestedQuestions.map((q, i) => (
               <button
                 key={i}
-                onClick={() => {
-                  if (q.type === 'link' && q.href) {
-                    setIsOpen(false);
-                    navigate(q.href);
-                  } else {
-                    handleSend(q.text);
-                  }
-                }}
+                onClick={() => handleQuickReply(q)}
                 disabled={isLoading}
-                className="text-xs whitespace-nowrap flex-shrink-0 bg-white dark:bg-[#26201a] border border-brown dark:border-brown text-brown dark:text-beige px-3 py-1.5 rounded-2xl hover:bg-brown dark:hover:bg-brown hover:text-white dark:hover:text-white transition-colors shadow-sm disabled:opacity-50"
+                className={`text-xs whitespace-nowrap flex-shrink-0 border px-3 py-1.5 rounded-2xl transition-colors shadow-sm disabled:opacity-50 ${
+                  q.action === 'cancel_orders' 
+                    ? 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200 dark:bg-[#332a22] dark:text-gray-300 dark:border-[#332a22] dark:hover:bg-[#44382d]' 
+                    : q.action === 'load_more' || q.action === 'show_orders'
+                    ? 'bg-brown-light/10 text-brown border-brown hover:bg-brown hover:text-white dark:bg-brown/20 dark:text-beige dark:border-brown-light dark:hover:bg-brown-light dark:hover:text-white'
+                    : 'bg-white text-brown border-brown hover:bg-brown hover:text-white dark:bg-[#26201a] dark:text-beige dark:border-brown dark:hover:bg-brown dark:hover:text-white'
+                }`}
               >
                 {q.text}
               </button>
