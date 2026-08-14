@@ -34,12 +34,15 @@ export const Chatbot = () => {
     }
   }, [language, messages.length]);
 
-  const handleSend = async () => {
-    if (!input.trim() || !language) return;
+  const handleSend = async (textOverride?: string) => {
+    // If textOverride is provided, use it (and don't clear the input field).
+    // If it's a normal send, use the input state and then clear it.
+    const textToSend = textOverride || input;
+    if (!textToSend.trim() || !language) return;
 
-    const userMsg: Message = { role: 'user', text: input };
+    const userMsg: Message = { role: 'user', text: textToSend };
     setMessages((prev) => [...prev, userMsg]);
-    setInput('');
+    if (!textOverride) setInput('');
     setIsLoading(true);
 
     try {
@@ -50,7 +53,7 @@ export const Chatbot = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: userMsg.text,
+          message: textToSend,
           history: messages,
           language: language,
         }),
@@ -75,6 +78,19 @@ export const Chatbot = () => {
     if (e.key === 'Enter') {
       handleSend();
     }
+  };
+
+  const suggestedQuestions = {
+    en: [
+      "Where is my order 1001?",
+      "Where is my order 1002?",
+      "How do I track my order?"
+    ],
+    hi: [
+      "मेरा ऑर्डर 1001 कहाँ है?",
+      "मेरा ऑर्डर 1002 कहाँ है?",
+      "मैं अपना ऑर्डर कैसे ट्रैक करूं?"
+    ]
   };
 
   if (!isOpen) {
@@ -170,6 +186,23 @@ export const Chatbot = () => {
                 {msg.text}
               </div>
             ))}
+
+            {/* Quick Replies */}
+            {messages.length === 1 && language && (
+              <div className="flex flex-wrap gap-2 mt-2 max-w-[90%]">
+                {suggestedQuestions[language].map((q, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSend(q)}
+                    disabled={isLoading}
+                    className="text-xs text-left bg-white border border-brown text-brown px-3 py-1.5 rounded-2xl hover:bg-brown hover:text-white transition-colors shadow-sm disabled:opacity-50"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {isLoading && (
               <div className="bg-white text-brown-dark self-start p-3 rounded-2xl rounded-tl-sm shadow-sm border border-beige flex items-center gap-2">
                  <div className="w-2 h-2 bg-brown-light rounded-full animate-bounce"></div>
@@ -191,7 +224,7 @@ export const Chatbot = () => {
               className="flex-1 bg-cream text-brown-dark text-base placeholder-brown/50 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brown/50"
             />
             <button
-              onClick={handleSend}
+              onClick={() => handleSend()}
               disabled={isLoading || !input.trim()}
               className="p-2.5 bg-brown text-white rounded-full hover:bg-brown-dark disabled:opacity-50 disabled:hover:bg-brown transition-colors flex-shrink-0"
             >
