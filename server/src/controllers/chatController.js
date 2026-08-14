@@ -1,12 +1,18 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import { getOrderStatus } from '../services/orderService.js';
 
-// Initialize the Gemini AI client
-// It will automatically use process.env.GEMINI_API_KEY
-const ai = new GoogleGenAI({});
+// The Gemini AI client will be initialized inside the handler
+// to ensure process.env variables are fully loaded.
 
 export const handleChat = async (req, res, next) => {
   try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error('Server missing GEMINI_API_KEY');
+      return res.status(500).json({ error: 'Server configuration error: API key missing.' });
+    }
+    const ai = new GoogleGenAI({ apiKey });
+
     const { message, history, language } = req.body;
     
     let systemInstruction = "You are ManjuBot, a helpful customer support bot for Manju's Atelier. You can help users track their orders. Be polite and concise.";
