@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, X, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { api } from '@/lib/api';
+import type { Order } from '@/types';
 
 interface Message {
   role: 'user' | 'model';
@@ -12,9 +15,11 @@ export const Chatbot = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [userOrders, setUserOrders] = useState<Order[]>([]);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -23,6 +28,17 @@ export const Chatbot = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Fetch user orders if logged in
+  useEffect(() => {
+    if (user) {
+      api.get<{ orders: Order[] }>('/orders/mine')
+        .then(({ orders }) => setUserOrders(orders))
+        .catch(() => void 0);
+    } else {
+      setUserOrders([]);
+    }
+  }, [user]);
 
   // Initial greeting
   useEffect(() => {
@@ -74,13 +90,21 @@ export const Chatbot = () => {
     }
   };
 
-  const suggestedQuestions = [
+  const baseQuestions = [
     { text: "Where is my order?", type: 'chat' },
     { text: "What is your return policy?", type: 'link', href: '/terms' },
     { text: "Do you ship internationally?", type: 'chat' },
     { text: "What payment methods are accepted?", type: 'chat' },
     { text: "How do I exchange an item?", type: 'link', href: '/terms' },
     { text: "How can I contact support?", type: 'link', href: '/contact' }
+  ];
+
+  const suggestedQuestions = [
+    ...userOrders.map(o => {
+      const id = o.customOrderId || o._id.slice(-8).toUpperCase();
+      return { text: `Track order #${id}`, type: 'chat' };
+    }),
+    ...baseQuestions
   ];
 
   if (!isOpen) {
@@ -125,8 +149,8 @@ export const Chatbot = () => {
           </div>
         ))}
 
-        {/* Quick Replies */}
-        {messages.length === 1 && (
+        {/* Quick Replies (show when not loading and last message is from model) */}
+        {!isLoading && messages.length > 0 && messages[messages.length - 1].role === 'model' && (
           <div className="flex gap-2 mt-2 w-full overflow-x-auto pb-2 scrollbar-hide">
             {suggestedQuestions.map((q, i) => (
               <button

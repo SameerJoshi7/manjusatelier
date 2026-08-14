@@ -60,7 +60,7 @@ export const handleChat = async (req, res, next) => {
        const functionCall = response.functionCalls[0];
        if (functionCall.name === 'get_order_status') {
          const { orderId } = functionCall.args;
-         const orderData = getOrderStatus(orderId);
+         const orderData = await getOrderStatus(orderId);
          
          const functionResponse = {
             role: 'function',
