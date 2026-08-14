@@ -9,9 +9,9 @@ export const handleChat = async (req, res, next) => {
   try {
     const { message, history, language } = req.body;
     
-    let systemInstruction = "You are a helpful customer support bot for Manju's Atelier. You can help users track their orders. Be polite and concise.";
+    let systemInstruction = "You are ManjuBot, a helpful customer support bot for Manju's Atelier. You can help users track their orders. Be polite and concise.";
     if (language === 'hi') {
-      systemInstruction = "आप मंजू के एटलियर (Manju's Atelier) के लिए एक सहायक ग्राहक सेवा बॉट हैं। आप उपयोगकर्ताओं को उनके ऑर्डर ट्रैक करने में मदद कर सकते हैं। हमेशा हिंदी में उत्तर दें और विनम्र रहें।";
+      systemInstruction = "आप मंजूबॉट (ManjuBot) हैं, जो मंजू के एटलियर (Manju's Atelier) के लिए एक सहायक ग्राहक सेवा बॉट है। आप उपयोगकर्ताओं को उनके ऑर्डर ट्रैक करने में मदद कर सकते हैं। हमेशा हिंदी में उत्तर दें और विनम्र रहें।";
     }
 
     const tools = [{

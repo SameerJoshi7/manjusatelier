@@ -28,8 +28,8 @@ export const Chatbot = () => {
   useEffect(() => {
     if (language && messages.length === 0) {
       const greeting = language === 'en' 
-        ? "Hi there! I'm Manju's Atelier AI Assistant. How can I help you track your order today?"
-        : "नमस्ते! मैं मंजू एटलियर का एआई सहायक हूँ। आज मैं आपका ऑर्डर ट्रैक करने में कैसे मदद कर सकता हूँ?";
+        ? "Hi there! I'm ManjuBot. How can I help you track your order today?"
+        : "नमस्ते! मैं मंजूबॉट (ManjuBot) हूँ। आज मैं आपका ऑर्डर ट्रैक करने में कैसे मदद कर सकता हूँ?";
       setMessages([{ role: 'model', text: greeting }]);
     }
   }, [language, messages.length]);
@@ -93,7 +93,7 @@ export const Chatbot = () => {
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 text-white flex justify-between items-center shadow-md z-10">
         <div>
-          <h3 className="font-semibold text-lg">{language === 'en' ? 'AI Support' : 'एआई सहायता'}</h3>
+          <h3 className="font-semibold text-lg">{language === 'en' ? 'ManjuBot' : 'मंजूबॉट'}</h3>
           <p className="text-xs text-purple-100">{language === 'en' ? 'Order Tracking & Help' : 'ऑर्डर ट्रैकिंग और मदद'}</p>
         </div>
         <div className="flex items-center gap-2">
