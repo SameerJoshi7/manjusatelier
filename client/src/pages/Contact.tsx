@@ -12,7 +12,7 @@ const faqs = [
   { q: 'Are all products truly handmade?', a: 'Yes! Every single piece is handcrafted in small batches at our studio. No mass production, ever.' },
   { q: 'Do you take custom orders?', a: 'Absolutely. Use the contact form or the "Request Custom Design" button and we\u2019ll work with you to create something special.' },
   { q: 'How long does shipping take?', a: 'Ready-made pieces ship within 2-3 business days. Custom orders typically take 1-2 weeks depending on complexity.' },
-  { q: 'What is your return policy?', a: 'We offer 7-day returns on ready-made items in original condition. Custom pieces are non-returnable.' },
+  { q: 'What is your return / exchange policy?', a: 'Returns and exchanges must be initiated within 7 days post-delivery. We cannot accept any requests after this period. Items must be in original condition, and custom pieces are non-returnable.' },
   { q: 'Which payment methods do you accept?', a: 'We accept all major cards, UPI, netbanking and wallets through our secure Razorpay checkout.' },
 ];
 
