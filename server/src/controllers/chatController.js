@@ -75,7 +75,10 @@ export const handleChat = async (req, res, next) => {
          // Call model again with the function response to generate natural language reply
          const followupContents = [
             ...contents,
-            { role: 'model', parts: response.parts },
+            { 
+               role: 'model', 
+               parts: [{ functionCall: { name: functionCall.name, args: functionCall.args } }] 
+            },
             functionResponse
          ];
 
