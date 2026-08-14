@@ -10,7 +10,7 @@ export const sendEmail = async (options) => {
   const from = `${process.env.FROM_NAME || "Manju's Atelier"} <${process.env.EMAIL_FROM || 'help@manjusatelier.in'}>`;
 
   try {
-    const data = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from,
       to: options.email,
       subject: options.subject,
@@ -18,7 +18,12 @@ export const sendEmail = async (options) => {
       html: options.html, // Optional
     });
     
-    console.log('Email sent via Resend:', data.id);
+    if (error) {
+      console.error('Resend API returned an error:', error);
+      throw error;
+    }
+    
+    console.log('Email sent via Resend:', data?.id);
     return data;
   } catch (error) {
     console.error('Error sending email via Resend:', error);
