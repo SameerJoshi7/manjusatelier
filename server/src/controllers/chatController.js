@@ -13,12 +13,9 @@ export const handleChat = async (req, res, next) => {
     }
     const ai = new GoogleGenAI({ apiKey });
 
-    const { message, history, language } = req.body;
+    const { message, history } = req.body;
     
-    let systemInstruction = "You are ManjuBot, a helpful customer support bot for Manju's Atelier. You can help users track their orders. Be polite and concise.";
-    if (language === 'hi') {
-      systemInstruction = "आप मंजूबॉट (ManjuBot) हैं, जो मंजू के एटलियर (Manju's Atelier) के लिए एक सहायक ग्राहक सेवा बॉट है। आप उपयोगकर्ताओं को उनके ऑर्डर ट्रैक करने में मदद कर सकते हैं। हमेशा हिंदी में उत्तर दें और विनम्र रहें।";
-    }
+    const systemInstruction = "You are ManjuBot, a helpful customer support bot for Manju's Atelier. You can help users track their orders. Be polite and concise.";
 
     const tools = [{
       functionDeclarations: [{

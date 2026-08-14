@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, Settings, Globe } from 'lucide-react';
+import { MessageCircle, X, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Message {
@@ -9,11 +9,9 @@ interface Message {
 
 export const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'hi' | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -26,19 +24,16 @@ export const Chatbot = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Initial greeting based on language
+  // Initial greeting
   useEffect(() => {
-    if (language && messages.length === 0) {
-      const greeting = language === 'en' 
-        ? "Hi there! I'm ManjuBot. How can I help you track your order today?"
-        : "नमस्ते! मैं मंजूबॉट (ManjuBot) हूँ। आज मैं आपका ऑर्डर ट्रैक करने में कैसे मदद कर सकता हूँ?";
-      setMessages([{ role: 'model', text: greeting }]);
+    if (messages.length === 0) {
+      setMessages([{ role: 'model', text: "Hi there! I'm ManjuBot. How can I help you track your order today?" }]);
     }
-  }, [language, messages.length]);
+  }, [messages.length]);
 
   const handleSend = async (textOverride?: string) => {
     const textToSend = textOverride || input;
-    if (!textToSend.trim() || !language) return;
+    if (!textToSend.trim()) return;
 
     const userMsg: Message = { role: 'user', text: textToSend };
     setMessages((prev) => [...prev, userMsg]);
@@ -55,7 +50,6 @@ export const Chatbot = () => {
         body: JSON.stringify({
           message: textToSend,
           history: messages,
-          language: language,
         }),
       });
 
@@ -68,7 +62,7 @@ export const Chatbot = () => {
       }
     } catch (error) {
       console.error('Chat error:', error);
-      setMessages((prev) => [...prev, { role: 'model', text: language === 'en' ? 'Sorry, I am having trouble connecting right now.' : 'क्षमा करें, मुझे अभी कनेक्ट करने में परेशानी हो रही है।' }]);
+      setMessages((prev) => [...prev, { role: 'model', text: 'Sorry, I am having trouble connecting right now.' }]);
     } finally {
       setIsLoading(false);
     }
@@ -80,24 +74,14 @@ export const Chatbot = () => {
     }
   };
 
-  const suggestedQuestions = {
-    en: [
-      { text: "Where is my order?", type: 'chat' },
-      { text: "What is your return policy?", type: 'link', href: '/terms' },
-      { text: "Do you ship internationally?", type: 'chat' },
-      { text: "What payment methods are accepted?", type: 'chat' },
-      { text: "How do I exchange an item?", type: 'link', href: '/terms' },
-      { text: "How can I contact support?", type: 'link', href: '/contact' }
-    ],
-    hi: [
-      { text: "मेरा ऑर्डर कहाँ है?", type: 'chat' },
-      { text: "आपकी वापसी (return) नीति क्या है?", type: 'link', href: '/terms' },
-      { text: "क्या आप अंतरराष्ट्रीय शिपिंग करते हैं?", type: 'chat' },
-      { text: "आप कौन-से भुगतान तरीके स्वीकार करते हैं?", type: 'chat' },
-      { text: "मैं किसी वस्तु को कैसे बदलूं (exchange)?", type: 'link', href: '/terms' },
-      { text: "मैं कस्टमर सपोर्ट से कैसे संपर्क करूं?", type: 'link', href: '/contact' }
-    ]
-  };
+  const suggestedQuestions = [
+    { text: "Where is my order?", type: 'chat' },
+    { text: "What is your return policy?", type: 'link', href: '/terms' },
+    { text: "Do you ship internationally?", type: 'chat' },
+    { text: "What payment methods are accepted?", type: 'chat' },
+    { text: "How do I exchange an item?", type: 'link', href: '/terms' },
+    { text: "How can I contact support?", type: 'link', href: '/contact' }
+  ];
 
   if (!isOpen) {
     return (
@@ -115,137 +99,83 @@ export const Chatbot = () => {
       {/* Header */}
       <div className="bg-gradient-to-r from-brown-dark to-brown p-4 text-white flex justify-between items-center shadow-md z-10">
         <div>
-          <h3 className="font-semibold text-lg">{language === 'en' ? 'ManjuBot' : 'मंजूबॉट'}</h3>
-          <p className="text-xs text-beige">{language === 'en' ? 'Order Tracking & Help' : 'ऑर्डर ट्रैकिंग और मदद'}</p>
+          <h3 className="font-semibold text-lg">ManjuBot</h3>
+          <p className="text-xs text-beige">Order Tracking & Help</p>
         </div>
-        <div className="flex items-center gap-2">
-          {language && (
-            <button 
-              onClick={() => setShowSettings(!showSettings)}
-              className="p-1 hover:bg-white/20 rounded transition-colors"
-            >
-              <Settings size={20} />
-            </button>
-          )}
-          <button 
-            onClick={() => setIsOpen(false)}
-            className="p-1 hover:bg-white/20 rounded transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
+        <button 
+          onClick={() => setIsOpen(false)}
+          className="p-1 hover:bg-white/20 rounded transition-colors"
+        >
+          <X size={20} />
+        </button>
       </div>
 
-      {/* Settings Overlay */}
-      {showSettings && (
-        <div className="absolute top-16 right-0 w-full bg-gray-50 dark:bg-[#1c1712] border-b border-gray-200 dark:border-brown-dark p-4 z-20 shadow-inner flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-700 dark:text-beige flex items-center gap-2"><Globe size={16}/> Language</span>
-            <div className="flex gap-2">
-                <button 
-                    onClick={() => { setLanguage('en'); setShowSettings(false); }}
-                    className={`px-3 py-1 rounded text-sm ${language === 'en' ? 'bg-brown text-white' : 'bg-gray-200 dark:bg-[#332a22] text-gray-700 dark:text-beige'}`}
-                >English</button>
-                <button 
-                    onClick={() => { setLanguage('hi'); setShowSettings(false); }}
-                    className={`px-3 py-1 rounded text-sm ${language === 'hi' ? 'bg-brown text-white' : 'bg-gray-200 dark:bg-[#332a22] text-gray-700 dark:text-beige'}`}
-                >हिंदी</button>
-            </div>
-        </div>
-      )}
+      {/* Chat Messages */}
+      <div className="flex-1 p-4 overflow-y-auto bg-cream dark:bg-[#1c1712] flex flex-col gap-3">
+        {messages.map((msg, idx) => (
+          <div 
+            key={idx} 
+            className={`max-w-[80%] p-3 rounded-2xl text-sm ${
+              msg.role === 'user' 
+                ? 'bg-brown text-white self-end rounded-tr-sm shadow-sm' 
+                : 'bg-white dark:bg-[#26201a] text-brown-dark dark:text-beige self-start rounded-tl-sm shadow-sm border border-beige dark:border-brown'
+            }`}
+          >
+            {msg.text}
+          </div>
+        ))}
 
-      {/* Language Selection Screen */}
-      {!language ? (
-        <div className="flex-1 p-6 flex flex-col items-center justify-center bg-cream dark:bg-[#1c1712] text-center">
-          <div className="w-16 h-16 bg-beige dark:bg-brown rounded-full flex items-center justify-center mb-4 text-brown-dark dark:text-white">
-            <Globe size={32} />
-          </div>
-          <h4 className="text-lg font-semibold text-brown-dark dark:text-beige mb-2">Choose your language</h4>
-          <p className="text-sm text-brown/70 dark:text-beige/70 mb-6">अपनी भाषा चुनें</p>
-          <div className="flex flex-col w-full gap-3">
-            <button 
-              onClick={() => setLanguage('en')}
-              className="w-full py-3 bg-white dark:bg-[#26201a] border-2 border-beige dark:border-brown hover:border-brown rounded-lg font-medium text-brown-dark dark:text-beige transition-colors shadow-sm"
-            >
-              English
-            </button>
-            <button 
-              onClick={() => setLanguage('hi')}
-              className="w-full py-3 bg-white dark:bg-[#26201a] border-2 border-beige dark:border-brown hover:border-brown rounded-lg font-medium text-brown-dark dark:text-beige transition-colors shadow-sm"
-            >
-              हिंदी (Hindi)
-            </button>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* Chat Messages */}
-          <div className="flex-1 p-4 overflow-y-auto bg-cream dark:bg-[#1c1712] flex flex-col gap-3">
-            {messages.map((msg, idx) => (
-              <div 
-                key={idx} 
-                className={`max-w-[80%] p-3 rounded-2xl text-sm ${
-                  msg.role === 'user' 
-                    ? 'bg-brown text-white self-end rounded-tr-sm shadow-sm' 
-                    : 'bg-white dark:bg-[#26201a] text-brown-dark dark:text-beige self-start rounded-tl-sm shadow-sm border border-beige dark:border-brown'
-                }`}
+        {/* Quick Replies */}
+        {messages.length === 1 && (
+          <div className="flex gap-2 mt-2 w-full overflow-x-auto pb-2 scrollbar-hide">
+            {suggestedQuestions.map((q, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  if (q.type === 'link' && q.href) {
+                    setIsOpen(false);
+                    navigate(q.href);
+                  } else {
+                    handleSend(q.text);
+                  }
+                }}
+                disabled={isLoading}
+                className="text-xs whitespace-nowrap flex-shrink-0 bg-white dark:bg-[#26201a] border border-brown dark:border-brown text-brown dark:text-beige px-3 py-1.5 rounded-2xl hover:bg-brown dark:hover:bg-brown hover:text-white dark:hover:text-white transition-colors shadow-sm disabled:opacity-50"
               >
-                {msg.text}
-              </div>
+                {q.text}
+              </button>
             ))}
-
-            {/* Quick Replies */}
-            {messages.length === 1 && language && (
-              <div className="flex gap-2 mt-2 w-full overflow-x-auto pb-2 scrollbar-hide">
-                {suggestedQuestions[language].map((q, i) => (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      if (q.type === 'link' && q.href) {
-                        setIsOpen(false);
-                        navigate(q.href);
-                      } else {
-                        handleSend(q.text);
-                      }
-                    }}
-                    disabled={isLoading}
-                    className="text-xs whitespace-nowrap flex-shrink-0 bg-white dark:bg-[#26201a] border border-brown dark:border-brown text-brown dark:text-beige px-3 py-1.5 rounded-2xl hover:bg-brown dark:hover:bg-brown hover:text-white dark:hover:text-white transition-colors shadow-sm disabled:opacity-50"
-                  >
-                    {q.text}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {isLoading && (
-              <div className="bg-white dark:bg-[#26201a] text-brown-dark dark:text-beige self-start p-3 rounded-2xl rounded-tl-sm shadow-sm border border-beige dark:border-brown flex items-center gap-2">
-                 <div className="w-2 h-2 bg-brown-light rounded-full animate-bounce"></div>
-                 <div className="w-2 h-2 bg-brown rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                 <div className="w-2 h-2 bg-brown-dark rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
           </div>
+        )}
 
-          {/* Input Area */}
-          <div className="p-3 bg-white dark:bg-[#26201a] border-t border-beige dark:border-brown-dark flex items-center gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder={language === 'en' ? "Type a message..." : "एक संदेश लिखें..."}
-              className="flex-1 bg-cream dark:bg-[#1c1712] text-brown-dark dark:text-beige text-base placeholder-brown/50 dark:placeholder-beige/50 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brown/50"
-            />
-            <button
-              onClick={() => handleSend()}
-              disabled={isLoading || !input.trim()}
-              className="p-2.5 bg-brown text-white rounded-full hover:bg-brown-dark disabled:opacity-50 disabled:hover:bg-brown transition-colors flex-shrink-0"
-            >
-              <Send size={18} />
-            </button>
+        {isLoading && (
+          <div className="bg-white dark:bg-[#26201a] text-brown-dark dark:text-beige self-start p-3 rounded-2xl rounded-tl-sm shadow-sm border border-beige dark:border-brown flex items-center gap-2">
+             <div className="w-2 h-2 bg-brown-light rounded-full animate-bounce"></div>
+             <div className="w-2 h-2 bg-brown rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+             <div className="w-2 h-2 bg-brown-dark rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
           </div>
-        </>
-      )}
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input Area */}
+      <div className="p-3 bg-white dark:bg-[#26201a] border-t border-beige dark:border-brown-dark flex items-center gap-2">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Type a message..."
+          className="flex-1 bg-cream dark:bg-[#1c1712] text-brown-dark dark:text-beige text-base placeholder-brown/50 dark:placeholder-beige/50 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brown/50"
+        />
+        <button
+          onClick={() => handleSend()}
+          disabled={isLoading || !input.trim()}
+          className="p-2.5 bg-brown text-white rounded-full hover:bg-brown-dark disabled:opacity-50 disabled:hover:bg-brown transition-colors flex-shrink-0"
+        >
+          <Send size={18} />
+        </button>
+      </div>
     </div>
   );
 };
