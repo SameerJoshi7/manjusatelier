@@ -95,6 +95,6 @@ export const handleChat = async (req, res, next) => {
     res.status(200).json({ text: finalResponseText });
   } catch (error) {
     console.error('Chat API Error:', error);
-    res.status(500).json({ error: 'Failed to process chat message. Please ensure GEMINI_API_KEY is set in your .env file.' });
+    res.status(500).json({ error: error.message || 'Failed to process chat message.' });
   }
 };
