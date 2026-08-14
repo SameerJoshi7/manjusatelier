@@ -23,6 +23,7 @@ import notificationRoutes from './routes/notificationRoutes.js';
 import pushRoutes from './routes/pushRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
+import contactRoutes from './routes/contactRoutes.js';
 
 export function createApp() {
   const app = express();
@@ -86,6 +87,7 @@ export function createApp() {
   app.use('/api/push', pushRoutes);
   app.use('/api/ai', aiRoutes);
   app.use('/api/chat', chatRoutes);
+  app.use('/api/contact', contactRoutes);
 
   // --- Errors ---
   app.use(notFound);

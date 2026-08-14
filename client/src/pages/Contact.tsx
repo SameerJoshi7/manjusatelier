@@ -6,6 +6,7 @@ import { Reveal } from '@/components/ui/Reveal';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import { cn } from '@/lib/utils';
+import { api } from '@/lib/api';
 
 const faqs = [
   { q: 'Are all products truly handmade?', a: 'Yes! Every single piece is handcrafted in small batches at our studio. No mass production, ever.' },
@@ -20,11 +21,21 @@ export default function Contact() {
   const { notify } = useToast();
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [loading, setLoading] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    notify('Thank you! We\u2019ll get back to you soon.');
-    setForm({ name: '', email: '', subject: '', message: '' });
+    setLoading(true);
+    try {
+      await api.post('/contact', form);
+      notify('Thank you! We\u2019ll get back to you soon.');
+      setForm({ name: '', email: '', subject: '', message: '' });
+    } catch (error: unknown) {
+      const e = error as { response?: { data?: { error?: string } } };
+      notify(e.response?.data?.error || 'Failed to send message.', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -99,8 +110,8 @@ export default function Contact() {
                 className="input resize-none"
               />
             </Field>
-            <Button type="submit" size="lg" fullWidth>
-              Send Message
+            <Button type="submit" size="lg" fullWidth disabled={loading}>
+              {loading ? 'Sending...' : 'Send Message'}
             </Button>
           </form>
         </Reveal>
