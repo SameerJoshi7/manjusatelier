@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, X, Send, Settings, Globe } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   role: 'user' | 'model';
@@ -15,6 +16,7 @@ export const Chatbot = () => {
   const [showSettings, setShowSettings] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -35,8 +37,6 @@ export const Chatbot = () => {
   }, [language, messages.length]);
 
   const handleSend = async (textOverride?: string) => {
-    // If textOverride is provided, use it (and don't clear the input field).
-    // If it's a normal send, use the input state and then clear it.
     const textToSend = textOverride || input;
     if (!textToSend.trim() || !language) return;
 
@@ -82,20 +82,20 @@ export const Chatbot = () => {
 
   const suggestedQuestions = {
     en: [
-      "Where is my order?",
-      "What is your return policy?",
-      "Do you ship internationally?",
-      "What payment methods are accepted?",
-      "How do I exchange an item?",
-      "How can I contact support?"
+      { text: "Where is my order?", type: 'chat' },
+      { text: "What is your return policy?", type: 'link', href: '/terms' },
+      { text: "Do you ship internationally?", type: 'chat' },
+      { text: "What payment methods are accepted?", type: 'chat' },
+      { text: "How do I exchange an item?", type: 'link', href: '/terms' },
+      { text: "How can I contact support?", type: 'link', href: '/contact' }
     ],
     hi: [
-      "मेरा ऑर्डर कहाँ है?",
-      "आपकी वापसी (return) नीति क्या है?",
-      "क्या आप अंतरराष्ट्रीय शिपिंग करते हैं?",
-      "आप कौन-से भुगतान तरीके स्वीकार करते हैं?",
-      "मैं किसी वस्तु को कैसे बदलूं (exchange)?",
-      "मैं कस्टमर सपोर्ट से कैसे संपर्क करूं?"
+      { text: "मेरा ऑर्डर कहाँ है?", type: 'chat' },
+      { text: "आपकी वापसी (return) नीति क्या है?", type: 'link', href: '/terms' },
+      { text: "क्या आप अंतरराष्ट्रीय शिपिंग करते हैं?", type: 'chat' },
+      { text: "आप कौन-से भुगतान तरीके स्वीकार करते हैं?", type: 'chat' },
+      { text: "मैं किसी वस्तु को कैसे बदलूं (exchange)?", type: 'link', href: '/terms' },
+      { text: "मैं कस्टमर सपोर्ट से कैसे संपर्क करूं?", type: 'link', href: '/contact' }
     ]
   };
 
@@ -111,7 +111,7 @@ export const Chatbot = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col z-50 overflow-hidden" style={{ height: '500px', maxHeight: '80vh' }}>
+    <div className="fixed bottom-6 right-6 w-80 sm:w-96 bg-white dark:bg-[#26201a] rounded-2xl shadow-2xl border border-gray-100 dark:border-brown-dark flex flex-col z-50 overflow-hidden" style={{ height: '500px', maxHeight: '80vh' }}>
       {/* Header */}
       <div className="bg-gradient-to-r from-brown-dark to-brown p-4 text-white flex justify-between items-center shadow-md z-10">
         <div>
@@ -138,16 +138,16 @@ export const Chatbot = () => {
 
       {/* Settings Overlay */}
       {showSettings && (
-        <div className="absolute top-16 right-0 w-full bg-gray-50 border-b border-gray-200 p-4 z-20 shadow-inner flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-700 flex items-center gap-2"><Globe size={16}/> Language</span>
+        <div className="absolute top-16 right-0 w-full bg-gray-50 dark:bg-[#1c1712] border-b border-gray-200 dark:border-brown-dark p-4 z-20 shadow-inner flex justify-between items-center">
+            <span className="text-sm font-medium text-gray-700 dark:text-beige flex items-center gap-2"><Globe size={16}/> Language</span>
             <div className="flex gap-2">
                 <button 
                     onClick={() => { setLanguage('en'); setShowSettings(false); }}
-                    className={`px-3 py-1 rounded text-sm ${language === 'en' ? 'bg-brown text-white' : 'bg-gray-200 text-gray-700'}`}
+                    className={`px-3 py-1 rounded text-sm ${language === 'en' ? 'bg-brown text-white' : 'bg-gray-200 dark:bg-[#332a22] text-gray-700 dark:text-beige'}`}
                 >English</button>
                 <button 
                     onClick={() => { setLanguage('hi'); setShowSettings(false); }}
-                    className={`px-3 py-1 rounded text-sm ${language === 'hi' ? 'bg-brown text-white' : 'bg-gray-200 text-gray-700'}`}
+                    className={`px-3 py-1 rounded text-sm ${language === 'hi' ? 'bg-brown text-white' : 'bg-gray-200 dark:bg-[#332a22] text-gray-700 dark:text-beige'}`}
                 >हिंदी</button>
             </div>
         </div>
@@ -155,22 +155,22 @@ export const Chatbot = () => {
 
       {/* Language Selection Screen */}
       {!language ? (
-        <div className="flex-1 p-6 flex flex-col items-center justify-center bg-cream text-center">
-          <div className="w-16 h-16 bg-beige rounded-full flex items-center justify-center mb-4 text-brown-dark">
+        <div className="flex-1 p-6 flex flex-col items-center justify-center bg-cream dark:bg-[#1c1712] text-center">
+          <div className="w-16 h-16 bg-beige dark:bg-brown rounded-full flex items-center justify-center mb-4 text-brown-dark dark:text-white">
             <Globe size={32} />
           </div>
-          <h4 className="text-lg font-semibold text-brown-dark mb-2">Choose your language</h4>
-          <p className="text-sm text-brown/70 mb-6">अपनी भाषा चुनें</p>
+          <h4 className="text-lg font-semibold text-brown-dark dark:text-beige mb-2">Choose your language</h4>
+          <p className="text-sm text-brown/70 dark:text-beige/70 mb-6">अपनी भाषा चुनें</p>
           <div className="flex flex-col w-full gap-3">
             <button 
               onClick={() => setLanguage('en')}
-              className="w-full py-3 bg-white border-2 border-beige hover:border-brown rounded-lg font-medium text-brown-dark transition-colors shadow-sm"
+              className="w-full py-3 bg-white dark:bg-[#26201a] border-2 border-beige dark:border-brown hover:border-brown rounded-lg font-medium text-brown-dark dark:text-beige transition-colors shadow-sm"
             >
               English
             </button>
             <button 
               onClick={() => setLanguage('hi')}
-              className="w-full py-3 bg-white border-2 border-beige hover:border-brown rounded-lg font-medium text-brown-dark transition-colors shadow-sm"
+              className="w-full py-3 bg-white dark:bg-[#26201a] border-2 border-beige dark:border-brown hover:border-brown rounded-lg font-medium text-brown-dark dark:text-beige transition-colors shadow-sm"
             >
               हिंदी (Hindi)
             </button>
@@ -179,14 +179,14 @@ export const Chatbot = () => {
       ) : (
         <>
           {/* Chat Messages */}
-          <div className="flex-1 p-4 overflow-y-auto bg-cream flex flex-col gap-3">
+          <div className="flex-1 p-4 overflow-y-auto bg-cream dark:bg-[#1c1712] flex flex-col gap-3">
             {messages.map((msg, idx) => (
               <div 
                 key={idx} 
                 className={`max-w-[80%] p-3 rounded-2xl text-sm ${
                   msg.role === 'user' 
                     ? 'bg-brown text-white self-end rounded-tr-sm shadow-sm' 
-                    : 'bg-white text-brown-dark self-start rounded-tl-sm shadow-sm border border-beige'
+                    : 'bg-white dark:bg-[#26201a] text-brown-dark dark:text-beige self-start rounded-tl-sm shadow-sm border border-beige dark:border-brown'
                 }`}
               >
                 {msg.text}
@@ -199,18 +199,25 @@ export const Chatbot = () => {
                 {suggestedQuestions[language].map((q, i) => (
                   <button
                     key={i}
-                    onClick={() => handleSend(q)}
+                    onClick={() => {
+                      if (q.type === 'link' && q.href) {
+                        setIsOpen(false);
+                        navigate(q.href);
+                      } else {
+                        handleSend(q.text);
+                      }
+                    }}
                     disabled={isLoading}
-                    className="text-xs whitespace-nowrap flex-shrink-0 bg-white border border-brown text-brown px-3 py-1.5 rounded-2xl hover:bg-brown hover:text-white transition-colors shadow-sm disabled:opacity-50"
+                    className="text-xs whitespace-nowrap flex-shrink-0 bg-white dark:bg-[#26201a] border border-brown dark:border-brown text-brown dark:text-beige px-3 py-1.5 rounded-2xl hover:bg-brown dark:hover:bg-brown hover:text-white dark:hover:text-white transition-colors shadow-sm disabled:opacity-50"
                   >
-                    {q}
+                    {q.text}
                   </button>
                 ))}
               </div>
             )}
 
             {isLoading && (
-              <div className="bg-white text-brown-dark self-start p-3 rounded-2xl rounded-tl-sm shadow-sm border border-beige flex items-center gap-2">
+              <div className="bg-white dark:bg-[#26201a] text-brown-dark dark:text-beige self-start p-3 rounded-2xl rounded-tl-sm shadow-sm border border-beige dark:border-brown flex items-center gap-2">
                  <div className="w-2 h-2 bg-brown-light rounded-full animate-bounce"></div>
                  <div className="w-2 h-2 bg-brown rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                  <div className="w-2 h-2 bg-brown-dark rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
@@ -220,14 +227,14 @@ export const Chatbot = () => {
           </div>
 
           {/* Input Area */}
-          <div className="p-3 bg-white border-t border-beige flex items-center gap-2">
+          <div className="p-3 bg-white dark:bg-[#26201a] border-t border-beige dark:border-brown-dark flex items-center gap-2">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={language === 'en' ? "Type a message..." : "एक संदेश लिखें..."}
-              className="flex-1 bg-cream text-brown-dark text-base placeholder-brown/50 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brown/50"
+              className="flex-1 bg-cream dark:bg-[#1c1712] text-brown-dark dark:text-beige text-base placeholder-brown/50 dark:placeholder-beige/50 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brown/50"
             />
             <button
               onClick={() => handleSend()}
