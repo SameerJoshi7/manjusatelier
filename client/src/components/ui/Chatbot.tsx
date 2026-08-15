@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { MessageCircle, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
@@ -20,7 +20,6 @@ type QuickReply = {
 export const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [userOrders, setUserOrders] = useState<Order[]>([]);
   
@@ -58,13 +57,11 @@ export const Chatbot = () => {
     }
   }, [messages.length]);
 
-  const handleSend = async (textOverride?: string) => {
-    const textToSend = textOverride || input;
+  const handleSend = async (textToSend: string) => {
     if (!textToSend.trim()) return;
 
     const userMsg: Message = { role: 'user', text: textToSend };
     setMessages((prev) => [...prev, userMsg]);
-    if (!textOverride) setInput('');
     setIsLoading(true);
 
     try {
@@ -92,12 +89,6 @@ export const Chatbot = () => {
       setMessages((prev) => [...prev, { role: 'model', text: 'Sorry, I am having trouble connecting right now.' }]);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSend();
     }
   };
 
