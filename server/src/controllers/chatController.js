@@ -49,7 +49,7 @@ If the user asks a question about an order, you have a tool to look up their ord
     ];
 
     const response = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'gpt-oss-20b',
       messages: messages,
       tools: tools,
       tool_choice: 'auto',
@@ -78,7 +78,7 @@ If the user asks a question about an order, you have a tool to look up their ord
          ];
 
          const followupResponse = await groq.chat.completions.create({
-            model: 'llama-3.3-70b-versatile',
+            model: 'gpt-oss-20b',
             messages: followupMessages,
             tools: tools,
             temperature: 0.2
