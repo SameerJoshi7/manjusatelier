@@ -213,24 +213,7 @@ export const Chatbot = () => {
         <div ref={messagesEndRef} className="h-px shrink-0" />
       </div>
 
-      {/* Input Area */}
-      <div className="p-3 bg-white dark:bg-[#26201a] border-t border-beige dark:border-brown-dark flex items-center gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Type a message..."
-          className="flex-1 bg-cream dark:bg-[#1c1712] text-brown-dark dark:text-beige text-base placeholder-brown/50 dark:placeholder-beige/50 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brown/50"
-        />
-        <button
-          onClick={() => handleSend()}
-          disabled={isLoading || !input.trim()}
-          className="p-2.5 bg-brown text-white rounded-full hover:bg-brown-dark disabled:opacity-50 disabled:hover:bg-brown transition-colors flex-shrink-0"
-        >
-          <Send size={18} />
-        </button>
-      </div>
+      {/* Input Area Removed - Users must use quick replies */}
     </div>
   );
 };
