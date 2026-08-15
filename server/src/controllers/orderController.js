@@ -597,18 +597,18 @@ export const updateReturnStatus = asyncHandler(async (req, res) => {
 
   await order.save();
 
-  let title = \`Request \${status.charAt(0).toUpperCase() + status.slice(1)}\`;
-  let body = \`Your \${order.returnExchange.actionType} request for order \${order.customOrderId} has been \${status}.\`;
+  let title = `Request ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+  let body = `Your ${order.returnExchange.actionType} request for order ${order.customOrderId} has been ${status}.`;
 
   await Notification.create({
     user: order.user,
     title,
     message: body,
-    link: \`/account?tab=orders\`,
+    link: `/account?tab=orders`,
   });
 
   try {
-    getSocket().to(\`user_\${order.user.toString()}\`).emit('order_update', { orderId: order._id });
+    getSocket().to(`user_${order.user.toString()}`).emit('order_update', { orderId: order._id });
     getSocket().to('admins').emit('order_update', { orderId: order._id });
   } catch (err) {}
 
