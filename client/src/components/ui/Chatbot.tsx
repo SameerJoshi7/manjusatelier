@@ -132,10 +132,10 @@ export const Chatbot = () => {
     { text: "Cancel", type: 'action' as const, action: 'cancel_orders' as const }
   ] : [
     { text: "Where is my order?", type: userOrders.length > 0 ? 'action' as const : 'chat' as const, action: 'show_orders' as const },
-    { text: "What is your return policy?", type: 'link' as const, href: '/terms' },
+    { text: "What is your return policy?", type: 'chat' as const },
     { text: "Do you ship internationally?", type: 'chat' as const },
     { text: "What payment methods are accepted?", type: 'chat' as const },
-    { text: "How do I exchange an item?", type: 'link' as const, href: '/terms' },
+    { text: "How do I exchange an item?", type: 'chat' as const },
     { text: "How can I contact support?", type: 'link' as const, href: '/contact' }
   ];
 
