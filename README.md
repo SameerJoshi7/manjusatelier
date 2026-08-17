@@ -1,6 +1,4 @@
 <div align="center">
-  <img src="https://via.placeholder.com/150x150.png?text=MA" alt="Manju's Atelier Logo" width="120" height="120" style="border-radius: 50%; margin-bottom: 20px;" />
-  
   <h1>✨ Manju's Atelier ✨</h1>
   <p><i>Handcrafted with Love, Made to Last.</i></p>
   
