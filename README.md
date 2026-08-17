@@ -1,6 +1,12 @@
 <div align="center">
+  <img src="https://via.placeholder.com/150x150.png?text=MA" alt="Manju's Atelier Logo" width="120" height="120" style="border-radius: 50%; margin-bottom: 20px;" />
+  
   <h1>✨ Manju's Atelier ✨</h1>
   <p><i>Handcrafted with Love, Made to Last.</i></p>
+  
+  <p>
+    <b>Live at:</b> <a href="https://www.manjusatelier.in">www.manjusatelier.in</a>
+  </p>
   
   [![React](https://img.shields.io/badge/React-18-blue?logo=react&logoColor=white)](https://react.dev)
   [![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
@@ -9,10 +15,33 @@
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 </div>
 
-A production-quality, full-stack e-commerce application for a premium handmade crafts brand.
-Elegant, warm, and fast — built with a mobile-first, accessibility-conscious approach.
+<br />
 
-## Tech Stack
+Welcome to **Manju's Atelier**, a production-grade, full-stack e-commerce application dedicated to premium handmade crafts. Designed with a warm, elegant aesthetic, it prioritizes a seamless user experience across all devices.
+
+---
+
+## 🚀 Live Production Status
+
+This application is currently live in production at **[www.manjusatelier.in](https://www.manjusatelier.in)**. 
+
+### ✅ What's Implemented (Done)
+- **Stunning Frontend:** Responsive, mobile-first UI built with React, Vite, and Tailwind CSS. Features subtle Framer Motion animations for a premium feel.
+- **Robust Backend:** Node.js & Express API, securely connected to MongoDB.
+- **User Authentication:** Secure JWT-based authentication (httpOnly cookies) and password hashing via bcrypt.
+- **Shopping Experience:** Full product catalog with categories, filtering, sorting, and search functionalities.
+- **Cart & Wishlist:** Fully functional shopping cart and wishlist state management.
+- **Real-time Interaction:** Integrated Chatbot and contact functionalities.
+- **Security:** Hardened with helmet, CORS, rate limiting, and mongo-sanitize.
+
+### 🚧 What's Next (Yet to be Done)
+- **Payment Gateway (Razorpay):** Integration with Razorpay for real-time checkout and payment processing is currently in development and is the next major milestone.
+- **Admin Dashboard UI:** The backend API is fully prepared with admin-guarded routes (`role: 'admin'`) for CRUD operations on products, categories, and coupons. The frontend admin UI is pending implementation.
+- **Order Management:** Full lifecycle tracking (from payment to shipping) will be finalized alongside the payment integration.
+
+---
+
+## 🛠️ Tech Stack
 
 **Frontend**
 - React 18 + Vite + TypeScript
@@ -24,120 +53,80 @@ Elegant, warm, and fast — built with a mobile-first, accessibility-conscious a
 **Backend**
 - Node.js + Express (ESM)
 - MongoDB + Mongoose
-- JWT auth (httpOnly cookies) with bcrypt password hashing
-- **Razorpay** payment gateway (server-side order creation, signature verification, webhooks)
-- Security: helmet, CORS, rate limiting, mongo-sanitize, hpp, input validation
+- JWT Auth (httpOnly cookies)
+- Socket.io (Real-time features)
 
-## Project Structure
+---
 
-```
+## 📂 Project Structure
+
+```text
 manjus-atelier/
 ├── client/            # React + Vite frontend
 │   └── src/
-│       ├── components/  # ui/, layout/, home/, product/
-│       ├── context/     # Auth, Cart, Wishlist, Theme, Toast
-│       ├── hooks/        # useProducts, useCategories, usePageMeta
-│       ├── lib/          # api client, utils, icons
-│       ├── pages/        # Home, Shop, ProductDetails, Cart, Checkout, ...
-│       └── types/
+│       ├── components/  # UI components, layout, pages
+│       ├── context/     # Auth, Cart, Wishlist, Theme
+│       ├── pages/       # Home, Shop, ProductDetails, Cart...
+│       └── types/       # TypeScript definitions
 ├── server/            # Express API
 │   └── src/
-│       ├── config/       # db connection
-│       ├── controllers/  # auth, product, category, order, review, coupon
-│       ├── middleware/   # auth, error handling, validation
-│       ├── models/       # User, Product, Category, Order, Review, Coupon
-│       ├── routes/       # + webhookRoutes (raw body for Razorpay)
-│       └── utils/        # token, razorpay, seed
-├── docker-compose.yml  # optional local MongoDB
-└── package.json        # root convenience scripts
+│       ├── config/      # Database connections
+│       ├── controllers/ # Business logic (auth, products)
+│       ├── models/      # Mongoose Schemas
+│       └── routes/      # API Endpoints
+└── package.json       # Root convenience scripts
 ```
 
-## Getting Started
+---
+
+## 💻 Getting Started (Local Development)
 
 ### 1. Prerequisites
-- Node.js 18+ (tested on 22)
-- A MongoDB database. Choose one:
-  - **MongoDB Atlas** (recommended, free, zero-install): create a free cluster at
-    <https://www.mongodb.com/atlas> and copy the connection string.
-  - **Docker**: `docker compose up -d` (starts MongoDB on `localhost:27017`).
-  - **Local install**: install MongoDB Community Server.
+- Node.js 18+ 
+- MongoDB (Atlas recommended, or local/Docker instance)
 
 ### 2. Install dependencies
 ```bash
-npm run install:all
-# or, from each folder:  cd server && npm install   /   cd client && npm install
+# Install concurrently at root to run both client/server easily
+npm install
+
+# Install client & server dependencies
+cd client && npm install
+cd ../server && npm install
 ```
 
-### 3. Configure the backend
+### 3. Environment Setup
 ```bash
 cd server
-cp .env.example .env        # then edit .env
+cp .env.example .env 
 ```
-Set at minimum:
-- `MONGODB_URI` — your MongoDB connection string
-- `JWT_SECRET`, `COOKIE_SECRET` — long random strings
-- `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` — from the
-  [Razorpay dashboard](https://dashboard.razorpay.com/app/keys) (test mode is fine)
+Configure your `.env` with your `MONGODB_URI`, `JWT_SECRET`, and `COOKIE_SECRET`.
 
-### 4. Seed the database
+### 4. Seed Database (Optional)
 ```bash
-npm run seed        # from the root, or `npm run seed` inside /server
+cd server
+npm run seed
 ```
-This creates 7 categories, 12 handmade products, 3 coupons, and demo accounts:
-- Admin: `admin@manjusatelier.com` / `Admin@12345`
+This populates the database with sample categories, products, and an admin user.
 
-### 5. Run in development
+### 5. Run the Application
+From the root directory, run both servers simultaneously:
 ```bash
-# Option A — one command (installs `concurrently` at root):
-npm install
 npm run dev
-
-# Option B — two terminals:
-npm run dev:server     # http://localhost:5000
-npm run dev:client     # http://localhost:5173
 ```
-The Vite dev server proxies `/api` to the backend automatically.
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:5000`
 
-## Payments (Razorpay)
+---
 
-Checkout uses Razorpay in **test mode** by default. Use Razorpay's
-[test cards](https://razorpay.com/docs/payments/payments/test-card-details/) (e.g. card
-`4111 1111 1111 1111`, any future expiry, any CVV) to simulate a successful payment.
+## ⚖️ License & Copyright
 
-Security highlights:
-- **Prices are always recomputed on the server** from the database — the client price is never
-  trusted.
-- Payment **signatures are verified** (`HMAC-SHA256`) before an order is marked paid.
-- Stock is decremented only after successful verification.
-- A **webhook** endpoint (`/api/webhooks/razorpay`) provides a reliable fallback using the raw
-  request body and webhook-secret verification. Configure it in the Razorpay dashboard for
-  production.
+**© 2026 Manju's Atelier. All Rights Reserved.**
 
-## Key Features
+This repository and its contents are **proprietary and confidential**. 
+This code is provided for portfolio and demonstration purposes only. You are **not** permitted to copy, modify, distribute, or use this source code, in whole or in part, for any personal or commercial projects. 
 
-- Home, Shop (filters/sort/search/pagination, grid & list views), Product Details (gallery + zoom,
-  tabs, reviews), Categories, About (timeline), Contact (form + map + FAQ), Cart (coupons, shipping
-  estimate), multi-step Checkout, order success, Wishlist, Auth, and Account/Orders.
-- Dark mode, sticky transparent-on-top navbar with mega menu, back-to-top, toasts.
-- Skeleton loaders, empty & error states, keyboard-friendly and ARIA-labelled controls.
-- SEO: per-page titles/descriptions, Open Graph & Twitter tags, JSON-LD, semantic HTML.
-- Performance: route-level code splitting, lazy image loading, manual vendor chunks.
+<div align="center">
+  <p>Built with ❤️ for Manju's Atelier.</p>
+</div>
 
-## Building for Production
-
-```bash
-npm run build            # builds the client to client/dist
-npm start                # runs the API (serve client/dist via your host/CDN)
-```
-
-## Extending (admin-ready)
-
-The API already exposes admin-guarded CRUD for products, categories, and coupons
-(`role: 'admin'`). Data models cover Products, Categories, Orders, Users, Reviews, Coupons, and
-Wishlist — ready to power an admin dashboard.
-
-## Notes on Images
-
-Product/lifestyle imagery uses seeded placeholder photos so the app works out of the box. Replace
-the image URLs in `server/src/utils/seed.js` (and category images) with your own asset URLs or a
-CDN when going live.
