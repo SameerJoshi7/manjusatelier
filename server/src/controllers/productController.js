@@ -1,5 +1,6 @@
 import Product from '../models/Product.js';
 import Category from '../models/Category.js';
+import Order from '../models/Order.js';
 import { asyncHandler, ApiError } from '../middleware/error.js';
 import { getCache, setCache, clearCachePattern } from '../utils/cache.js';
 
@@ -25,9 +26,17 @@ export const getProducts = asyncHandler(async (req, res) => {
     page = 1,
     limit = 12,
     featured,
+    ids,
   } = req.query;
 
   const filter = {};
+
+  if (ids) {
+    const idArray = ids.split(',').map(id => id.trim()).filter(Boolean);
+    if (idArray.length > 0) {
+      filter._id = { $in: idArray };
+    }
+  }
 
   if (search) filter.$text = { $search: search };
   if (material) filter.material = new RegExp(`^${material}$`, 'i');
@@ -135,11 +144,44 @@ export const createProduct = asyncHandler(async (req, res) => {
 });
 
 export const updateProduct = asyncHandler(async (req, res) => {
+  const oldProduct = await Product.findById(req.params.id);
+  if (!oldProduct) throw new ApiError(404, 'Product not found');
+
   const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
-  if (!product) throw new ApiError(404, 'Product not found');
+
+  // Back in stock notification
+  if (oldProduct.stock === 0 && product.stock > 0) {
+    const BackInStock = (await import('../models/BackInStock.js')).default;
+    const { sendBatchEmail } = await import('../utils/sendEmail.js');
+    
+    const subscriptions = await BackInStock.find({ product: product._id, notified: false });
+    
+    if (subscriptions.length > 0) {
+      const emailsData = subscriptions.map((sub) => ({
+        to: sub.email,
+        subject: `Back in Stock: ${product.name}`,
+        html: `
+          <div style="font-family: sans-serif; padding: 20px;">
+            <h2>Good news!</h2>
+            <p><strong>${product.name}</strong> is now back in stock.</p>
+            <p><a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/product/${product.slug}" style="display:inline-block; padding: 10px 20px; background-color: #4A3C31; color: #fff; text-decoration: none; border-radius: 5px;">Shop Now</a></p>
+          </div>
+        `,
+        text: `${product.name} is back in stock! Shop now at ${process.env.CLIENT_URL || 'http://localhost:5173'}/product/${product.slug}`,
+      }));
+
+      await sendBatchEmail(emailsData);
+      
+      await BackInStock.updateMany(
+        { _id: { $in: subscriptions.map(s => s._id) } },
+        { $set: { notified: true } }
+      );
+    }
+  }
+
   await clearCachePattern('products');
   res.json({ success: true, product });
 });
@@ -149,4 +191,62 @@ export const deleteProduct = asyncHandler(async (req, res) => {
   if (!product) throw new ApiError(404, 'Product not found');
   await clearCachePattern('products');
   res.json({ success: true, message: 'Product deleted' });
+});
+
+export const subscribeBackInStock = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) throw new ApiError(400, 'Email is required');
+  
+  const product = await Product.findById(req.params.id);
+  if (!product) throw new ApiError(404, 'Product not found');
+  if (product.stock > 0) throw new ApiError(400, 'Product is already in stock');
+
+  const BackInStock = (await import('../models/BackInStock.js')).default;
+  
+  const existing = await BackInStock.findOne({ email, product: product._id, notified: false });
+  if (existing) {
+    return res.json({ success: true, message: 'Already subscribed' });
+  }
+
+  await BackInStock.create({ email, product: product._id });
+  res.status(201).json({ success: true, message: 'Subscribed successfully' });
+});
+
+/**
+ * GET /api/products/:id/also-bought
+ * Returns products frequently bought with the given product.
+ */
+export const getAlsoBought = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  
+  // Find orders containing this product
+  const orders = await Order.find({ 'items.product': id }).select('items.product').lean();
+  
+  if (!orders || orders.length === 0) {
+    return res.json([]);
+  }
+
+  // Count frequencies of other products
+  const productCounts = {};
+  orders.forEach(order => {
+    order.items.forEach(item => {
+      const pid = item.product.toString();
+      if (pid !== id) {
+        productCounts[pid] = (productCounts[pid] || 0) + 1;
+      }
+    });
+  });
+
+  // Sort by frequency and get top 4
+  const topProductIds = Object.entries(productCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(entry => entry[0]);
+
+  if (topProductIds.length === 0) {
+    return res.json([]);
+  }
+
+  const relatedProducts = await Product.find({ _id: { $in: topProductIds }, stock: { $gt: 0 } }).lean();
+  res.json(relatedProducts);
 });

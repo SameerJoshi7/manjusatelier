@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useState, useEffect, ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, XCircle, Info } from 'lucide-react';
 
@@ -29,6 +29,25 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts((prev) => [...prev, { id, type, message }]);
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3200);
   }, []);
+
+  useEffect(() => {
+    const handleAuthExpired = (e: Event) => {
+      const msg = (e as CustomEvent).detail?.message || 'Session expired. Please log in again.';
+      notify(msg, 'error');
+    };
+    const handleGlobalError = (e: Event) => {
+      const msg = (e as CustomEvent).detail?.message || 'An unexpected error occurred.';
+      notify(msg, 'error');
+    };
+    
+    window.addEventListener('auth-expired', handleAuthExpired);
+    window.addEventListener('global-error', handleGlobalError);
+    
+    return () => {
+      window.removeEventListener('auth-expired', handleAuthExpired);
+      window.removeEventListener('global-error', handleGlobalError);
+    };
+  }, [notify]);
 
   return (
     <ToastContext.Provider value={{ notify }}>

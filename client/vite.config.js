@@ -8,7 +8,10 @@ export default defineConfig({
     plugins: [
         react(),
         VitePWA({
-            registerType: 'prompt',
+            strategies: 'injectManifest',
+            srcDir: 'src',
+            filename: 'sw.ts',
+            registerType: 'autoUpdate',
             injectRegister: 'auto',
             includeAssets: ['favicon.png', 'favicon.svg', 'logo-256.png'],
             manifest: {
@@ -33,49 +36,10 @@ export default defineConfig({
                     },
                 ],
             },
-            workbox: {
+            injectManifest: {
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-                cleanupOutdatedCaches: true,
-                clientsClaim: true,
                 // Never let the SW serve/cache API calls or the dev server.
-                navigateFallbackDenylist: [/^\/api/],
-                runtimeCaching: [
-                    {
-                        // App shell / navigations: network-first so new deploys show quickly.
-                        urlPattern: function (_a) {
-                            var request = _a.request;
-                            return request.mode === 'navigate';
-                        },
-                        handler: 'NetworkFirst',
-                        options: { cacheName: 'pages', networkTimeoutSeconds: 3 },
-                    },
-                    {
-                        // Product & placeholder images from our API — cache for offline.
-                        urlPattern: function (_a) {
-                            var url = _a.url;
-                            return url.pathname.startsWith('/api/placeholder');
-                        },
-                        handler: 'CacheFirst',
-                        options: {
-                            cacheName: 'placeholder-images',
-                            expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 30 },
-                        },
-                    },
-                    {
-                        // Google Fonts.
-                        urlPattern: function (_a) {
-                            var url = _a.url;
-                            return url.origin === 'https://fonts.googleapis.com' ||
-                                url.origin === 'https://fonts.gstatic.com';
-                        },
-                        handler: 'CacheFirst',
-                        options: {
-                            cacheName: 'google-fonts',
-                            expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
-                            cacheableResponse: { statuses: [0, 200] },
-                        },
-                    },
-                ],
+                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
             },
             devOptions: {
                 enabled: false,

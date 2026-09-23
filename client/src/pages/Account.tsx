@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, User as UserIcon, Plus, Trash2, MapPin } from 'lucide-react';
+import { LogOut, User as UserIcon, Plus, Trash2, MapPin, Package } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Order, Address } from '@/types';
 import { useAuth } from '@/context/AuthContext';
@@ -333,7 +333,7 @@ export default function Account() {
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brown/10 pb-3">
                   <div>
                     <p className="font-medium text-brown-dark dark:text-beige">
-                      #{order._id.slice(-8).toUpperCase()}
+                      #{order.customOrderId || order._id.slice(-8).toUpperCase()}
                     </p>
                     <p className="text-xs text-brown/50">
                       {formatDate(order.createdAt)}
@@ -402,6 +402,17 @@ export default function Account() {
                       </div>
                     </div>
                   ))}
+                </div>
+                
+                <div className="mt-4 pt-3 border-t border-brown/10 dark:border-beige/10 flex justify-end">
+                  <a
+                    href={`${import.meta.env.VITE_API_URL || ''}/api/orders/${order._id}/invoice?token=${localStorage.getItem('token')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-brown/10 px-3 py-1.5 text-xs font-semibold text-brown transition-colors hover:bg-brown/20 dark:bg-beige/10 dark:text-beige"
+                  >
+                    <Package size={14} /> Download Invoice
+                  </a>
                 </div>
               </div>
             )})}

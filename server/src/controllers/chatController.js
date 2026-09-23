@@ -49,7 +49,7 @@ If the user asks a question about an order, you have a tool to look up their ord
     ];
 
     const response = await groq.chat.completions.create({
-      model: 'gpt-oss-20b',
+      model: process.env.GROQ_MODEL || 'qwen/qwen3.8-27b',
       messages: messages,
       tools: tools,
       tool_choice: 'auto',
@@ -78,7 +78,7 @@ If the user asks a question about an order, you have a tool to look up their ord
          ];
 
          const followupResponse = await groq.chat.completions.create({
-            model: 'gpt-oss-20b',
+            model: process.env.GROQ_MODEL || 'qwen/qwen3.8-27b',
             messages: followupMessages,
             tools: tools,
             temperature: 0.2

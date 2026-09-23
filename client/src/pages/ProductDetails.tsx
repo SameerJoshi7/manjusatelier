@@ -26,7 +26,9 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Rating } from '@/components/ui/Rating';
 import { ProductCard } from '@/components/product/ProductCard';
+import { RecentlyViewed } from '@/components/product/RecentlyViewed';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { trackEvent } from '@/lib/analytics';
 
 const tabs = ['Description', 'Details', 'Care', 'Reviews'] as const;
 type Tab = (typeof tabs)[number];
@@ -66,7 +68,25 @@ export default function ProductDetails() {
       .get<{ product: Product; related: Product[] }>(`/products/${slug}`)
       .then((res) => {
         setProduct(res.product);
-        setRelated(res.related);
+        trackEvent('product_viewed', {}, res.product._id);
+        
+        // Fetch also-bought products
+        api.get<Product[]>(`/products/${res.product._id}/also-bought`)
+           .then(alsoBought => {
+               if (alsoBought && alsoBought.length > 0) {
+                   setRelated(alsoBought);
+               } else {
+                   setRelated(res.related); // Fallback to category related
+               }
+           })
+           .catch(() => setRelated(res.related));
+        
+        // Save to recently viewed
+        try {
+          const stored = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+          const updated = [res.product._id, ...stored.filter((id: string) => id !== res.product._id)].slice(0, 10);
+          localStorage.setItem('recentlyViewed', JSON.stringify(updated));
+        } catch (e) {}
       })
       .catch(() => setProduct(null))
       .finally(() => setLoading(false));
@@ -105,6 +125,7 @@ export default function ProductDetails() {
   };
 
   const buyNow = () => {
+    trackEvent('added_to_cart', { qty }, product._id);
     add(product, qty);
     navigate('/checkout');
   };
@@ -291,12 +312,22 @@ export default function ProductDetails() {
             </div>
 
             <Button
-              onClick={() => {
+              onClick={(e) => {
+                const btn = e.currentTarget;
+                const originalHTML = btn.innerHTML;
+                btn.classList.add('bg-forest');
+                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:8px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Added';
+                setTimeout(() => {
+                  btn.classList.remove('bg-forest');
+                  btn.innerHTML = originalHTML;
+                }, 1000);
+                trackEvent('added_to_cart', { qty }, product._id);
                 add(product, qty);
                 notify('Added to cart');
               }}
               disabled={!product.inStock}
               size="lg"
+              className="transition-colors duration-200"
             >
               <ShoppingBag size={18} /> Add to Cart
             </Button>
@@ -304,6 +335,43 @@ export default function ProductDetails() {
               Buy Now
             </Button>
           </div>
+
+          {!product.inStock && (
+            <div className="mt-4 rounded-xl border border-brown/20 bg-beige/30 p-4 dark:border-beige/20 dark:bg-beige/5">
+              <h3 className="mb-2 text-sm font-semibold text-brown-dark dark:text-beige">
+                Notify me when available
+              </h3>
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const fd = new FormData(e.currentTarget);
+                  const email = fd.get('email');
+                  const btn = e.currentTarget.querySelector('button');
+                  if (btn) btn.disabled = true;
+                  api.post(`/products/${product._id}/notify-stock`, { email })
+                    .then(() => {
+                      notify('You will be notified when this is back in stock!', 'info');
+                      if (btn) btn.textContent = 'Subscribed ✓';
+                    })
+                    .catch((err) => {
+                      notify(err instanceof Error ? err.message : 'Something went wrong', 'error');
+                      if (btn) btn.disabled = false;
+                    });
+                }}
+                className="flex gap-2"
+              >
+                <input 
+                  type="email" 
+                  name="email" 
+                  required 
+                  defaultValue={user?.email || ''}
+                  placeholder="Enter your email" 
+                  className="input flex-1 bg-white text-sm dark:bg-[#2c2621]"
+                />
+                <Button type="submit" size="sm">Notify Me</Button>
+              </form>
+            </div>
+          )}
 
           <div className="mt-4 flex gap-4">
             <button
@@ -389,7 +457,7 @@ export default function ProductDetails() {
       {related.length > 0 && (
         <section className="mt-12">
           <h2 className="mb-6 font-serif text-3xl text-brown-dark dark:text-beige">
-            You May Also Love
+            Frequently Bought Together / You May Also Love
           </h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
             {related.map((p) => (
@@ -398,6 +466,9 @@ export default function ProductDetails() {
           </div>
         </section>
       )}
+
+      {/* Recently Viewed */}
+      <RecentlyViewed currentProductId={product._id} />
 
       {/* Lightbox Modal */}
       <AnimatePresence>

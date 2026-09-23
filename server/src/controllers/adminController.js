@@ -11,7 +11,7 @@ export const getStats = asyncHandler(async (req, res) => {
   const [revenueAgg, totalOrders, paidOrders, pendingOrders, productCount, customerCount, lowStock, recentOrders] =
     await Promise.all([
       Order.aggregate([
-        { $match: { paymentStatus: 'paid' } },
+        { $match: { paymentStatus: { $in: ['UTR_VERIFIED', 'SUCCESSFUL'] } } },
         { $group: { _id: null, total: { $sum: '$total' } } },
       ]),
       Order.countDocuments(),
@@ -41,6 +41,72 @@ export const getStats = asyncHandler(async (req, res) => {
       lowStock,
       recentOrders,
     },
+  });
+});
+
+/** GET /api/admin/customers — get all customers with their order stats. */
+export const getCustomers = asyncHandler(async (req, res) => {
+  const { search, page = 1, limit = 20 } = req.query;
+  const pageNum = Math.max(1, Number(page));
+  const limitNum = Math.min(100, Math.max(1, Number(limit)));
+  const skip = (pageNum - 1) * limitNum;
+
+  const match = { role: 'user' };
+  if (search) {
+    match.$or = [
+      { name: new RegExp(search, 'i') },
+      { email: new RegExp(search, 'i') }
+    ];
+  }
+
+  const [customers, total] = await Promise.all([
+    User.aggregate([
+      { $match: match },
+      {
+        $lookup: {
+          from: 'orders',
+          localField: '_id',
+          foreignField: 'user',
+          as: 'orders'
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          phone: 1,
+          createdAt: 1,
+          orderCount: { $size: '$orders' },
+          totalSpent: {
+            $sum: {
+              $map: {
+                input: {
+                  $filter: {
+                    input: '$orders',
+                    as: 'order',
+                    cond: { $in: ['$$order.paymentStatus', ['UTR_VERIFIED', 'SUCCESSFUL', 'paid']] }
+                  }
+                },
+                as: 'validOrder',
+                in: '$$validOrder.total'
+              }
+            }
+          }
+        }
+      },
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limitNum }
+    ]),
+    User.countDocuments(match)
+  ]);
+
+  res.json({
+    success: true,
+    customers,
+    total,
+    page: pageNum,
+    pages: Math.ceil(total / limitNum)
   });
 });
 

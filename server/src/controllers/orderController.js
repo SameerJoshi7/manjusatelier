@@ -7,8 +7,8 @@ import Setting from '../models/Setting.js';
 import Notification from '../models/Notification.js';
 import { asyncHandler, ApiError } from '../middleware/error.js';
 import { getRazorpay, verifyPaymentSignature } from '../utils/razorpay.js';
-import { sendEmail } from '../utils/sendEmail.js';
-import { getOrderReceivedTemplate, getPaymentVerifiedTemplate, getOrderShippedTemplate, getOrderDeliveredTemplate, getOrderCancelledTemplate } from '../utils/emailTemplates.js';
+import notificationService from '../services/notificationService.js';
+import { generateInvoice } from '../utils/invoiceGenerator.js';
 
 /**
  * Recompute the cart total from the DATABASE (never trust client prices).
@@ -87,48 +87,11 @@ export const createOrder = asyncHandler(async (req, res) => {
     paymentStatus: 'PAYMENT_PENDING',
   });
 
-  try {
-    getSocket().to('admins').emit('order_update', { orderId: order._id, type: 'NEW_ORDER' });
-  } catch (err) {
-    console.error('Socket emission failed:', err);
-  }
 
-  // Send Order Received Email
-  try {
-    const populatedUser = await mongoose.model('User').findById(req.user._id);
-    if (populatedUser && populatedUser.email) {
-      await sendEmail({
-        email: populatedUser.email,
-        subject: `Yay! We got your order! 🎉 - #${order.customOrderId}`,
-        html: getOrderReceivedTemplate(order)
-      });
-    }
-
-    // In-app notification
-    await Notification.create({
-      user: req.user._id,
-      title: 'Yay! We got your order! 🎉',
-      message: `Thank you for your order #${order.customOrderId}. Please complete your UPI payment.`,
-      link: `/account?tab=orders`,
-    });
-
-    // Push notification
-    const { sendPushToUser } = await import('../utils/push.js');
-    await sendPushToUser(req.user._id, {
-      title: 'Order Received 🎉',
-      body: `We have received your order #${order.customOrderId}.`,
-      icon: '/pwa-192x192.png',
-      url: '/account?tab=orders'
-    });
-
-    try {
-      getSocket().to('admins').emit('order_update', { type: 'NEW_ORDER', orderId: order._id });
-    } catch (err) {
-      console.error('Socket error:', err);
-    }
-  } catch (err) {
+  // Send Order Received Notifications (Email, In-App, Push, Socket)
+  notificationService.notifyOrderReceived(order).catch((err) => {
     console.error('Failed to send order received notifications:', err);
-  }
+  });
 
   res.status(201).json({
     success: true,
@@ -216,7 +179,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     req.params.id,
     updateData,
     { new: true }
-  );
+  ).populate('user', 'name email');
   if (!order) throw new ApiError(404, 'Order not found');
 
   try {
@@ -233,67 +196,14 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   } else if (orderStatus === 'delivered') {
     title = "It's Here! Your package has arrived! 🎁";
     body = `Your order ${order.customOrderId} has been delivered. Enjoy!`;
-  } else if (orderStatus === 'processing') {
-    title = "We're on it! 🛠️";
-    body = `Your order ${order.customOrderId} is now being processed.`;
-  } else if (orderStatus === 'confirmed') {
-    title = 'Woohoo! Order Confirmed! 🎉';
-    body = `Your order ${order.customOrderId} has been confirmed.`;
-  } else if (orderStatus === 'cancelled') {
-    title = 'Order Cancelled 😔';
-    body = `Your order ${order.customOrderId} has been cancelled.`;
   }
-
-  await Notification.create({
-    user: order.user._id,
-    title,
-    message: body,
-    link: `/account?tab=orders`,
+  
+  // Send Notifications
+  notificationService.notifyOrderStatusUpdate(order, orderStatus).catch(err => {
+    console.error('Failed to send order status notifications:', err);
   });
-
-  const { sendPushToUser } = await import('../utils/push.js');
-  await sendPushToUser(order.user._id, {
-    title,
-    body,
-    icon: '/pwa-192x192.png',
-    url: '/account?tab=orders'
-  });
-
-  // Send email if shipped
-  if (orderStatus === 'shipped' && order.user.email) {
-    try {
-      await sendEmail({
-        email: order.user.email,
-        subject: `Wow! Your Order Has Shipped!! 🚚✨ - #${order.customOrderId}`,
-        html: getOrderShippedTemplate(order)
-      });
-    } catch (err) {
-      console.error('Failed to send shipped email:', err);
-    }
-  } else if (orderStatus === 'delivered' && order.user.email) {
-    try {
-      await sendEmail({
-        email: order.user.email,
-        subject: `It's Here! Your package has arrived! 🎁 - #${order.customOrderId}`,
-        html: getOrderDeliveredTemplate(order)
-      });
-    } catch (err) {
-      console.error('Failed to send delivered email:', err);
-    }
-  } else if (orderStatus === 'cancelled' && order.user.email) {
-    try {
-      await sendEmail({
-        email: order.user.email,
-        subject: `Order Cancelled 😔 - #${order.customOrderId}`,
-        html: getOrderCancelledTemplate(order)
-      });
-    } catch (err) {
-      console.error('Failed to send cancelled email:', err);
-    }
-  }
 
   try {
-    getSocket().to(`user_${order.user._id.toString()}`).emit('order_update', { orderId: order._id });
     getSocket().to('admins').emit('order_update', { orderId: order._id });
   } catch (err) {
     console.error('Socket emission failed:', err);
@@ -352,37 +262,9 @@ export const verifyUtr = asyncHandler(async (req, res) => {
         await order.save({ session });
       });
 
-      try {
-        getSocket().to('admins').emit('order_update', { type: 'UTR_VERIFIED', orderId: order._id });
-        getSocket().to(`user_${order.user._id}`).emit('order_update', { type: 'UTR_VERIFIED', orderId: order._id });
-      } catch (err) {}
-
-      await Notification.create({
-        user: order.user._id,
-        title: 'Woohoo! Payment Successful! 💸',
-        message: `Your payment for order ${order.customOrderId} has been verified successfully.`,
-        link: `/account?tab=orders`,
+      notificationService.notifyPaymentVerified(order).catch(err => {
+        console.error('Failed to send payment verified notifications:', err);
       });
-
-      const { sendPushToUser } = await import('../utils/push.js');
-      await sendPushToUser(order.user._id, {
-        title: 'Woohoo! Payment Successful! 💸',
-        body: `Your payment for order ${order.customOrderId} has been verified.`,
-        icon: '/pwa-192x192.png',
-        url: '/account?tab=orders'
-      });
-
-      if (order.user.email) {
-        try {
-          await sendEmail({
-            email: order.user.email,
-            subject: `Woohoo! Payment Successful! 💸 - #${order.customOrderId}`,
-            html: getPaymentVerifiedTemplate(order)
-          });
-        } catch (err) {
-          console.error('Failed to send payment verified email:', err);
-        }
-      }
     } else {
       if (!order.utrEdited) {
         // First rejection: give them a chance to edit
@@ -390,62 +272,14 @@ export const verifyUtr = asyncHandler(async (req, res) => {
         order.utrNumber = undefined;
         await order.save();
 
-        await Notification.create({
-          user: order.user._id,
-          title: 'UTR Rejected',
-          message: `The UTR for order ${order.customOrderId} was rejected. Please check and enter the correct UTR (you have one edit left).`,
-          link: `/account?tab=orders`,
-        });
-
-        const { sendPushToUser } = await import('../utils/push.js');
-        await sendPushToUser(order.user._id, {
-          title: 'Action Required: UTR Rejected',
-          body: `The UTR for order ${order.customOrderId} was rejected. Please update it.`,
-          icon: '/pwa-192x192.png',
-          url: '/account?tab=orders'
-        });
-
-        try {
-          getSocket().to('admins').emit('order_update', { type: 'UTR_REJECTED', orderId: order._id });
-          getSocket().to(`user_${order.user._id}`).emit('order_update', { type: 'UTR_REJECTED', orderId: order._id });
-        } catch (err) {}
+        notificationService.notifyUtrRejected(order).catch(e => console.error(e));
       } else {
         // Second rejection: cancel order
         order.paymentStatus = 'FAILED';
         order.orderStatus = 'cancelled';
         await order.save();
 
-        await Notification.create({
-          user: order.user._id,
-          title: 'Order Cancelled 😔',
-          message: `We could not verify the UTR for order ${order.customOrderId}. The order has been cancelled.`,
-          link: `/account?tab=orders`,
-        });
-
-        const { sendPushToUser } = await import('../utils/push.js');
-        await sendPushToUser(order.user._id, {
-          title: 'Order Cancelled 😔',
-          body: `We could not verify your UTR for order ${order.customOrderId}. It has been cancelled.`,
-          icon: '/pwa-192x192.png',
-          url: '/account?tab=orders'
-        });
-
-        try {
-          getSocket().to('admins').emit('order_update', { type: 'ORDER_CANCELLED', orderId: order._id });
-          getSocket().to(`user_${order.user._id}`).emit('order_update', { type: 'ORDER_CANCELLED', orderId: order._id });
-        } catch (err) {}
-
-        if (order.user.email) {
-          try {
-            await sendEmail({
-              email: order.user.email,
-              subject: `Order Cancelled 😔 - #${order.customOrderId}`,
-              html: getOrderCancelledTemplate(order)
-            });
-          } catch (err) {
-            console.error('Failed to send cancelled email:', err);
-          }
-        }
+        notificationService.notifyOrderStatusUpdate(order, 'cancelled').catch(e => console.error(e));
       }
     }
   } catch (err) {
@@ -613,4 +447,18 @@ export const updateReturnStatus = asyncHandler(async (req, res) => {
   } catch (err) {}
 
   res.json({ success: true, order });
+});
+
+export const getInvoice = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id)
+    .populate('user', 'name email')
+    .populate('items.product', 'name');
+
+  if (!order) throw new ApiError(404, 'Order not found');
+  
+  if (req.user.role !== 'admin' && String(order.user._id) !== String(req.user._id)) {
+    throw new ApiError(403, 'Not authorized');
+  }
+
+  generateInvoice(order, res);
 });

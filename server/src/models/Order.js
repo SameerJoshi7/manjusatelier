@@ -56,20 +56,20 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Pre-save hook to generate customOrderId
+import Counter from './Counter.js';
+
+// Pre-save hook to generate customOrderId safely
 orderSchema.pre('save', async function (next) {
   if (this.isNew && !this.customOrderId) {
     try {
-      // Find the last order to increment the ID
-      const lastOrder = await this.constructor.findOne({}, {}, { sort: { createdAt: -1 } });
-      let nextIdNumber = 1000; // Starting point
-      if (lastOrder && lastOrder.customOrderId) {
-        const match = lastOrder.customOrderId.match(/ORD-(\d+)/);
-        if (match && match[1]) {
-          nextIdNumber = parseInt(match[1], 10) + 1;
-        }
-      }
-      this.customOrderId = `ORD-${nextIdNumber}`;
+      const counter = await Counter.findByIdAndUpdate(
+        { _id: 'orderId' },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
+      // Start from 1000 if it's the first one, or adjust base as needed
+      // If we want it to start from 1000, we could initialize or just add 1000
+      this.customOrderId = `ORD-${1000 + counter.seq}`;
     } catch (error) {
       return next(error);
     }

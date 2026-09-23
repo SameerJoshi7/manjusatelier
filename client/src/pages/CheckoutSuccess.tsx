@@ -41,7 +41,7 @@ export default function CheckoutSuccess() {
               <Package size={18} /> Order #{order._id.slice(-8).toUpperCase()}
             </span>
             <span className="rounded-full bg-forest/15 px-3 py-1 text-xs font-semibold text-forest">
-              {order.paymentStatus === 'paid' ? 'Paid' : order.paymentStatus}
+              {order.paymentStatus === 'SUCCESSFUL' ? 'Paid' : order.paymentStatus.replace(/_/g, ' ')}
             </span>
           </div>
           <dl className="mt-4 space-y-2 text-sm">

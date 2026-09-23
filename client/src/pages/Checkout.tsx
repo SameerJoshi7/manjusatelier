@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 import { formatPrice, finalPrice, cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
+import { trackEvent } from '@/lib/analytics';
 import type { Address } from '@/types';
 
 const steps = ['Shipping', 'Review', 'Payment'] as const;
@@ -48,6 +49,12 @@ export default function Checkout() {
   });
 
   useEffect(() => {
+    if (items.length > 0) {
+      trackEvent('checkout_started');
+    }
+  }, [items.length]);
+
+  useEffect(() => {
     if (user && !user.addresses?.length) {
       setAddress((a) => ({ ...a, fullName: a.fullName || user.name, phone: a.phone || user.phone || '' }));
     }
@@ -68,7 +75,17 @@ export default function Checkout() {
     }
   }, [step, activeOrder]);
 
-  const total = subtotal + shippingFee;
+  const [discount, setDiscount] = useState(0);
+
+  useEffect(() => {
+    if (couponCode && items.length > 0) {
+      api.post<{ discount: number }>('/coupons/validate', { code: couponCode, cartTotal: subtotal })
+        .then(res => setDiscount(res.discount))
+        .catch(() => setDiscount(0));
+    }
+  }, [couponCode, subtotal, items]);
+
+  const total = subtotal + shippingFee - discount;
 
   if (!authLoading && !user) {
     return (
@@ -103,7 +120,7 @@ export default function Checkout() {
     setProcessing(true);
     try {
       if (user) {
-        let newAddresses = [...(user.addresses || [])];
+        const newAddresses = [...(user.addresses || [])];
         if (addressIndex === 'new') {
           newAddresses.push(address);
         } else {
@@ -121,6 +138,8 @@ export default function Checkout() {
         shippingAddress: address,
         couponCode,
       });
+
+      trackEvent('order_placed', { orderId: order.customOrderId, amount: order.amount });
 
       clear();
       setActiveOrder(order);
@@ -385,7 +404,7 @@ export default function Checkout() {
               {couponCode && (
                 <div className="flex justify-between text-forest">
                   <dt>Coupon {couponCode}</dt>
-                  <dd>applied at payment</dd>
+                  <dd>-{formatPrice(discount)}</dd>
                 </div>
               )}
               <div className="flex justify-between border-t border-brown/10 pt-3 text-base font-semibold text-brown-dark dark:text-beige">

@@ -7,6 +7,7 @@ function getToken(req) {
   if (req.cookies?.token) return req.cookies.token;
   const header = req.headers.authorization;
   if (header?.startsWith('Bearer ')) return header.split(' ')[1];
+  if (req.query?.token) return req.query.token;
   return null;
 }
 

@@ -58,10 +58,8 @@ export const getCache = async (key) => {
 export const clearCachePattern = async (pattern) => {
   try {
     if (useRedis && redisClient) {
-      // In a real prod environment with many keys, SCAN should be used instead of KEYS
-      const keys = await redisClient.keys(`*${pattern}*`);
-      if (keys.length > 0) {
-        await redisClient.del(keys);
+      for await (const key of redisClient.scanIterator({ MATCH: `*${pattern}*` })) {
+        await redisClient.del(key);
       }
     } else {
       const keys = memoryCache.keys().filter((k) => k.includes(pattern));
@@ -71,5 +69,11 @@ export const clearCachePattern = async (pattern) => {
     }
   } catch (err) {
     console.error('Cache Clear Error:', err);
+  }
+};
+
+export const closeCache = async () => {
+  if (useRedis && redisClient) {
+    await redisClient.quit();
   }
 };

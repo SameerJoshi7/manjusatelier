@@ -9,9 +9,11 @@ import {
   LogOut,
   Menu,
   X,
+  Users,
   Store,
   Settings2,
   Megaphone,
+  BarChart,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { usePageMeta } from '@/hooks/usePageMeta';
@@ -23,9 +25,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 const nav = [
   { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
+  { to: '/admin/analytics', label: 'Analytics', icon: BarChart },
   { to: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { to: '/admin/products', label: 'Products', icon: Package },
   { to: '/admin/categories', label: 'Categories', icon: Tags },
+  { to: '/admin/customers', label: 'Customers', icon: Users },
   { to: '/admin/coupons', label: 'Coupons', icon: Ticket },
   { to: '/admin/marketing', label: 'Marketing', icon: Megaphone },
   { to: '/admin/settings', label: 'Settings', icon: Settings2 },

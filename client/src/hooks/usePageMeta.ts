@@ -8,10 +8,11 @@ interface Meta {
 }
 
 function setMeta(name: string, content: string) {
-  let el = document.querySelector(`meta[name="${name}"]`);
+  const attr = name.startsWith('og:') ? 'property' : 'name';
+  let el = document.querySelector(`meta[${attr}="${name}"]`);
   if (!el) {
     el = document.createElement('meta');
-    el.setAttribute('name', name);
+    el.setAttribute(attr, name);
     document.head.appendChild(el);
   }
   el.setAttribute('content', content);

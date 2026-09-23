@@ -5,9 +5,11 @@ import User from '../models/User.js';
 import { sendEmail } from './sendEmail.js';
 import { getAbandonedCartTemplate } from './emailTemplates.js';
 
+let tasks = [];
+
 export const initCronJobs = () => {
-  // Run every minute
-  cron.schedule('* * * * *', async () => {
+  // Run every 5 minutes
+  const t1 = cron.schedule('*/5 * * * *', async () => {
     try {
       // Find orders that are PAYMENT_PENDING and created more than 5 minutes ago
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
@@ -41,7 +43,7 @@ export const initCronJobs = () => {
   });
   
   // Run every day at 10:00 AM for abandoned carts
-  cron.schedule('0 10 * * *', async () => {
+  const t2 = cron.schedule('0 10 * * *', async () => {
     try {
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -78,5 +80,12 @@ export const initCronJobs = () => {
     }
   });
 
+  tasks.push(t1, t2);
+
   console.log('[CRON] Jobs initialized.');
+};
+
+export const stopCronJobs = () => {
+  tasks.forEach(t => t.stop());
+  tasks = [];
 };

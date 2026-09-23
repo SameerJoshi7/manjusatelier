@@ -34,7 +34,7 @@ export default function Shop() {
 
   usePageMeta({ title: "Shop — Manju's Atelier" });
 
-  const page = Number(params.get('page')) || 1;
+  const [page, setPage] = useState(1);
 
   const query = useMemo(
     () => ({
@@ -59,9 +59,7 @@ export default function Shop() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !loading && data && page < data.pages) {
-          const next = new URLSearchParams(params);
-          next.set('page', String(page + 1));
-          setParams(next, { replace: true });
+          setPage((p) => p + 1);
         }
       },
       { rootMargin: '100px' } // fetch a bit before they hit the absolute bottom
@@ -78,13 +76,15 @@ export default function Shop() {
     const next = new URLSearchParams(params);
     if (value) next.set(key, value);
     else next.delete(key);
-    if (key !== 'page') next.delete('page');
+    next.delete('page'); // Clear page from URL if it exists
+    setPage(1); // Reset local page state
     setParams(next, { replace: true });
   };
 
   const clearAll = () => {
     setParams({}, { replace: true });
     setMaxPrice(5000);
+    setPage(1);
   };
 
   const activeFilters = ['category', 'material', 'color', 'search', 'inStock', 'maxPrice'].filter(

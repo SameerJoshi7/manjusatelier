@@ -47,14 +47,24 @@ export function ProductCard({ product }: ProductCardProps) {
             <Eye size={16} /> View Details
           </Link>
           <button
-            onClick={() => {
+            onClick={(e) => {
               if (!product.inStock) return;
+              const btn = e.currentTarget;
+              const originalHTML = btn.innerHTML;
+              btn.classList.add('bg-forest');
+              btn.classList.remove('bg-brown', 'hover:bg-brown-dark');
+              btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+              setTimeout(() => {
+                btn.classList.remove('bg-forest');
+                btn.classList.add('bg-brown', 'hover:bg-brown-dark');
+                btn.innerHTML = originalHTML;
+              }, 1000);
               add(product);
               notify('Added to cart');
             }}
             disabled={!product.inStock}
             aria-label="Add to cart"
-            className="btn bg-brown px-3 py-2.5 text-cream hover:bg-brown-dark"
+            className="btn bg-brown px-3 py-2.5 text-cream hover:bg-brown-dark transition-colors duration-200"
           >
             <ShoppingBag size={16} />
           </button>
@@ -135,13 +145,22 @@ export function ProductCard({ product }: ProductCardProps) {
             />
           </button>
           <button
-            onClick={() => {
+            onClick={(e) => {
               if (!product.inStock) return;
+              const btn = e.currentTarget;
+              btn.classList.add('scale-95', 'bg-forest', 'text-white');
+              btn.classList.remove('bg-[#FFD814]', 'text-black');
+              btn.textContent = 'Added ✓';
+              setTimeout(() => {
+                btn.classList.remove('scale-95', 'bg-forest', 'text-white');
+                btn.classList.add('bg-[#FFD814]', 'text-black');
+                btn.textContent = 'Add to Cart';
+              }, 1000);
               add(product);
               notify('Added to cart');
             }}
             disabled={!product.inStock}
-            className="flex-1 rounded-full bg-[#FFD814] px-3 py-2 text-xs font-medium text-black shadow-sm transition hover:bg-[#F7CA00] disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-500"
+            className="flex-1 rounded-full bg-[#FFD814] px-3 py-2 text-xs font-medium text-black shadow-sm transition-all duration-200 hover:bg-[#F7CA00] disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-500"
           >
             Add to Cart
           </button>

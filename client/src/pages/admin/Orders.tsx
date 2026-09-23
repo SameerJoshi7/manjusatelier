@@ -296,9 +296,18 @@ export default function Orders() {
                           rel="noopener noreferrer"
                           className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[#25D366]/10 px-3 py-1.5 text-xs font-semibold text-[#128C7E] transition-colors hover:bg-[#25D366]/20 dark:bg-[#25D366]/10 dark:text-[#25D366]"
                         >
-                          <MessageCircle size={14} /> Message on WhatsApp
+                          <MessageCircle size={14} /> Message
                         </a>
                       )}
+                      
+                      <a
+                        href={`${import.meta.env.VITE_API_URL || ''}/api/orders/${o._id}/invoice`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 ml-2 inline-flex items-center gap-1.5 rounded-lg bg-brown/10 px-3 py-1.5 text-xs font-semibold text-brown transition-colors hover:bg-brown/20 dark:bg-beige/10 dark:text-beige"
+                      >
+                        <Package size={14} /> Invoice
+                      </a>
                       
                       <div className="mt-3 border-t border-brown/10 pt-2">
                          <p className="text-xs text-brown/50">Method: {o.paymentMethod || 'UPI'}</p>

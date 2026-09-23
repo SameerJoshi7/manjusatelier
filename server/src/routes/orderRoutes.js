@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { body } from 'express-validator';
+import { validate } from '../middleware/validate.js';
 import { protect, adminOnly } from '../middleware/auth.js';
 import {
   createOrder,
@@ -12,7 +14,8 @@ import {
   trackOrder,
   getPendingOrderCount,
   requestReturnExchange,
-  updateReturnStatus
+  updateReturnStatus,
+  getInvoice
 } from '../controllers/orderController.js';
 
 const router = Router();
@@ -21,9 +24,30 @@ router.get('/track/:customOrderId', trackOrder);
 
 router.use(protect); // all order routes require auth
 
-router.post('/', createOrder);
-router.post('/:id/utr', submitUtr);
-router.put('/:id/edit-utr', editUtr);
+router.post(
+  '/',
+  [
+    body('items').isArray({ min: 1 }).withMessage('At least one item is required'),
+    body('shippingAddress').isObject().withMessage('Shipping address is required'),
+    body('paymentMethod').isIn(['UPI', 'COD']).withMessage('Invalid payment method')
+  ],
+  validate,
+  createOrder
+);
+
+router.post(
+  '/:id/utr',
+  [body('utrNumber').isLength({ min: 12, max: 12 }).isNumeric().withMessage('UTR must be 12 digits')],
+  validate,
+  submitUtr
+);
+
+router.put(
+  '/:id/edit-utr',
+  [body('utrNumber').isLength({ min: 12, max: 12 }).isNumeric().withMessage('UTR must be 12 digits')],
+  validate,
+  editUtr
+);
 router.get('/mine', getMyOrders);
 router.post('/:id/request-return', requestReturnExchange);
 
@@ -34,6 +58,7 @@ router.patch('/:id/status', adminOnly, updateOrderStatus);
 router.patch('/:id/verify-utr', adminOnly, verifyUtr);
 router.patch('/:id/return-status', adminOnly, updateReturnStatus);
 
+router.get('/:id/invoice', getInvoice);
 router.get('/:id', getOrder);
 
 export default router;

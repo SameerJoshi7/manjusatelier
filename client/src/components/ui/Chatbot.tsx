@@ -21,6 +21,7 @@ export const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [inputValue, setInputValue] = useState('');
   const [userOrders, setUserOrders] = useState<Order[]>([]);
   
   // Order selection state
@@ -204,7 +205,38 @@ export const Chatbot = () => {
         <div ref={messagesEndRef} className="h-px shrink-0" />
       </div>
 
-      {/* Input Area Removed - Users must use quick replies */}
+      {/* Input Area */}
+      <div className="p-3 bg-white dark:bg-[#26201a] border-t border-gray-100 dark:border-brown-dark shadow-sm z-10 shrink-0">
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (inputValue.trim()) {
+              handleSend(inputValue);
+              setInputValue('');
+            }
+          }}
+          className="flex items-center gap-2 relative"
+        >
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Type your message..."
+            disabled={isLoading}
+            className="flex-1 rounded-full border border-gray-200 dark:border-brown bg-gray-50 dark:bg-[#1c1712] px-4 py-2 text-sm text-brown-dark dark:text-beige focus:border-brown focus:outline-none focus:ring-1 focus:ring-brown disabled:opacity-50"
+          />
+          <button
+            type="submit"
+            disabled={!inputValue.trim() || isLoading}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-brown text-white transition-colors hover:bg-brown-dark disabled:opacity-50 shrink-0"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

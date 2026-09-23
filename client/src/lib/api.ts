@@ -34,7 +34,15 @@ async function request<T>(path: string, options: Options = {}): Promise<T> {
   const data = isJson ? await res.json() : null;
 
   if (!res.ok) {
-    throw new ApiError(res.status, data?.message || `Request failed (${res.status})`);
+    const errorMsg = data?.message || `Request failed (${res.status})`;
+    
+    if (res.status === 401 || res.status === 403) {
+      window.dispatchEvent(new CustomEvent('auth-expired', { detail: { message: errorMsg } }));
+    } else if (res.status >= 500) {
+      window.dispatchEvent(new CustomEvent('global-error', { detail: { message: errorMsg } }));
+    }
+
+    throw new ApiError(res.status, errorMsg);
   }
   return data as T;
 }
@@ -55,9 +63,26 @@ async function upload<T>(path: string, formData: FormData): Promise<T> {
   const data = res.headers.get('content-type')?.includes('application/json')
     ? await res.json()
     : null;
-  if (!res.ok) throw new ApiError(res.status, data?.message || `Upload failed (${res.status})`);
+    
+  if (!res.ok) {
+    const errorMsg = data?.message || `Upload failed (${res.status})`;
+    
+    if (res.status === 401 || res.status === 403) {
+      window.dispatchEvent(new CustomEvent('auth-expired', { detail: { message: errorMsg } }));
+    } else if (res.status >= 500) {
+      window.dispatchEvent(new CustomEvent('global-error', { detail: { message: errorMsg } }));
+    }
+
+    throw new ApiError(res.status, errorMsg);
+  }
   return data as T;
 }
+
+export const getErrorMessage = (error: unknown): string => {
+  if (error instanceof ApiError) return error.message;
+  if (error instanceof Error) return error.message;
+  return 'An unexpected error occurred';
+};
 
 export const api = {
   get: <T>(path: string) => request<T>(path),

@@ -249,7 +249,7 @@ function ProductForm({
       const { data } = await api.post<{ data: any }>('/ai/generate-product', { imageUrl: coverImage });
       
       setForm(prev => {
-        let newBadges = [...prev.badges];
+        const newBadges = [...prev.badges];
         if (data.tags && Array.isArray(data.tags)) {
           data.tags.forEach((tag: string) => {
              const capitalized = tag.charAt(0).toUpperCase() + tag.slice(1);
