@@ -131,3 +131,22 @@ export const getAbandonedCartTemplate = (userName, discountCode) => `
     </div>
   </div>
 `;
+
+export const getBulkOrderReplyTemplate = (name) => `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #f8f5f0; padding: 20px; text-align: center;">
+      <h1 style="color: #4a3b32; margin: 0; font-size: 24px;">Manju's Atelier</h1>
+    </div>
+    <div style="padding: 30px; background-color: #ffffff;">
+      <h2 style="color: #4a3b32; margin-top: 0;">Thank you for your bulk order inquiry, ${name}!</h2>
+      <p style="color: #666666; line-height: 1.6;">We have received your bulk order request and are excited to work with you.</p>
+      <p style="color: #666666; line-height: 1.6;">Our team will review your details and get back to you shortly.</p>
+      <p style="color: #666666; line-height: 1.6;">For immediate assistance, please feel free to reach out to us:</p>
+      <ul style="color: #666666; line-height: 1.6;">
+        <li>Email: queries@manjusatelier.in</li>
+        <li>Phone: +91 98765 43210</li>
+      </ul>
+      <p style="color: #666666; line-height: 1.6; margin-top: 20px;">We look forward to fulfilling your request!</p>
+    </div>
+  </div>
+`;

@@ -86,7 +86,7 @@ export function Footer() {
             <h5 className="font-serif text-cream">Bulk Orders</h5>
             <p className="mt-1 text-xs text-beige/70">
               Planning a corporate event or wedding? For bulk orders, please{' '}
-              <Link to="/contact" className="text-gold hover:underline font-medium">
+              <Link to="/bulk-orders" className="text-gold hover:underline font-medium">
                 contact us here
               </Link>.
             </p>

@@ -14,6 +14,7 @@ const ProductDetails = lazy(() => import('@/pages/ProductDetails'));
 const Categories = lazy(() => import('@/pages/Categories'));
 const About = lazy(() => import('@/pages/About'));
 const Contact = lazy(() => import('@/pages/Contact'));
+const BulkOrders = lazy(() => import('@/pages/BulkOrders'));
 const Cart = lazy(() => import('@/pages/Cart'));
 const Checkout = lazy(() => import('@/pages/Checkout'));
 const CheckoutSuccess = lazy(() => import('@/pages/CheckoutSuccess'));
@@ -81,6 +82,7 @@ export default function App() {
             <Route path="/categories" element={<Categories />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/bulk-orders" element={<BulkOrders />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/checkout/success/:id" element={<CheckoutSuccess />} />
