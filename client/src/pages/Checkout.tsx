@@ -215,6 +215,7 @@ export default function Checkout() {
                 Shipping & Details
               </h2>
               
+              {user?.addresses && user.addresses.length > 0 && (
                 <Field label="Saved Addresses">
                   <select 
                     className="input mb-4" 
@@ -235,11 +236,12 @@ export default function Checkout() {
                     }}
                   >
                     <option value="new">Add New Address</option>
-                    {user?.addresses?.map((a, i) => (
+                    {user.addresses.map((a, i) => (
                       <option key={i} value={i}>{a.line1}, {a.city}</option>
                     ))}
                   </select>
                 </Field>
+              )}
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Full Name">

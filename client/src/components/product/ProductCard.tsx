@@ -9,6 +9,7 @@ import { LazyImage } from '@/components/ui/LazyImage';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/components/ui/Toast';
+import { useProductModal } from '@/context/ProductModalContext';
 
 interface ProductCardProps {
   product: Product;
@@ -18,6 +19,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const { has, toggle } = useWishlist();
   const { add } = useCart();
   const { notify } = useToast();
+  const { openModal } = useProductModal();
   const wished = has(product._id);
   const price = finalPrice(product);
 
@@ -29,7 +31,14 @@ export function ProductCard({ product }: ProductCardProps) {
     >
       {/* Image Section - Completely clean */}
       <div className="relative aspect-square w-[45%] shrink-0 sm:w-full overflow-hidden bg-beige/40">
-        <Link to={`/product/${product.slug}`} aria-label={product.name}>
+        <Link 
+          to={`/product/${product.slug}`} 
+          aria-label={product.name}
+          onClick={(e) => {
+            e.preventDefault();
+            openModal(product.slug);
+          }}
+        >
           <LazyImage
             src={product.images[0]}
             alt={product.name}
@@ -40,12 +49,15 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Desktop Quick Actions (Hidden on Mobile) */}
         <div className="hidden absolute inset-x-3 bottom-3 sm:flex translate-y-4 gap-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          <Link
-            to={`/product/${product.slug}`}
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              openModal(product.slug);
+            }}
             className="btn flex-1 bg-white/95 py-2.5 text-sm text-brown backdrop-blur hover:bg-white"
           >
-            <Eye size={16} /> View Details
-          </Link>
+            <Eye size={16} /> Quick View
+          </button>
           <button
             onClick={(e) => {
               if (!product.inStock) return;
@@ -100,7 +112,14 @@ export function ProductCard({ product }: ProductCardProps) {
         <p className="text-[10px] sm:text-xs uppercase tracking-wide text-brown/50 dark:text-beige/50">
           {categoryName(product)}
         </p>
-        <Link to={`/product/${product.slug}`} className="mt-1 pr-6 sm:pr-8">
+        <Link 
+          to={`/product/${product.slug}`} 
+          className="mt-1 pr-6 sm:pr-8"
+          onClick={(e) => {
+            e.preventDefault();
+            openModal(product.slug);
+          }}
+        >
           <h3 className="font-serif text-sm sm:text-lg leading-snug text-brown-dark transition-colors group-hover:text-brown dark:text-beige line-clamp-2">
             {product.name}
           </h3>

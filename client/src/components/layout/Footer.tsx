@@ -82,6 +82,15 @@ export function Footer() {
             Handcrafted with love, made to last. Every piece is created in small batches with care,
             intention, and a story worth sharing.
           </p>
+          <div className="mt-6 rounded-xl bg-cream/5 p-4 max-w-sm ring-1 ring-cream/10">
+            <h5 className="font-serif text-cream">Bulk Orders</h5>
+            <p className="mt-1 text-xs text-beige/70">
+              Planning a corporate event or wedding? For bulk orders, please{' '}
+              <Link to="/contact" className="text-gold hover:underline font-medium">
+                contact us here
+              </Link>.
+            </p>
+          </div>
 
           {/* 
           <form onSubmit={subscribe} className="mt-6 max-w-sm">
