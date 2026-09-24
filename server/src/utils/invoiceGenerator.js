@@ -7,13 +7,13 @@ function formatPaymentStatus(status) {
     .join(' ');
 }
 
-export function generateInvoice(order, res) {
+export function generateInvoice(order, res, inline = false) {
   const doc = new PDFDocument({ margin: 50 });
 
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader(
     'Content-Disposition',
-    `attachment; filename=invoice-${order.customOrderId || order._id}.pdf`
+    `${inline ? 'inline' : 'attachment'}; filename=invoice-${order.customOrderId || order._id}.pdf`
   );
 
   doc.pipe(res);

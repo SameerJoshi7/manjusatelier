@@ -460,5 +460,6 @@ export const getInvoice = asyncHandler(async (req, res) => {
     throw new ApiError(403, 'Not authorized');
   }
 
-  generateInvoice(order, res);
+  const inline = req.query.action === 'view';
+  generateInvoice(order, res, inline);
 });

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronDown, Package, CheckCircle2, XCircle, MessageCircle } from 'lucide-react';
+import { ChevronDown, Package, CheckCircle2, XCircle, MessageCircle, Eye } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatPrice, cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -300,14 +300,24 @@ export default function Orders() {
                         </a>
                       )}
                       
-                      <a
-                        href={`${import.meta.env.VITE_API_URL || ''}/api/orders/${o._id}/invoice`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-3 ml-2 inline-flex items-center gap-1.5 rounded-lg bg-brown/10 px-3 py-1.5 text-xs font-semibold text-brown transition-colors hover:bg-brown/20 dark:bg-beige/10 dark:text-beige"
-                      >
-                        <Package size={14} /> Invoice
-                      </a>
+                      <div className="mt-3 flex gap-2 flex-wrap">
+                        <a
+                          href={`${import.meta.env.VITE_API_URL || ''}/api/orders/${o._id}/invoice?action=view&token=${localStorage.getItem('token')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-brown/10 px-3 py-1.5 text-xs font-semibold text-brown transition-colors hover:bg-brown/20 dark:bg-beige/10 dark:text-beige"
+                        >
+                          <Eye size={14} /> View Invoice
+                        </a>
+                        <a
+                          href={`${import.meta.env.VITE_API_URL || ''}/api/orders/${o._id}/invoice?token=${localStorage.getItem('token')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-brown/10 px-3 py-1.5 text-xs font-semibold text-brown transition-colors hover:bg-brown/20 dark:bg-beige/10 dark:text-beige"
+                        >
+                          <Package size={14} /> Download
+                        </a>
+                      </div>
                       
                       <div className="mt-3 border-t border-brown/10 pt-2">
                          <p className="text-xs text-brown/50">Method: {o.paymentMethod || 'UPI'}</p>
