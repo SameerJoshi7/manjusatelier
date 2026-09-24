@@ -92,22 +92,21 @@ export function generateInvoice(order, res) {
     .font('Helvetica');
 
   if (order.shippingAddress) {
-    let currentY = 185;
-    if (order.shippingAddress.line1) {
-      doc.text(order.shippingAddress.line1, 350, currentY);
-      currentY += 15;
+    const addressLines = [];
+    if (order.shippingAddress.line1) addressLines.push(order.shippingAddress.line1);
+    if (order.shippingAddress.line2) addressLines.push(order.shippingAddress.line2);
+    
+    const cityState = [order.shippingAddress.city, order.shippingAddress.state].filter(Boolean).join(', ');
+    const postal = order.shippingAddress.postalCode || '';
+    if (cityState || postal) {
+      addressLines.push(`${cityState} ${postal}`.trim());
     }
-    if (order.shippingAddress.line2) {
-      doc.text(order.shippingAddress.line2, 350, currentY);
-      currentY += 15;
-    }
-    if (order.shippingAddress.city || order.shippingAddress.state) {
-      const cityState = [order.shippingAddress.city, order.shippingAddress.state].filter(Boolean).join(', ');
-      doc.text(`${cityState} ${order.shippingAddress.postalCode || ''}`.trim(), 350, currentY);
-      currentY += 15;
-    }
+    
+    doc.text(addressLines.join('\n'), 350, 185, { width: 200, lineGap: 3 });
+    
     if (order.shippingAddress.phone) {
-      doc.fillColor(lightText).text(`Phone: ${order.shippingAddress.phone}`, 350, currentY);
+      doc.moveDown(0.5);
+      doc.fillColor(lightText).text(`Phone: ${order.shippingAddress.phone}`, { width: 200 });
     }
   }
 
@@ -140,7 +139,6 @@ export function generateInvoice(order, res) {
     // Instead of drawing a rect background, just text
     const name = item.product?.name || item.name || 'Product';
     
-    // Handle multi-line item names if needed, but for simplicity we assume it fits or truncate
     doc.fillColor(textColor);
     generateTableRow(
       doc,
@@ -151,8 +149,11 @@ export function generateInvoice(order, res) {
       `Rs. ${(item.price * item.quantity).toFixed(2)}`
     );
     
-    doc.strokeColor('#eeeeee').lineWidth(1).moveTo(50, position + 20).lineTo(550, position + 20).stroke();
-    position += 30;
+    const height = doc.heightOfString(name, { width: 220 });
+    const rowHeight = Math.max(height + 15, 30);
+    
+    doc.strokeColor('#eeeeee').lineWidth(1).moveTo(50, position + height + 10).lineTo(550, position + height + 10).stroke();
+    position += rowHeight;
   }
 
   // Summary Box
@@ -183,7 +184,7 @@ export function generateInvoice(order, res) {
   doc.text(`Rs. ${order.total.toFixed(2)}`, 450, currentSummaryY, { width: 80, align: 'right' });
 
   // Footer
-  const footerTop = 720;
+  const footerTop = doc.page.height - 90;
   doc
     .strokeColor('#dddddd')
     .lineWidth(1)
@@ -199,7 +200,7 @@ export function generateInvoice(order, res) {
       'Thank you for shopping with Manju\'s Atelier!',
       50,
       footerTop,
-      { align: 'center', width: 500 }
+      { align: 'center', width: 500, lineBreak: false }
     );
     
   doc
@@ -210,7 +211,7 @@ export function generateInvoice(order, res) {
       'For any inquiries, please contact us at queries@manjusatelier.in',
       50,
       footerTop + 15,
-      { align: 'center', width: 500 }
+      { align: 'center', width: 500, lineBreak: false }
     );
 
   doc.end();
