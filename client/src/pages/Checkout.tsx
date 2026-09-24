@@ -137,6 +137,7 @@ export default function Checkout() {
         items: items.map((i) => ({ productId: i.product._id, quantity: i.quantity })),
         shippingAddress: address,
         couponCode,
+        paymentMethod: 'UPI',
       });
 
       trackEvent('order_placed', { orderId: order.customOrderId, amount: order.amount });
