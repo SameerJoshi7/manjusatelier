@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Mail, Phone, Building, CheckCircle } from 'lucide-react';
-import api from '@/lib/api';
+import { api } from '@/lib/api';
 
 export default function BulkOrders() {
   const [formData, setFormData] = useState({
@@ -115,7 +115,7 @@ export default function BulkOrders() {
               <Button
                 className="mt-8"
                 onClick={() => setStatus('idle')}
-                variant="outline"
+                variant="secondary"
               >
                 Submit Another Inquiry
               </Button>
