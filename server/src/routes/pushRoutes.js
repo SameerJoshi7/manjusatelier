@@ -35,25 +35,34 @@ router.post(
       const userId = req.user ? req.user._id : null;
 
       // Upsert the subscription using the endpoint as the unique key
-      const updatedSubscription = await PushSubscription.findOneAndUpdate(
-        { endpoint: subscription.endpoint },
-        { 
+      let existingSubscription = await PushSubscription.findOne({ endpoint: subscription.endpoint });
+      let isNew = false;
+
+      if (!existingSubscription) {
+        existingSubscription = new PushSubscription({
           endpoint: subscription.endpoint,
           keys: subscription.keys,
-          user: userId 
-        },
-        { upsert: true, new: true }
-      );
+          user: userId
+        });
+        await existingSubscription.save();
+        isNew = true;
+      } else {
+        existingSubscription.keys = subscription.keys;
+        existingSubscription.user = userId;
+        await existingSubscription.save();
+      }
 
-      // Send a welcome notification
-      await sendPushNotification(subscription, {
-        title: "You're subscribed!",
-        body: "Thanks for enabling notifications for Manju's Atelier.",
-        icon: "/pwa-192x192.png",
-        url: "/"
-      });
+      // Send a welcome notification only if it's the first time
+      if (isNew) {
+        await sendPushNotification(subscription, {
+          title: "You're subscribed!",
+          body: "Thanks for enabling notifications for Manju's Atelier.",
+          icon: "/pwa-192x192.png",
+          url: "/"
+        });
+      }
 
-      res.status(201).json({ success: true, data: updatedSubscription });
+      res.status(201).json({ success: true, data: existingSubscription });
     } catch (error) {
       console.error('Error saving push subscription:', error);
       res.status(500).json({ success: false, message: 'Server error saving subscription' });
