@@ -68,8 +68,9 @@ orderSchema.pre('save', async function (next) {
         { new: true, upsert: true }
       );
       // Start from 1000 if it's the first one, or adjust base as needed
-      // If we want it to start from 1000, we could initialize or just add 1000
-      this.customOrderId = `ORD-${1000 + counter.seq}`;
+      // Include a short timestamp string to prevent collisions if DB is wiped but orders remain
+      const timePart = Date.now().toString(36).toUpperCase().slice(-4);
+      this.customOrderId = `ORD-${timePart}-${1000 + counter.seq}`;
     } catch (error) {
       return next(error);
     }
