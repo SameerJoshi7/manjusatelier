@@ -1,4 +1,5 @@
 import sendEmail from '../utils/sendEmail.js';
+import { getBulkOrderReplyTemplate } from '../utils/emailTemplates.js';
 
 export const submitContactForm = async (req, res) => {
   try {
@@ -30,8 +31,6 @@ export const submitContactForm = async (req, res) => {
   }
 };
 
-import { getBulkOrderReplyTemplate } from '../utils/emailTemplates.js';
-
 export const submitBulkOrderForm = async (req, res) => {
   try {
     const { name, email, phone, organization, productsOfInterest, expectedQuantity, details } = req.body;
@@ -54,9 +53,9 @@ export const submitBulkOrderForm = async (req, res) => {
     // Email to Admin
     await sendEmail({
       email: 'queries@manjusatelier.in',
-      subject: \`Bulk Order Inquiry from \${name}\`,
+      subject: `Bulk Order Inquiry from ${name}`,
       html: emailHtml,
-      message: \`Name: \${name}\\nEmail: \${email}\\nPhone: \${phone}\\nProducts: \${productsOfInterest}\`
+      message: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nProducts: ${productsOfInterest}`
     });
 
     // Email to Customer
@@ -64,7 +63,7 @@ export const submitBulkOrderForm = async (req, res) => {
       email,
       subject: "We've received your Bulk Order request!",
       html: getBulkOrderReplyTemplate(name),
-      message: \`Hi \${name}, thank you for your bulk order inquiry. We will get back to you shortly.\`
+      message: `Hi ${name}, thank you for your bulk order inquiry. We will get back to you shortly.`
     });
 
     res.status(200).json({ message: 'Bulk order inquiry submitted successfully.' });
