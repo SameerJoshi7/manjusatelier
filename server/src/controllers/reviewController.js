@@ -3,14 +3,14 @@ import Review from '../models/Review.js';
 import { asyncHandler, ApiError } from '../middleware/error.js';
 
 export const getProductReviews = asyncHandler(async (req, res) => {
-  const reviews = await Review.find({ product: req.params.productId }).sort({ createdAt: -1 });
+  const reviews = await Review.find({ product: req.params.productId, status: 'approved' }).sort({ createdAt: -1 });
   res.json({ success: true, reviews });
 });
 
 /** GET /api/reviews/recent — latest reviews across all products (for testimonials). */
 export const getRecentReviews = asyncHandler(async (req, res) => {
   const limit = Math.min(12, Number(req.query.limit) || 6);
-  const reviews = await Review.find({ comment: { $exists: true, $ne: '' } })
+  const reviews = await Review.find({ comment: { $exists: true, $ne: '' }, status: 'approved' })
     .sort({ createdAt: -1 })
     .limit(limit)
     .populate('product', 'name slug images');
@@ -56,6 +56,31 @@ export const createOfflineReview = asyncHandler(async (req, res) => {
     name,
     rating,
     comment,
+    status: 'pending',
   });
   res.status(201).json({ success: true, review });
+});
+
+// Admin endpoint to get pending reviews
+export const getPendingReviews = asyncHandler(async (req, res) => {
+  const reviews = await Review.find({ status: 'pending' })
+    .sort({ createdAt: -1 })
+    .populate('product', 'name');
+  res.json({ success: true, reviews });
+});
+
+// Admin endpoint to approve a review
+export const updateReviewStatus = asyncHandler(async (req, res) => {
+  const { status } = req.body;
+  if (!['approved', 'pending'].includes(status)) {
+    throw new ApiError(400, 'Invalid status');
+  }
+
+  const review = await Review.findById(req.params.id);
+  if (!review) throw new ApiError(404, 'Review not found');
+
+  review.status = status;
+  await review.save(); // triggers recalcProductRating if approved
+
+  res.json({ success: true, review });
 });

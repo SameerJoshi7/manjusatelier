@@ -8,6 +8,7 @@ const reviewSchema = new mongoose.Schema(
     name: { type: String, required: true },
     rating: { type: Number, required: true, min: 1, max: 5 },
     comment: { type: String, trim: true, maxlength: 1000 },
+    status: { type: String, enum: ['pending', 'approved'], default: 'approved' },
   },
   { timestamps: true }
 );
@@ -18,7 +19,7 @@ reviewSchema.index({ product: 1, user: 1 }, { unique: true });
 // Recalculate product rating aggregate after save/remove
 reviewSchema.statics.recalcProductRating = async function recalc(productId) {
   const stats = await this.aggregate([
-    { $match: { product: productId } },
+    { $match: { product: productId, status: 'approved' } },
     { $group: { _id: '$product', avg: { $avg: '$rating' }, count: { $sum: 1 } } },
   ]);
   const { avg = 0, count = 0 } = stats[0] || {};

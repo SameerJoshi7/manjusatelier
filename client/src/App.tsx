@@ -40,6 +40,7 @@ const AdminCoupons = lazy(() => import('@/pages/admin/Coupons'));
 const AdminSettings = lazy(() => import('@/pages/admin/Settings'));
 const AdminCustomers = lazy(() => import('@/pages/admin/Customers'));
 const Marketing = lazy(() => import('@/pages/admin/Marketing'));
+const AdminReviews = lazy(() => import('@/pages/admin/Reviews'));
 
 export default function App() {
   const {
@@ -109,6 +110,7 @@ export default function App() {
             <Route path="categories" element={<AdminCategories />} />
             <Route path="coupons" element={<AdminCoupons />} />
             <Route path="customers" element={<AdminCustomers />} />
+            <Route path="reviews" element={<AdminReviews />} />
             <Route path="marketing" element={<Marketing />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>

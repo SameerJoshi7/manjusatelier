@@ -14,6 +14,7 @@ import {
   Settings2,
   Megaphone,
   BarChart,
+  MessageSquare,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { usePageMeta } from '@/hooks/usePageMeta';
@@ -31,6 +32,7 @@ const nav = [
   { to: '/admin/categories', label: 'Categories', icon: Tags },
   { to: '/admin/customers', label: 'Customers', icon: Users },
   { to: '/admin/coupons', label: 'Coupons', icon: Ticket },
+  { to: '/admin/reviews', label: 'Reviews', icon: MessageSquare },
   { to: '/admin/marketing', label: 'Marketing', icon: Megaphone },
   { to: '/admin/settings', label: 'Settings', icon: Settings2 },
 ];
