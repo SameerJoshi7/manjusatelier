@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { api } from '@/lib/api';
-import { Star, CheckCircle } from 'lucide-react';
+import { Star, CheckCircle, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function OfflineReview() {
@@ -16,6 +16,9 @@ export default function OfflineReview() {
     rating: 5,
     comment: '',
   });
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const selectedProduct = products.find(p => p._id === formData.productId);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -100,26 +103,53 @@ export default function OfflineReview() {
               <div className="text-center text-brown/60">Loading products...</div>
             ) : (
               <div className="space-y-2">
-                <label htmlFor="productId" className="text-sm font-medium text-brown-dark">
+                <label className="text-sm font-medium text-brown-dark">
                   Which product did you purchase? *
                 </label>
-                <select
-                  id="productId"
-                  name="productId"
-                  required
-                  value={formData.productId}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-brown/20 px-4 py-2.5 text-brown outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold bg-white"
-                >
-                  <option value="" disabled>
-                    Select a product
-                  </option>
-                  {products.map((p) => (
-                    <option key={p._id} value={p._id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="flex w-full items-center justify-between rounded-lg border border-brown/20 bg-white px-4 py-2.5 text-left text-brown outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold"
+                  >
+                    {selectedProduct ? (
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={selectedProduct.images?.[0] || '/placeholder.png'} 
+                          alt={selectedProduct.name}
+                          className="h-8 w-8 rounded object-cover"
+                        />
+                        <span className="truncate">{selectedProduct.name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-brown/60">Select a product</span>
+                    )}
+                    <ChevronDown size={18} className="text-brown/40" />
+                  </button>
+
+                  {dropdownOpen && (
+                    <div className="absolute left-0 top-full z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-brown/20 bg-white shadow-lg">
+                      {products.map((p) => (
+                        <button
+                          key={p._id}
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => ({ ...prev, productId: p._id }));
+                            setDropdownOpen(false);
+                          }}
+                          className="flex w-full items-center gap-3 border-b border-brown/5 p-3 text-left transition-colors last:border-0 hover:bg-gold/10"
+                        >
+                          <img
+                            src={p.images?.[0] || '/placeholder.png'}
+                            alt={p.name}
+                            className="h-10 w-10 shrink-0 rounded object-cover"
+                          />
+                          <span className="truncate text-brown-dark">{p.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

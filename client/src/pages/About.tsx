@@ -42,10 +42,10 @@ export default function About() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <Reveal>
             <LazyImage
-              src={placeholder('manjus-founder2', 900, 1000, 'Our Founder')}
+              src="/founder.png"
               alt="Manju in her studio"
-              wrapperClassName="overflow-hidden rounded-3xl"
-              className="aspect-[4/5] w-full object-cover"
+              wrapperClassName="overflow-hidden rounded-3xl ring-4 ring-gold/20 shadow-xl"
+              className="aspect-[4/5] w-full object-cover grayscale hover:grayscale-0 transition duration-700"
             />
           </Reveal>
           <Reveal delay={0.15}>
