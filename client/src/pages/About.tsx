@@ -16,31 +16,8 @@ export default function About() {
 
   return (
     <div>
-      {/* Hero */}
-      <section className="relative flex py-24 items-center overflow-hidden md:py-32">
-        <img
-          src={placeholder('manjus-about', 1920, 900)}
-          alt="Artisan studio"
-          className="absolute inset-0 -z-10 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 -z-10 bg-brown-dark/60" />
-        <div className="container-x text-cream">
-          <Reveal>
-            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-gold">
-              Our Story
-            </span>
-            <h1 className="mt-3 max-w-2xl font-serif text-4xl md:text-5xl lg:text-6xl">
-              A Passion for Crafting the Extraordinary
-            </h1>
-            <p className="mt-4 max-w-xl text-lg text-cream/90 leading-relaxed">
-              Welcome to Manju's Atelier, where every pipe cleaner transforms into a whimsical piece of art. Join me on a journey of passion, creativity, and handmade magic.
-            </p>
-          </Reveal>
-        </div>
-      </section>
-
       {/* Founder story */}
-      <section className="section container-x">
+      <section className="section container-x pt-12 md:pt-20">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <Reveal>
             <div className="relative group overflow-hidden rounded-3xl ring-4 ring-gold/20 shadow-xl aspect-[4/5] w-full">
