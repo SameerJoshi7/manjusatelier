@@ -41,12 +41,19 @@ export default function About() {
       <section className="section container-x">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <Reveal>
-            <LazyImage
-              src="/founder.png"
-              alt="Manju in her studio"
-              wrapperClassName="overflow-hidden rounded-3xl ring-4 ring-gold/20 shadow-xl"
-              className="aspect-[4/5] w-full object-cover grayscale hover:grayscale-0 transition duration-700"
-            />
+            <div className="relative group overflow-hidden rounded-3xl ring-4 ring-gold/20 shadow-xl aspect-[4/5] w-full">
+              <LazyImage
+                src="/founder.jpg"
+                alt="Manju - Founder & Artisan"
+                wrapperClassName="h-full w-full"
+                className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8 text-cream opacity-90 group-hover:opacity-100 transition-opacity duration-500">
+                <h3 className="font-serif text-3xl font-bold tracking-wide">Manju</h3>
+                <p className="mt-2 text-sm uppercase tracking-widest text-gold font-medium">Founder & Master Artisan</p>
+                <div className="w-12 h-1 bg-gold mt-4 transform origin-left group-hover:scale-x-150 transition-transform duration-500"></div>
+              </div>
+            </div>
           </Reveal>
           <Reveal delay={0.15}>
             <h2 className="font-serif text-4xl text-brown-dark dark:text-beige">
