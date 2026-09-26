@@ -6,10 +6,9 @@ import { CraftProcess } from '@/components/home/CraftProcess';
 import { placeholder } from '@/lib/placeholder';
 
 const timeline = [
-  { year: '2014', title: 'The First Pour', desc: 'Manju crafts her very first resin piece at her kitchen table.' },
-  { year: '2017', title: 'A Growing Passion', desc: 'Weekend markets and word of mouth turn a hobby into a small business.' },
-  { year: '2020', title: 'Manju\u2019s Atelier is Born', desc: 'The studio opens its doors and welcomes its first artisans.' },
-  { year: '2024', title: 'Nationwide Love', desc: 'Thousands of handmade pieces now live in homes across India.' },
+  { year: '2025', title: 'The Spark of Inspiration', desc: 'Manju begins her deep dive into researching the intricate art of pipe cleaner (chenille) crafts.' },
+  { year: 'Early 2026', title: 'Hands-On Creation', desc: 'Research turns into reality as she begins crafting her very first unique pieces herself.' },
+  { year: 'Now', title: 'Open for Market', desc: 'Her amazing ideas and beautiful artworks are officially open to the market, ready to be shared with the world.' },
 ];
 
 export default function About() {
