@@ -9,6 +9,8 @@ interface RatingProps {
 }
 
 export function Rating({ value, count, size = 14, className }: RatingProps) {
+  if (count === 0) return null;
+  
   return (
     <div className={cn('flex items-center gap-1', className)} aria-label={`Rated ${value} out of 5`}>
       <div className="flex">

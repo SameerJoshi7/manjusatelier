@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Review from '../models/Review.js';
 import { asyncHandler, ApiError } from '../middleware/error.js';
 
@@ -41,4 +42,20 @@ export const deleteReview = asyncHandler(async (req, res) => {
   }
   await Review.findOneAndDelete({ _id: review._id });
   res.json({ success: true, message: 'Review deleted' });
+});
+
+export const createOfflineReview = asyncHandler(async (req, res) => {
+  const { productId, rating, comment, name } = req.body;
+  if (!productId || !rating || !name) {
+    throw new ApiError(400, 'Product, rating, and name are required');
+  }
+
+  const review = await Review.create({
+    product: productId,
+    user: new mongoose.Types.ObjectId(), // fake user ID for offline to bypass unique index
+    name,
+    rating,
+    comment,
+  });
+  res.status(201).json({ success: true, review });
 });

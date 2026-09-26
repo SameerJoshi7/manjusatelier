@@ -28,6 +28,7 @@ const columns = [
       { label: 'Categories', to: '/categories' },
       { label: 'About Us', to: '/about' },
       { label: 'Custom Orders', to: '/shop?category=custom-orders' },
+      { label: 'Leave a Review', to: '/offline-review' },
     ],
   },
   {
