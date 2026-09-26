@@ -61,8 +61,8 @@ export default function About() {
             <div className="mt-5 space-y-4 text-brown/70 dark:text-beige/70">
               <p>
                 What began as a quiet escape from a busy corporate life slowly blossomed into a
-                lifelong passion. Manju discovered that working with her hands — shaping clay,
-                pouring resin, weaving thread — brought a kind of joy that nothing else could.
+                lifelong passion. Manju discovered that working with her hands — specifically mastering 
+                the intricate art of pipe cleaner and chenille crafts — brought a kind of joy that nothing else could.
               </p>
               <p>
                 She turned that joy into Manju&apos;s Atelier, a home for handmade creations that

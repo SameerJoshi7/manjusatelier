@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Send, Loader2, Megaphone } from 'lucide-react';
+import { Send, Loader2, Megaphone, QrCode } from 'lucide-react';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
@@ -140,18 +140,46 @@ export default function Marketing() {
           </div>
         </div>
 
-        <div className="rounded-2xl bg-cream/50 p-6 dark:bg-[#1c1712]/50">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-gold/20 text-gold rounded-full">
-              <Megaphone className="w-6 h-6" />
+        <div className="flex flex-col gap-6">
+          <div className="rounded-2xl bg-cream/50 p-6 dark:bg-[#1c1712]/50">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-gold/20 text-gold rounded-full">
+                <Megaphone className="w-6 h-6" />
+              </div>
+              <h3 className="font-serif text-xl text-brown-dark dark:text-beige">Important info</h3>
             </div>
-            <h3 className="font-serif text-xl text-brown-dark dark:text-beige">Important info</h3>
+            <ul className="space-y-4 text-sm text-brown/70 dark:text-beige/70">
+              <li>• Emails are only sent to users who have opted into promotional emails.</li>
+              <li>• A legally compliant "Unsubscribe" link is automatically appended to the bottom of all promotional emails.</li>
+              <li>• Emails are sent in batches to prevent server overload. Please wait while the broadcast processes.</li>
+            </ul>
           </div>
-          <ul className="space-y-4 text-sm text-brown/70 dark:text-beige/70">
-            <li>• Emails are only sent to users who have opted into promotional emails.</li>
-            <li>• A legally compliant "Unsubscribe" link is automatically appended to the bottom of all promotional emails.</li>
-            <li>• Emails are sent in batches to prevent server overload. Please wait while the broadcast processes.</li>
-          </ul>
+
+          <div className="rounded-2xl bg-white p-6 shadow-sm dark:bg-[#1c1712]">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-gold/20 text-gold rounded-full">
+                <QrCode className="w-6 h-6" />
+              </div>
+              <h3 className="font-serif text-xl text-brown-dark dark:text-beige">Offline Stall QR</h3>
+            </div>
+            <p className="text-sm text-brown/70 dark:text-beige/70 mb-4">
+              Print this QR Code for your physical stalls. Customers can scan it to directly jump to your feedback page.
+            </p>
+            <div className="flex flex-col items-center justify-center p-6 bg-white border border-brown/10 rounded-xl">
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin + '/offline-review')}`} 
+                alt="Offline Review QR" 
+                className="w-32 h-32" 
+              />
+              <button 
+                type="button"
+                className="mt-6 text-sm font-semibold text-gold hover:text-gold-light transition-colors" 
+                onClick={() => window.open(`https://api.qrserver.com/v1/create-qr-code/?size=800x800&data=${encodeURIComponent(window.location.origin + '/offline-review')}`)}
+              >
+                Open High-Res Version for Printing
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
