@@ -3,7 +3,6 @@ import { usePageMeta } from '@/hooks/usePageMeta';
 import { Reveal } from '@/components/ui/Reveal';
 import { LazyImage } from '@/components/ui/LazyImage';
 import { CraftProcess } from '@/components/home/CraftProcess';
-import { placeholder } from '@/lib/placeholder';
 
 const timeline = [
   { year: '2025', title: 'The Spark of Inspiration', desc: 'Manju begins her deep dive into researching the intricate art of pipe cleaner (chenille) crafts.' },
