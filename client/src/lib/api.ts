@@ -37,7 +37,9 @@ async function request<T>(path: string, options: Options = {}): Promise<T> {
     const errorMsg = data?.message || `Request failed (${res.status})`;
     
     if (res.status === 401 || res.status === 403) {
-      window.dispatchEvent(new CustomEvent('auth-expired', { detail: { message: errorMsg } }));
+      if (!path.includes('/auth/me')) {
+        window.dispatchEvent(new CustomEvent('auth-expired', { detail: { message: errorMsg } }));
+      }
     } else if (res.status >= 500) {
       window.dispatchEvent(new CustomEvent('global-error', { detail: { message: errorMsg } }));
     }
