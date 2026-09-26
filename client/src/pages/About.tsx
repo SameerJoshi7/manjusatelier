@@ -17,7 +17,7 @@ export default function About() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative flex min-h-[50vh] items-center overflow-hidden">
+      <section className="relative flex py-24 items-center overflow-hidden md:py-32">
         <img
           src={placeholder('manjus-about', 1920, 900)}
           alt="Artisan studio"
@@ -29,9 +29,12 @@ export default function About() {
             <span className="text-sm font-semibold uppercase tracking-[0.2em] text-gold">
               Our Story
             </span>
-            <h1 className="mt-3 max-w-2xl font-serif text-4xl md:text-6xl">
-              A Woman, A Passion, A Legacy of Handmade
+            <h1 className="mt-3 max-w-2xl font-serif text-4xl md:text-5xl lg:text-6xl">
+              A Passion for Crafting the Extraordinary
             </h1>
+            <p className="mt-4 max-w-xl text-lg text-cream/90 leading-relaxed">
+              Welcome to Manju's Atelier, where every pipe cleaner transforms into a whimsical piece of art. Join me on a journey of passion, creativity, and handmade magic.
+            </p>
           </Reveal>
         </div>
       </section>
@@ -56,18 +59,18 @@ export default function About() {
           </Reveal>
           <Reveal delay={0.15}>
             <h2 className="font-serif text-4xl text-brown-dark dark:text-beige">
-              Meet Manju, Our Founder
+              Hello, I'm Manju
             </h2>
             <div className="mt-5 space-y-4 text-brown/70 dark:text-beige/70">
               <p>
-                What began as a quiet escape from a busy corporate life slowly blossomed into a
-                lifelong passion. Manju discovered that working with her hands — specifically mastering 
-                the intricate art of pipe cleaner and chenille crafts — brought a kind of joy that nothing else could.
+                What began as a quiet escape from my daily routine slowly blossomed into a
+                lifelong passion. I discovered that working with my hands — specifically mastering 
+                the intricate art of pipe cleaner and chenille crafts — brought me a kind of joy that nothing else could.
               </p>
               <p>
-                She turned that joy into Manju&apos;s Atelier, a home for handmade creations that
-                carry warmth, intention, and story. Every piece we make is a small act of love,
-                designed to be treasured for years to come.
+                I turned that joy into Manju&apos;s Atelier, a home for handmade creations that
+                carry warmth, intention, and a unique story. Every piece I make is a small act of love,
+                designed to bring a smile to your face and be treasured for years to come.
               </p>
               <p className="font-serif text-2xl italic text-brown">
                 &ldquo;Handmade is imperfect, and that&apos;s exactly what makes it beautiful.&rdquo;
