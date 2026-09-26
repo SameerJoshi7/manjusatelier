@@ -40,8 +40,7 @@ export default function About() {
             <div className="mt-5 space-y-4 text-brown/70 dark:text-beige/70">
               <p>
                 What began as a quiet escape from my daily routine slowly blossomed into a
-                lifelong passion. I discovered that working with my hands — specifically mastering 
-                the intricate art of pipe cleaner and chenille crafts — brought me a kind of joy that nothing else could.
+                lifelong passion. I discovered that mastering the intricate art of pipe cleaner and chenille crafts brought me a kind of joy that nothing else could.
               </p>
               <p>
                 I turned that joy into Manju&apos;s Atelier, a home for handmade creations that

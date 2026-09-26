@@ -42,7 +42,7 @@ export function Hero() {
             Handmade Creations That Tell a Story
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream/85">
-            Each piece at Manju&apos;s Atelier is lovingly made by hand — no two exactly alike.
+            Each piece at Manju&apos;s Atelier is lovingly made by hand and no two are exactly alike.
             Bring home warmth, character, and craftsmanship made to last a lifetime.
           </p>
           <div className="mt-9 flex flex-wrap gap-4">

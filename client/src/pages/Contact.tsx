@@ -51,7 +51,7 @@ export default function Contact() {
           We&apos;d Love to Hear From You
         </h1>
         <p className="mt-4 text-brown/70 dark:text-beige/70">
-          Questions, custom requests, or just a hello — reach out anytime.
+          Questions, custom requests, or just a hello, reach out anytime.
         </p>
       </header>
 

@@ -17,7 +17,7 @@ export function FeaturedCategories() {
       <SectionHeading
         eyebrow="Browse"
         title="Featured Categories"
-        subtitle="From glossy resin art to earthy clay crafts — discover collections made to bring warmth to every corner."
+        subtitle="From glossy resin art to earthy clay crafts, discover collections made to bring warmth to every corner."
       />
 
       <motion.div
