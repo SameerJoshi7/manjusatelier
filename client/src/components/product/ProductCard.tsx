@@ -136,17 +136,17 @@ export function ProductCard({ product }: ProductCardProps) {
            {product.inStock && <span className="text-[10px] text-forest">In Stock</span>}
         </div>
 
-        <div className="mt-auto pt-3 flex items-center gap-2 sm:hidden">
+        <div className="mt-auto pt-3 flex items-center gap-1.5 sm:hidden">
           <button
             onClick={() => {
               toggle(product._id);
               notify(wished ? 'Removed from wishlist' : 'Added to wishlist', 'info');
             }}
             aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
-            className="grid shrink-0 h-9 w-9 place-items-center rounded-full border border-brown/20 bg-white text-brown shadow-sm"
+            className="grid shrink-0 h-8 w-8 place-items-center rounded-full border border-brown/20 bg-white text-brown shadow-sm"
           >
             <Heart
-              size={15}
+              size={14}
               className={cn(wished && 'fill-red-500 text-red-500 animate-heart-pop')}
             />
           </button>
@@ -166,7 +166,7 @@ export function ProductCard({ product }: ProductCardProps) {
               notify('Added to cart');
             }}
             disabled={!product.inStock}
-            className="flex-1 rounded-full bg-[#FFD814] px-3 py-2 text-xs font-medium text-black shadow-sm transition-all duration-200 hover:bg-[#F7CA00] disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-500"
+            className="flex-1 whitespace-nowrap overflow-hidden text-ellipsis rounded-full bg-[#FFD814] px-2 py-1.5 text-[10px] font-medium text-black shadow-sm transition-all duration-200 hover:bg-[#F7CA00] disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-500"
           >
             Add to Cart
           </button>
