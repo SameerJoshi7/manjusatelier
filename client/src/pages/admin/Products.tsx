@@ -293,6 +293,9 @@ function ProductForm({
     e.preventDefault();
     if (form.category.length === 0) return notify('Please choose at least one category', 'error');
     if (form.images.length === 0) return notify('Please add at least one product image', 'error');
+    if (form.postToSocials && !form.postToInstagram && !form.postToFacebook && !form.postToX) {
+      return notify('Please select at least one social media platform to post to, or disable Auto-Post', 'error');
+    }
     setSaving(true);
     const payload = {
       name: form.name,

@@ -142,8 +142,8 @@ export const createProduct = asyncHandler(async (req, res) => {
   const product = await Product.create(data);
   await clearCachePattern('products');
 
-  // Dispatch Social Media Webhook if requested
-  if (data.postToSocials && process.env.MAKE_WEBHOOK_URL) {
+  // Dispatch Social Media Webhook if requested and at least one platform is selected
+  if (data.postToSocials && process.env.MAKE_WEBHOOK_URL && (data.postToInstagram || data.postToFacebook || data.postToX)) {
     try {
       fetch(process.env.MAKE_WEBHOOK_URL, {
         method: 'POST',
@@ -178,8 +178,8 @@ export const updateProduct = asyncHandler(async (req, res) => {
     runValidators: true,
   });
 
-  // Dispatch Social Media Webhook if requested
-  if (req.body.postToSocials && process.env.MAKE_WEBHOOK_URL) {
+  // Dispatch Social Media Webhook if requested and at least one platform is selected
+  if (req.body.postToSocials && process.env.MAKE_WEBHOOK_URL && (req.body.postToInstagram || req.body.postToFacebook || req.body.postToX)) {
     try {
       fetch(process.env.MAKE_WEBHOOK_URL, {
         method: 'POST',
