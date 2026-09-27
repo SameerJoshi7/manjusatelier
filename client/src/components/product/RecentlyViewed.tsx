@@ -40,7 +40,7 @@ export function RecentlyViewed({ currentProductId }: { currentProductId?: string
   return (
     <div className="mt-20">
       <h2 className="mb-8 font-serif text-3xl text-brown-dark dark:text-beige">Recently Viewed</h2>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-4 lg:gap-x-8">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:gap-6">
         {products.map((p) => (
           <ProductCard key={p._id} product={p} />
         ))}
