@@ -18,7 +18,10 @@ export function finalPrice(p: Product): number {
 }
 
 export function categoryName(p: Product): string {
-  return typeof p.category === 'string' ? p.category : p.category?.name ?? '';
+  if (!p.category) return 'Uncategorized';
+  const first = Array.isArray(p.category) ? p.category[0] : p.category;
+  if (!first) return 'Uncategorized';
+  return typeof first === 'string' ? first : first.name ?? 'Uncategorized';
 }
 
 export function formatDate(dateString: string | Date): string {

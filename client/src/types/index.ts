@@ -20,7 +20,7 @@ export interface Product {
   discount: number;
   finalPrice: number;
   images: string[];
-  category: Category | string;
+  category: Category[] | string[] | Category | string;
   material?: string;
   dimensions?: string;
   careInstructions?: string;

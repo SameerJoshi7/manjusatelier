@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, required: true, min: 0 },
     discount: { type: Number, default: 0, min: 0, max: 100 }, // percentage
     images: [{ type: String, required: true }],
-    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true, index: true },
+    category: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true, index: true }],
     material: { type: String, trim: true },
     dimensions: { type: String, trim: true },
     careInstructions: { type: String, trim: true },

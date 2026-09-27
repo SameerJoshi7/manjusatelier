@@ -112,8 +112,9 @@ export const getProductBySlug = asyncHandler(async (req, res) => {
   );
   if (!product) throw new ApiError(404, 'Product not found');
 
+  const categoryIds = product.category.map(c => c._id);
   const related = await Product.find({
-    category: product.category._id,
+    category: { $in: categoryIds },
     _id: { $ne: product._id },
   })
     .limit(4)

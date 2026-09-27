@@ -12,7 +12,7 @@ const ALL_BADGES: Badge[] = ['New', 'Sale', 'Limited', 'Handmade'];
 
 interface FormState {
   name: string;
-  category: string;
+  category: string[];
   price: string;
   discount: string;
   stock: string;
@@ -27,7 +27,7 @@ interface FormState {
 
 const emptyForm: FormState = {
   name: '',
-  category: '',
+  category: [],
   price: '',
   discount: '0',
   stock: '0',
@@ -119,7 +119,7 @@ export default function Products() {
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-brown-dark dark:text-beige">{p.name}</p>
                 <p className="text-xs text-brown/50 dark:text-beige/50">
-                  {typeof p.category === 'object' ? p.category.name : ''} ·{' '}
+                  {Array.isArray(p.category) && p.category.length > 0 && typeof p.category[0] === 'object' ? p.category[0].name : ''} ·{' '}
                   {formatPrice(finalPrice(p))}
                   {p.discount > 0 && <span className="text-forest"> (-{p.discount}%)</span>}
                 </p>
@@ -191,8 +191,11 @@ function ProductForm({
     product
       ? {
           name: product.name,
-          category:
-            typeof product.category === 'object' ? product.category._id : product.category,
+          category: Array.isArray(product.category)
+            ? product.category.map((c) => (typeof c === 'object' ? c._id : c))
+            : product.category
+              ? [typeof product.category === 'object' ? product.category._id : product.category]
+              : [],
           price: String(product.price),
           discount: String(product.discount),
           stock: String(product.stock),
@@ -262,7 +265,7 @@ function ProductForm({
           ...prev,
           name: prev.name || data.name || '',
           description: prev.description || data.description || '',
-          category: prev.category || data.category || '',
+          category: prev.category.length ? prev.category : (data.category ? (Array.isArray(data.category) ? data.category : [data.category]) : []),
           color: prev.color || data.color || '',
           badges: newBadges
         };
@@ -277,7 +280,7 @@ function ProductForm({
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.category) return notify('Please choose a category', 'error');
+    if (form.category.length === 0) return notify('Please choose at least one category', 'error');
     if (form.images.length === 0) return notify('Please add at least one product image', 'error');
     setSaving(true);
     const payload = {
@@ -417,15 +420,26 @@ function ProductForm({
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Category">
-              <select className="input" required value={form.category} onChange={(e) => set('category', e.target.value)}>
-                <option value="">Select…</option>
+            <Field label="Categories">
+              <div className="flex flex-col gap-2 rounded-xl border border-brown/15 bg-cream p-3 dark:bg-[#1c1712] dark:border-beige/10 h-[46px] overflow-y-auto" style={{ height: 'auto', maxHeight: '150px' }}>
                 {categories.map((c) => (
-                  <option key={c._id} value={c._id}>
+                  <label key={c._id} className="flex items-center gap-2 text-sm text-brown-dark dark:text-beige cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="rounded border-brown/20 text-gold focus:ring-gold dark:border-beige/20 dark:bg-[#26201a]"
+                      checked={form.category.includes(c._id)}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        set('category', checked 
+                          ? [...form.category, c._id] 
+                          : form.category.filter(id => id !== c._id)
+                        );
+                      }}
+                    />
                     {c.name}
-                  </option>
+                  </label>
                 ))}
-              </select>
+              </div>
             </Field>
             <Field label="Color">
               <input className="input" required value={form.color} onChange={(e) => set('color', e.target.value)} />
