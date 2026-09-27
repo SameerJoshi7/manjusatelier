@@ -153,7 +153,7 @@ export const createProduct = asyncHandler(async (req, res) => {
           productLink: `${process.env.FRONTEND_URL}/product/${product.slug}`,
           caption: data.socialCaption,
           images: product.images,
-          coverImage: product.images && product.images.length > 0 ? product.images[0] : '',
+          coverImage: product.images && product.images.length > 0 ? (product.images[0].match(/\.(jpg|jpeg|png|gif|webp)$/i) ? product.images[0] : `${product.images[0]}.jpg`) : '',
           platforms: {
             instagram: !!data.postToInstagram,
             facebook: !!data.postToFacebook,
@@ -189,7 +189,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
           productLink: `${process.env.FRONTEND_URL}/product/${product.slug}`,
           caption: req.body.socialCaption,
           images: product.images,
-          coverImage: product.images && product.images.length > 0 ? product.images[0] : '',
+          coverImage: product.images && product.images.length > 0 ? (product.images[0].match(/\.(jpg|jpeg|png|gif|webp)$/i) ? product.images[0] : `${product.images[0]}.jpg`) : '',
           platforms: {
             instagram: !!req.body.postToInstagram,
             facebook: !!req.body.postToFacebook,
