@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { useToast } from '@/components/ui/Toast';
-import { Loader2, CheckCircle, XCircle, Trash2, Clock } from 'lucide-react';
+import { Loader2, CheckCircle, Trash2, Clock } from 'lucide-react';
 import { Rating } from '@/components/ui/Rating';
 import { formatDate } from '@/lib/utils';
 
