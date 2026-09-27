@@ -141,6 +141,30 @@ export const createProduct = asyncHandler(async (req, res) => {
   }
   const product = await Product.create(data);
   await clearCachePattern('products');
+
+  // Dispatch Social Media Webhook if requested
+  if (data.postToSocials && process.env.MAKE_WEBHOOK_URL) {
+    try {
+      fetch(process.env.MAKE_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productName: product.name,
+          productLink: `${process.env.FRONTEND_URL}/product/${product.slug}`,
+          caption: data.socialCaption,
+          images: product.images,
+          platforms: {
+            instagram: !!data.postToInstagram,
+            facebook: !!data.postToFacebook,
+            x: !!data.postToX,
+          }
+        })
+      }).catch(err => console.error('Social webhook failed:', err));
+    } catch (e) {
+      console.error('Failed to trigger social webhook:', e);
+    }
+  }
+
   res.status(201).json({ success: true, product });
 });
 
