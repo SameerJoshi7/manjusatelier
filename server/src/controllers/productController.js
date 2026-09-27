@@ -177,6 +177,29 @@ export const updateProduct = asyncHandler(async (req, res) => {
     runValidators: true,
   });
 
+  // Dispatch Social Media Webhook if requested
+  if (req.body.postToSocials && process.env.MAKE_WEBHOOK_URL) {
+    try {
+      fetch(process.env.MAKE_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productName: product.name,
+          productLink: `${process.env.FRONTEND_URL}/product/${product.slug}`,
+          caption: req.body.socialCaption,
+          images: product.images,
+          platforms: {
+            instagram: !!req.body.postToInstagram,
+            facebook: !!req.body.postToFacebook,
+            x: !!req.body.postToX,
+          }
+        })
+      }).catch(err => console.error('Social webhook failed on update:', err));
+    } catch (e) {
+      console.error('Failed to trigger social webhook on update:', e);
+    }
+  }
+
   // Back in stock notification
   if (oldProduct.stock === 0 && product.stock > 0) {
     const BackInStock = (await import('../models/BackInStock.js')).default;

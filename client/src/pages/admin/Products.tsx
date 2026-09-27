@@ -307,7 +307,7 @@ function ProductForm({
       images: form.images.filter(Boolean),
       badges: form.badges,
       featured: form.featured,
-      ...(!product && form.postToSocials ? {
+      ...(form.postToSocials ? {
         postToSocials: true,
         postToInstagram: form.postToInstagram,
         postToFacebook: form.postToFacebook,
@@ -519,11 +519,10 @@ function ProductForm({
             Show in Featured Products
           </label>
 
-          {!product && (
             <div className="mt-4 rounded-xl border border-brown/10 bg-cream/50 p-4 dark:border-beige/10 dark:bg-[#1c1712]/50">
               <label className="flex cursor-pointer items-center gap-2 font-serif text-lg text-brown-dark dark:text-beige">
                 <input type="checkbox" className="h-4 w-4 accent-brown" checked={form.postToSocials} onChange={(e) => set('postToSocials', e.target.checked)} />
-                <Sparkles size={18} className="text-gold" /> Auto-Post to Social Media
+                <Sparkles size={18} className="text-gold" /> {product ? 'Share to Social Media' : 'Auto-Post to Social Media'}
               </label>
               
               {form.postToSocials && (
@@ -539,14 +538,13 @@ function ProductForm({
                       <input type="checkbox" className="accent-brown" checked={form.postToX} onChange={(e) => set('postToX', e.target.checked)} /> X (Twitter)
                     </label>
                   </div>
-                  <Field label="Social Media Caption (AI Auto-filled)">
+                  <Field label={product ? "Social Media Caption" : "Social Media Caption (AI Auto-filled)"}>
                     <textarea rows={3} className="input resize-none" placeholder="Catchy caption with hashtags..." value={form.socialCaption || ''} onChange={(e) => set('socialCaption', e.target.value)} />
                   </Field>
                   <p className="text-xs text-brown/50 dark:text-beige/50">When you save this product, we'll automatically send this post to your configured social accounts via Make.com webhook.</p>
                 </div>
               )}
             </div>
-          )}
 
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={onClose}>
