@@ -310,7 +310,6 @@ export default function Shop() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setFiltersOpen(false)}
           >
             <motion.div
               className="absolute right-0 top-0 h-full w-[300px] overflow-y-auto bg-cream p-6 dark:bg-[#1c1712]"

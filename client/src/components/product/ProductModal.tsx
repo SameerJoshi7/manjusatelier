@@ -54,7 +54,6 @@ export function ProductModal() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={closeModal}
             className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
           />
           <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 sm:p-6 pointer-events-none">

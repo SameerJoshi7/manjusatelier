@@ -312,7 +312,6 @@ function ProductForm({
   return (
     <div
       className="fixed inset-0 z-[80] grid place-items-center overflow-y-auto bg-brown-dark/50 p-4 backdrop-blur-sm"
-      onClick={onClose}
     >
       <div
         className="my-8 w-full max-w-2xl rounded-2xl bg-cream p-6 shadow-lift dark:bg-[#1c1712]"

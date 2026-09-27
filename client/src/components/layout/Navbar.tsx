@@ -124,7 +124,6 @@ export function Navbar() {
       {/* Mobile Menu Backdrop */}
       {mobileOpen && (
         <div
-          onClick={() => setMobileOpen(false)}
           className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
         />
       )}

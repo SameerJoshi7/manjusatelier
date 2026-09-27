@@ -26,7 +26,6 @@ export function QuickView({ product, onClose }: QuickViewProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
           role="dialog"
           aria-modal="true"
           aria-label={`Quick view: ${product.name}`}
