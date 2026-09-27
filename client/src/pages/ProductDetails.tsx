@@ -132,18 +132,27 @@ export default function ProductDetails() {
 
   return (
     <div className="container-x py-10">
-      {/* Breadcrumb */}
-      <nav className="mb-6 flex items-center gap-1 text-sm text-brown/50 dark:text-beige/50">
-        <Link to="/" className="hover:text-brown">
-          Home
-        </Link>
-        <ChevronRight size={14} />
-        <Link to="/shop" className="hover:text-brown">
-          Shop
-        </Link>
-        <ChevronRight size={14} />
-        <span className="text-brown-dark dark:text-beige">{product.name}</span>
-      </nav>
+      {/* Back Button & Breadcrumb */}
+      <div className="mb-6 flex flex-col gap-3">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex w-fit items-center gap-1.5 rounded-full border border-brown/10 bg-white/50 px-3 py-1.5 text-sm font-medium text-brown transition-colors hover:bg-brown/5 hover:text-brown-dark dark:border-beige/10 dark:bg-[#1c1712]/50 dark:text-beige/70 dark:hover:bg-[#26201a] dark:hover:text-beige"
+        >
+          <ChevronLeft size={16} />
+          Back
+        </button>
+        <nav className="flex items-center gap-1 text-sm text-brown/50 dark:text-beige/50">
+          <Link to="/" className="hover:text-brown">
+            Home
+          </Link>
+          <ChevronRight size={14} />
+          <Link to="/shop" className="hover:text-brown">
+            Shop
+          </Link>
+          <ChevronRight size={14} />
+          <span className="text-brown-dark dark:text-beige">{product.name}</span>
+        </nav>
+      </div>
 
       <div className="grid gap-10 lg:grid-cols-2">
         {/* Gallery */}
