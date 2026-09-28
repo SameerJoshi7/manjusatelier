@@ -35,16 +35,38 @@ Analyze this product image and generate a structured JSON object containing:
 
 Return ONLY the raw JSON object. Do not include markdown code blocks or any other text.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: [
-        prompt,
-        { inlineData: { data: base64Image, mimeType } }
-      ],
-      config: {
-        temperature: 0.4,
+    const modelsToTry = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-1.5-pro'];
+    let response;
+    let lastError;
+
+    for (const model of modelsToTry) {
+      try {
+        response = await ai.models.generateContent({
+          model: model,
+          contents: [
+            prompt,
+            { inlineData: { data: base64Image, mimeType } }
+          ],
+          config: {
+            temperature: 0.4,
+          }
+        });
+        break; // Success! Break out of the loop
+      } catch (e) {
+        lastError = e;
+        console.warn(`Model ${model} failed: ${e.message}`);
+        // If it's a 429 quota error, we continue to the next model
+        if (e.status === 429 || (e.message && e.message.includes('429'))) {
+          continue;
+        }
+        // If it's some other error (like invalid image), throw immediately
+        throw e;
       }
-    });
+    }
+
+    if (!response) {
+      throw lastError || new Error('All AI models failed due to rate limits.');
+    }
 
     const aiMessage = response.text;
     
