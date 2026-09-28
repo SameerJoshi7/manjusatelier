@@ -1,5 +1,6 @@
 import { asyncHandler, ApiError } from '../middleware/error.js';
 import { GoogleGenAI } from '@google/genai';
+import Groq from 'groq-sdk';
 
 export const generateProductDetails = asyncHandler(async (req, res) => {
   const { imageUrl } = req.body;
@@ -35,41 +36,44 @@ Analyze this product image and generate a structured JSON object containing:
 
 Return ONLY the raw JSON object. Do not include markdown code blocks or any other text.`;
 
-    const modelsToTry = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-1.5-pro'];
-    let response;
+    let aiMessage;
     let lastError;
-
-    for (const model of modelsToTry) {
-      try {
-        response = await ai.models.generateContent({
-          model: model,
+    
+    try {
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.8-flash',
           contents: [
             prompt,
             { inlineData: { data: base64Image, mimeType } }
           ],
-          config: {
-            temperature: 0.4,
-          }
+          config: { temperature: 0.4 }
         });
-        break; // Success! Break out of the loop
-      } catch (e) {
-        lastError = e;
-        console.warn(`Model ${model} failed: ${e.message}`);
-        // If it's a 429 quota error, we continue to the next model
-        if (e.status === 429 || (e.message && e.message.includes('429'))) {
-          continue;
+        aiMessage = response.text;
+    } catch (e) {
+        console.warn(`Gemini failed: ${e.message}. Falling back to Groq...`);
+        if (!process.env.GROQ_API_KEY) {
+            throw new Error('Gemini failed and GROQ_API_KEY is not configured for fallback.');
         }
-        // If it's some other error (like invalid image), throw immediately
-        throw e;
-      }
+        
+        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+        const groqResponse = await groq.chat.completions.create({
+            model: 'llama-3.2-11b-vision-preview',
+            messages: [
+                {
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: prompt },
+                        { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64Image}` } }
+                    ]
+                }
+            ],
+            temperature: 0.4,
+        });
+        
+        aiMessage = groqResponse.choices[0]?.message?.content;
+        if (!aiMessage) throw new Error('Groq returned an empty response.');
     }
 
-    if (!response) {
-      throw lastError || new Error('All AI models failed due to rate limits.');
-    }
-
-    const aiMessage = response.text;
-    
     // Attempt to parse JSON. Sometimes LLMs return markdown anyway.
     let jsonStr = aiMessage.trim();
     if (jsonStr.startsWith('```json')) {
@@ -86,7 +90,7 @@ Return ONLY the raw JSON object. Do not include markdown code blocks or any othe
 
     res.json({ success: true, data: parsed });
   } catch (error) {
-    console.error('Gemini AI Error:', error);
+    console.error('AI Error:', error);
     throw new ApiError(500, 'Failed to generate product details with AI. ' + (error.message || ''));
   }
 });
