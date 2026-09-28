@@ -50,28 +50,43 @@ Return ONLY the raw JSON object. Do not include markdown code blocks or any othe
         });
         aiMessage = response.text;
     } catch (e) {
-        console.warn(`Gemini failed: ${e.message}. Falling back to Groq...`);
-        if (!process.env.GROQ_API_KEY) {
-            throw new Error('Gemini failed and GROQ_API_KEY is not configured for fallback.');
+        console.warn(`Gemini failed: ${e.message}. Falling back to OpenRouter...`);
+        if (!process.env.OPENROUTER_API_KEY) {
+            throw new Error('Gemini failed and OPENROUTER_API_KEY is not configured for fallback.');
         }
         
-        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-        const groqResponse = await groq.chat.completions.create({
-            model: 'llama-3.2-11b-vision-preview',
-            messages: [
-                {
-                    role: 'user',
-                    content: [
-                        { type: 'text', text: prompt },
-                        { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64Image}` } }
-                    ]
-                }
-            ],
-            temperature: 0.4,
+        const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': process.env.CLIENT_URL || 'https://manjusatelier.in',
+                'X-Title': "Manju's Atelier"
+            },
+            body: JSON.stringify({
+                model: 'openai/gpt-4o-mini',
+                messages: [
+                    {
+                        role: 'user',
+                        content: [
+                            { type: 'text', text: prompt },
+                            { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64Image}` } }
+                        ]
+                    }
+                ],
+                temperature: 0.4
+            })
         });
+
+        if (!openRouterResponse.ok) {
+            const errText = await openRouterResponse.text();
+            throw new Error(`OpenRouter API error: ${errText}`);
+        }
+
+        const openRouterData = await openRouterResponse.json();
+        aiMessage = openRouterData.choices[0]?.message?.content;
         
-        aiMessage = groqResponse.choices[0]?.message?.content;
-        if (!aiMessage) throw new Error('Groq returned an empty response.');
+        if (!aiMessage) throw new Error('OpenRouter returned an empty response.');
     }
 
     // Attempt to parse JSON. Sometimes LLMs return markdown anyway.
